@@ -13,17 +13,6 @@
 #' @import graphics
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
-#' @examples 
-#' data(metalonda_test_data)
-#' n.sample = 5
-#' n.timepoints = 10
-#' n.group = 2
-#' Group = factor(c(rep(0, n.sample*n.timepoints), rep(1, n.sample*n.timepoints)))
-#' Time = rep(rep(1:n.timepoints, times = n.sample), 2)
-#' ID = factor(rep(1:(2*n.sample), each = n.timepoints))
-#' points = seq(1, 10, length.out = 10)
-#' aggregate.df = data.frame(Count = metalonda_test_data[1,], Time = Time, Group = Group, ID = ID)
-#' visualizeFeature(aggregate.df, text = rownames(metalonda_test_data)[1], Group)
 #' @export
 visualizeFeature = function (df, text, group.levels, unit = "days", ylabel = "Normalized Count", 
                              col = c("blue", "firebrick"), prefix = "Test")
@@ -79,25 +68,25 @@ visualizeFeatureSpline = function (df, model, method, text, group.levels, unit =
   dd.0 = model$dd.0
   dd.1 = model$dd.1
   
-  cat("v0.7", "\n")
+  #cat("v0.7", "\n")
   ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)), rep("longdash", nrow(dd.1))))
   size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
-  cat("v0.9", "\n")
+  #cat("v0.9", "\n")
   head(df)
   head(dd.0)
   head(dd.1)
   dm = rbind(df[,c("Time", "Count", "Group", "Subject")], dd.0[,c("Time", "Count", "Group", "Subject")], dd.1[,c("Time", "Count", "Group", "Subject")])
-  cat("v0.92", "\n")
+  #cat("v0.92", "\n")
   dm$lnn=ln
-  cat("v0.96", "\n")
+  #cat("v0.96", "\n")
   dm$sz= size
   
   p = ggplot(dm, aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
   
-  cat("v1.0", "\n")
+  #cat("v1.0", "\n")
   p = p + theme_bw() + geom_point(size=1, alpha=0.5) + geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
     ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
-    scale_colour_manual(values = c(col, col), 
+    scale_colour_manual(values = c(col, "darkblue", "darkgreen"), 
                         breaks = c("0", "1", "fit.0", "fit.1"),
                         labels = c(group.levels[1], group.levels[2], paste(group.levels[1], ".fit", sep=""), paste(group.levels[2], ".fit", sep="")))+
     theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
@@ -112,6 +101,48 @@ visualizeFeatureSpline = function (df, model, method, text, group.levels, unit =
 }
 
 
+
+visualizeFeatureSpline_permute = function (df, model, method, text, group.levels, unit = "days", ylabel = "Normalized Count", 
+                                   col = c("blue", "firebrick"), prefix = "Test")
+{ 
+  #cat("Visualizing Splines of Feature = ", text, "\n")
+  
+  Count=0;Time=0;Subject=0;Group=0;lnn=0 ## This line is just to pass the CRAN checks for the aes in ggplot2
+  dd.null = model$dd.null
+  dd.0 = model$dd.0
+  dd.1 = model$dd.1
+  
+  #cat("v0.7", "\n")
+  ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)), rep("longdash", nrow(dd.1))))
+  size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
+  #cat("v0.9", "\n")
+  head(df)
+  head(dd.0)
+  head(dd.1)
+  dm = rbind(df[,c("Time", "Count", "Group", "Subject")], dd.0[,c("Time", "Count", "Group", "Subject")], dd.1[,c("Time", "Count", "Group", "Subject")])
+  #cat("v0.92", "\n")
+  dm$lnn=ln
+  #cat("v0.96", "\n")
+  dm$sz= size
+  
+  p = ggplot(dm, aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
+  
+  #cat("v1.0", "\n")
+  p = p + theme_bw() + geom_point(size=1, alpha=0.5) + geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
+    ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
+    scale_colour_manual(values = c(col, "yellow", "brown"), 
+                        breaks = c("0", "1", "fit.0", "fit.1"),
+                        labels = c(group.levels[1], group.levels[2], paste(group.levels[1], ".fit", sep=""), paste(group.levels[2], ".fit", sep="")))+
+    theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
+          axis.text.y = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
+          axis.title.x = element_text(colour="black", size=15, angle=0, hjust=.5, vjust=0.5, face="bold"),
+          axis.title.y = element_text(colour="black", size=15, angle=90, hjust=.5, vjust=.5, face="bold"), 
+          legend.text=element_text(size=15, face="plain"), legend.title = element_blank(),
+          plot.title = element_text(hjust = 0.5)) +
+    theme(legend.position="top") + scale_x_continuous(breaks = waiver()) + guides(linetype=FALSE, size =FALSE)
+  
+  ggsave(filename=paste(prefix, "_Feature_", text, "_CurveFitting_", method, ".jpg", sep=""), dpi = 1200, height = 10, width = 15, units = 'cm')
+}
 
 
 #' Visualize significant time interval
@@ -329,7 +360,8 @@ visualizeARHistogram2 = function(permuted, text, method, prefix = "Test", modelS
   r = ceiling(sqrt(n))
   c = ceiling(sqrt(n))
   xx = paste(prefix, "/", "Feature_", text, "_testStat_distribution_ALL_INTERVALL_", method, ".jpg", sep = "")
-  jpeg(filename = xx, res = 1200, height = r*5, width = c*5, units = 'cm')
+  #jpeg(filename = xx, res = 1200, height = r*5, width = c*5, units = 'cm')
+  jpeg(filename = xx, res = 1200, height = 40, width = 40, units = 'cm')
   
   
   

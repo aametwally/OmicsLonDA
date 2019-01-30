@@ -10,17 +10,6 @@
 #' @import stats
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
-#' @examples 
-#' data(metalonda_test_data)
-#' n.sample = 5 
-#' n.timepoints = 10 
-#' n.group = 2 
-#' Group = factor(c(rep(0, n.sample*n.timepoints), rep(1, n.sample*n.timepoints)))
-#' Time = rep(rep(1:n.timepoints, times = n.sample), 2)
-#' Subject = factor(rep(1:(2*n.sample), each = n.timepoints))
-#' points = seq(1, 10, length.out = 10)
-#' aggretage.df = data.frame(Count = metalonda_test_data[1,], Time = Time, Group = Group, Subject = Subject)
-#' cf = curveFitting(df = aggretage.df, method= "ssnbinomial", points)
 #' @export
 curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", points){
   
@@ -55,12 +44,21 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
     ran.0 = mkran(~1|Subject, group.0)
     ran.1 = mkran(~1|Subject, group.1)
     
+    
+    ### With Subjet Random Effect
     ## null model
-    mod.null = ssanova(formula, data = group.null, skip.iter=TRUE, random = ran.null, na.action = na.omit)
+    # mod.null = ssanova(formula, data = group.null, skip.iter=TRUE, random = ran.null, na.action = na.omit)
+    # 
+    # ## full model
+    # mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE, random = ran.0, na.action = na.omit)
+    # mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE, random = ran.1, na.action = na.omit)
+    
+    # ## null model
+    mod.null = ssanova(formula, data = group.null, skip.iter=TRUE)
 
     ## full model
-    mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE, random = ran.0, na.action = na.omit)
-    mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE, random = ran.1, na.action = na.omit)
+    mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE)
+    mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE)
     
     
     
@@ -164,56 +162,17 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
 }
 
 
-#' Calculate Area Ratio (AR) of each feature's time interval
+#' Calculate Test-Statistic of each feature's time interval
 #'
-#' Calculate Area Ratio (AR) of each feature's time interval
+#' Calculate Test-Statistic of each feature's time interval
 #' 
 #' @param curve.fit.df gss data object of the fitted spline
-#' @return returns the area ratio for all time intervals
+#' @return returns testStat for all time intervals
 #' @import pracma
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
-#' data(metalonda_test_data)
-#' n.sample = 5
-#' n.timepoints = 10
-#' n.group= 2
-#' Group = factor(c(rep(0,n.sample*n.timepoints), rep(1,n.sample*n.timepoints)))
-#' Time = rep(rep(1:n.timepoints, times = n.sample), 2)
-#' Subject = factor(rep(1:(2*n.sample), each = n.timepoints))
-#' points = seq(1, 10, length.out = 10)
-#' aggregate.df = data.frame(Count = metalonda_test_data[1,], Time = Time, Group = Group, Subject = Subject)
-#' model = curveFitting(df = aggregate.df, method= "ssnbinomial", points)
-#' intervalArea(model)
 #' @export
-intervalArea = function(curve.fit.df){
-  size = length(curve.fit.df$dd.null$Time)
-  ar = numeric(size - 1)
-  
-  ## Calculate the absoulte and the sign of each interval area
-  ar.abs = numeric(size - 1)
-  ar.sign = numeric(size - 1)
-  for(i in 1:(size - 1)){
-    area.0 = trapz(curve.fit.df$dd.0$Time[i:(i+1)], curve.fit.df$dd.0$Count[i:(i+1)])
-    area.1 = trapz(curve.fit.df$dd.1$Time[i:(i+1)], curve.fit.df$dd.1$Count[i:(i+1)])
-    area.null = trapz(curve.fit.df$dd.null$Time[i:(i+1)], curve.fit.df$dd.null$Count[i:(i+1)])
-    
-    ar[i] = (abs(area.0) - abs(area.1)) / max(abs(area.0), abs(area.1))
-    if(is.na(ar[i])){
-     ar[i]=1
-    }
-    ar.abs[i] = abs(ar[i])
-    ar.sign[i] = ar[i]/abs(ar[i])
-  }
-  
-  return(list(ar = ar, ar.abs = ar.abs, ar.sign = ar.sign))
-}
-
-
-
-
-
-#' Calculate Test-Statistic of each feature's time interval
 testStat = function(curve.fit.df){
   size = length(curve.fit.df$dd.null$Time)
   testStat = numeric(size - 1)
@@ -233,95 +192,26 @@ testStat = function(curve.fit.df){
   return(list(testStat = testStat))
 }
 
-
-
-#' Find significant time intervals
-#'
-#' Identify significant time intervals
-#' 
-#' @param adjusted.pvalue vector of the adjusted p-value
-#' @param threshold p-value cut off
-#' @param sign vector hold area sign of each time interval 
-#' @return returns a list of the start and end points of all significant time intervals
-#' @references
-#' Ahmed Metwally (ametwall@stanford.edu)
-#' @examples 
-#' p = c(0.04, 0.01, 0.02, 0.04, 0.06, 0.2, 0.06, 0.04)
-#' sign = c(1, 1, 1, 1, -1, -1, 1, 1)
-#' findSigInterval(p, threshold = 0.05, sign)
-#' @export
-findSigInterval = function(adjusted.pvalue, threshold = 0.05, sign)
-{
-  sig = which(adjusted.pvalue < threshold)
-  sign = sign[sig]
-  padj = adjusted.pvalue[sig]
-  start = numeric()
-  end = numeric()
-  p = numeric()
-  dom = numeric()
-  
-  if(length(sig) == 0)
-  {
-    cat("No Significant Intevals Found \n")
-  }
-  else if(length(sig) == 1)
-  {
-    start = sig[1]
-    end = sig [1]
-    p = padj[1]
-    dom = sign[1]
-  }
-  else
-  {
-    start = sig[1]
-    
-    if((sig[2] - sig[1]) != 1 | sign[2] != sign[1])
-    {
-      end = c(end, sig[1])
-      dom = c(dom, sign[1])
-      p = c(p, padj[1])
-    }
-    
-    for(i in 2:length(sig))
-    {
-      if(i != length(sig))
-      {
-        if((sig[i] - sig[i-1]) > 1 | sign[i] != sign[i-1])
-        {
-          start= c(start, sig[i])
-        }
-        
-        if((sig[i+1] - sig[i]) != 1 | sign[i+1] != sign[i])
-        {
-          end = c(end, sig[i])
-          dom = c(dom, sign[i])
-          p = c(p, mean(adjusted.pvalue[start[length(start)] : end[length(end)]]))
-        }
-      }
-      else
-      {
-        if((sig[i]-sig[i-1]) > 1 | sign[i] != sign[i-1])
-        {
-          start= c(start, sig[i])
-        }
-        end= c(end, sig[i])
-        dom = c(dom, sign[i])
-        p = c(p, mean(adjusted.pvalue[start[length(start)] : end[length(end)]]))
-      }
-    }
-  }
-  
-  return(list(start = start, end = end, pvalue = p, dominant = dom))
-}
-
-
-
-
-
-## Find Significant Interval based on testStat
+# 
+# 
+# #' Find Significant Interval based on testStat
+# #'
+# #' Find Significant Interval based on testStat
+# #' 
+# #' @param adjusted.pvalue vector of the adjusted p-value
+# #' @param threshold p-value cut off
+# #' @param sign vector hold area sign of each time interval 
+# #' @return returns a list of the start and end points of all significant time intervals
+# #' @references
+# #' Ahmed Metwally (ametwall@stanford.edu)
+# #' @examples 
+# #' p = c(0.04, 0.01, 0.02, 0.04, 0.06, 0.2, 0.06, 0.04)
+# #' sign = c(1, 1, 1, 1, -1, -1, 1, 1)
+# #' findSigInterval2(p, threshold = 0.05, sign)
+# #' @export
 findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 {
-  sig = which(adjusted.pvalue < threshold)
+  sig = which(adjusted.pvalue < threshold/2)
   sign = sign[sig]
   padj = adjusted.pvalue[sig]
   start = numeric()
@@ -386,42 +276,15 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 
 
 
-#' Calculate Area Ratio (AR) of each feature's time interval for all permutations
+#' Calculate testStat of each feature's time interval for all permutations
 #'
-#' Fits longitudinal samples from the same group using negative binomial or LOWESS for all permutations
+#' Fits longitudinal samples from the same group using SSANOVA
 #' 
 #' @param perm list has all the permutated models
 #' @return returns a list of all permutation area ratio
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
-#' @examples 
-#' data(metalonda_test_data)
-#' n.sample = 5 # sample size;
-#' n.timepoints = 10 # time point;
-#' n.perm = 3
-#' n.group= 2 # number of group;
-#' Group = factor(c(rep(0,n.sample*n.timepoints), rep(1,n.sample*n.timepoints)))
-#' Time = rep(rep(1:n.timepoints, times = n.sample), 2)
-#' Subject = factor(rep(1:(2*n.sample), each = n.timepoints))
-#' points = seq(1, 10, length.out = 10)
-#' aggretage.df = data.frame(Count = metalonda_test_data[1,], Time = Time, Group = Group, Subject = Subject)
-#' perm = permutation(aggretage.df, n.perm = 3, method = "ssnbinomial", points)
-#' areaPermutation(perm)
 #' @export
-areaPermutation = function(perm)
-{
-  ar.list = list()
-  list.len = length(perm)
-  for (j in 1:list.len)
-  {
-    ar.list[[j]] = intervalArea(perm[[j]])
-  }
-  
-  return(ar.list)
-}
-
-
-
 testStatPermutation = function(perm)
 {
   testStat.list = list()

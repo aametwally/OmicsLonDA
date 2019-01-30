@@ -1,4 +1,4 @@
-#' Omics Longitudinal Differential Abundance Analysis for one feature
+#' Omics Longitudinal Differential Analysis for one feature
 #'
 #' Find significant time intervals of the one feature
 #' 
@@ -23,26 +23,11 @@
 #' @import zoo 
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
-#' @examples 
-#' data(omicslonda_test_data)
-#' n.sample = 5
-#' n.timepoints = 10
-#' n.group = 2
-#' Group = factor(c(rep(0, n.sample*n.timepoints), rep(1,n.sample*n.timepoints)))
-#' Time = rep(rep(1:n.timepoints, times = n.sample), 2)
-#' Subject = factor(rep(1:(2*n.sample), each = n.timepoints))
-#' points = seq(1, 10, length.out = 10)
-#' \dontrun{
-#' output.nbinomial = omicslonda(Count = omicslonda_test_data[1,], Time = Time, Group = Group,
-#' Subject = Subject, fit.method =  "ssnbinomial", n.perm = 10, points = points,
-#' text = rownames(omicslonda_test_data)[1], parall = FALSE, pvalue.threshold = 0.05, 
-#' adjust.method = "BH", time.unit = "hours", ylabel = "Normalized Count", col = c("black", "green"))
-#' }
 #' @export
 omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ssnbinomial", 
                       points, text = 0, parall = FALSE, pvalue.threshold = 0.05, 
                       adjust.method = "BH", time.unit = "days", ylabel = "Normalized Count", col = c("blue", "firebrick"),
-                      prefix = "Test")
+                      prefix = "Test", DrawTestStatDist = FALSE)
 {
   cat("Start OmicsLonDA \n")
   
@@ -53,6 +38,9 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   # Extract groups
   Group = as.character(df$Group)
   group.levels = sort(unique(Group))
+  #print("Group levels = \n")
+  print(group.levels)
+  #print("\n")
   
   
   
@@ -83,7 +71,10 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   
   
   
-  print(df)
+  #print(df)
+  #cat("print df v1.0 = ", df$Group, "\n")
+  #print(df)
+  #print(df$Group)
   
   ## Visualize feature's abundance accross different time points  
   visualizeFeature(df, text, group.levels, unit = time.unit, ylabel = ylabel, col = col, prefix = prefix)
@@ -153,7 +144,11 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   # 1: <anonymous>: ... may be used in an incorrect context: ‘.fun(piece, ...)’
   
   ## Permutation 
-  perm  = permutation(formula = formula, df, n.perm, fit.method, points, parall = parall)
+  #perm  = permutation(formula = formula, df, n.perm, fit.method, points, parall = parall)
+  #cat("Omicslonda group  = ", df$Group, "\n")
+  #perm  = permutationMC(formula = formula, perm.dat = df, n.perm = n.perm, method = fit.method, points = points, parall = parall, prefix = prefix)
+  perm  = permutationMC_fixPoints(formula = formula, perm.dat = df, n.perm = n.perm, method = fit.method, points = points, parall = parall, prefix = prefix)
+  
   
   
   # ## Area p-value per unit interval
@@ -178,7 +173,10 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   ### DEVELOPEMENT: Test for having the null distribution from all timepoints
   test.stat.prem = testStatPermutation(perm)
   t1 = do.call(rbind, test.stat.prem)
-  t2 = do.call(rbind, t1[,1])
+  
+  ## TODO: Fix the inconsistent # of points issue.
+  #t2 = do.call(rbind, t1[,1])
+  t2 = unlist(t1[,1])
   t3 = as.vector(t2)
   length(t3)
   pvalue.test.stat = sapply(1:(length(points)-1), function(i){
@@ -191,10 +189,17 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
       sum(t3 < stat[i])/length(t3)
     }
   } )
-  adjusted.pvalue2 = p.adjust(pvalue.test.stat, method = adjust.method)
-  adjusted.pvalue = adjusted.pvalue2
-  ##  Visualize AR empirical distribution for the null distribution
-  visualizeARHistogram2(t3, text, fit.method, prefix = prefix, modelStat = stat)
+  # adjusted.pvalue2 = p.adjust(pvalue.test.stat, method = adjust.method)
+  # adjusted.pvalue = adjusted.pvalue2
+  
+  adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+  
+  if(DrawTestStatDist)
+  {
+    ##  Visualize AR empirical distribution for the null distribution
+    visualizeARHistogram2(t3, text, fit.method, prefix = prefix, modelStat = stat)
+  }
+
   
   
   
@@ -225,15 +230,15 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   avg.mod0.count = rollapply(model$dd.0$Count, 2, mean)
   avg.mod1.count = rollapply(model$dd.1$Count, 2, mean)
   foldChange = avg.mod0.count/avg.mod1.count
-  log2FoldChange = log2(foldChange)
+  #log2FoldChange = log2(foldChange)
   
   
   output.details = list(feature = rep(text, length(interval.start)), 
                         interval.start = interval.start, interval.end = interval.end,
                         avg.mod0.count = avg.mod0.count, avg.mod1.count = avg.mod1.count, 
-                        foldChange = foldChange, log2FoldChange = log2FoldChange, 
+                        foldChange = foldChange, #log2FoldChange = log2FoldChange, 
                         testStat = stat, testStat.abs = abs(stat), testStat.sign = sign(stat), dominant = dominant,
-                        intervals.pvalue = pvalue.test.stat, adjusted.pvalue = adjusted.pvalue)
+                        intervals.pvalue = pvalue.test.stat, adjusted.pvalue = adjusted.pvalue, points = points)
   output.summary = data.frame(feature = rep(text, length(interval$start)), start = st, end = en,
                               dominant = interval$dominant, pvalue = interval$pvalue)
   
@@ -241,12 +246,74 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   ## Output table and volcano plot that summarize time intervals statistics
   feature.summary = as.data.frame(do.call(cbind, output.details), stringsAsFactors = FALSE)
   write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv", prefix, text, fit.method), row.names = FALSE)
-  x = as.data.frame(sapply(feature.summary[, c("foldChange","log2FoldChange", "intervals.pvalue", "adjusted.pvalue")], as.numeric))
-  visualizeVolcanoPlot(df = x, text, prefix = prefix, fit.method = fit.method)
+  #x = as.data.frame(sapply(feature.summary[, c("foldChange","log2FoldChange", "intervals.pvalue", "adjusted.pvalue")], as.numeric))
+  #visualizeVolcanoPlot(df = x, text, prefix = prefix, fit.method = fit.method)
   cat("\n\n")
   
   return(list(detailed = output.details, summary = output.summary))
 }
+
+
+omicslondaAll_Test_iPOP = function(formula = Count ~ Time, data, n.perm = 25, fit.method = "ssgaussian", 
+                         num.intervals = 100, parall = FALSE, pvalue.threshold = 0.05, 
+                         adjust.method = "BH", time.unit = "days", norm.method = "none", prefix = "TestOmicsLonDA",
+                         ylabel = "Normalized Count", col = c("blue", "firebrick"))
+{
+  
+  
+  
+  ## Apply omicslonda for each feature
+  #data = metabolite_norm_filtered_rename
+  n.features = length(data)
+  detailed = list()
+  summary = list()
+  points = seq(1, 50, length.out = 50)
+  
+  
+  
+  ## TODO: Get Group name
+  group.levels = sort(unique(data[[1]]$Group))
+  if(length(group.levels) > 2){
+    stop("You have more than two phenotypes.")
+  }
+  gr.1 = group.levels[1]
+  gr.2 = group.levels[2]
+  
+  omicslondaResults = list()
+  for (i in 1:n.features)
+  {
+    cat ("Feature  = ", data[[i]]$feature[1], "\n")
+    
+
+    omicslondaResults[[i]] = omicslonda(formula = Count ~ Time, df = data[[i]], n.perm = n.perm, fit.method = fit.method, points = points,
+                                        text = unique(data[[i]]$feature), parall = parall, pvalue.threshold = pvalue.threshold,     
+                                        adjust.method = adjust.method, col = col, 
+                                        prefix = prefix, ylabel = ylabel, 
+                                        DrawTestStatDist = FALSE)
+
+
+    detailed[[i]] = omicslondaResults[[i]]$detailed
+    summary[[i]] = omicslondaResults[[i]]$summary
+  }
+  
+  summary.tmp = do.call(rbind, summary)
+  summary.tmp$dominant[which(summary.tmp$dominant == 1)] = gr.1
+  summary.tmp$dominant[which(summary.tmp$dominant == -1)] = gr.2
+  
+  ## Output table and figure that summarize the significant time intervals
+  write.csv(summary.tmp, file = sprintf("%s/OmicsLonDA_TimeIntervals_%s_%s.csv", prefix, fit.method, prefix), row.names = FALSE)
+  visualizeTimeIntervals(interval.details = summary.tmp, prefix, unit = time.unit, col = col, fit.method = fit.method)
+  
+  aggregateData = list(output.detail = detailed, output.summary = summary.tmp)
+  save(aggregateData, file = sprintf("%s/OmicsLonDA_Summary_%s_%s.RData", prefix, fit.method, prefix))
+  return(aggregateData)
+}
+
+
+
+
+
+
 
 
 #' Omics Longitudinal Differential Abundance Analysis for all Features
@@ -365,7 +432,6 @@ omicslondaAll = function(formula = Count ~ Time, countTable, metadata, n.perm = 
   write.csv(summary.tmp, file = sprintf("%s/OmicsLonDA_TimeIntervals_%s_%s.csv", prefix, fit.method, prefix), row.names = FALSE)
   visualizeTimeIntervals(interval.details = summary.tmp, prefix, unit = time.unit, col = col, fit.method = fit.method)
   
-  
   aggregateData = list(output.detail = detailed, output.summary = summary.tmp)
   save(aggregateData, file = sprintf("%s/OmicsLonDA_Summary_%s_%s.RData", prefix, fit.method, prefix))
   return(aggregateData)
@@ -387,7 +453,7 @@ omicslondaCorr = function (data1, data2,
 {
   cat("Start omicslondaCorr \n")
   
-  ## TODO: Export in MetaLonDA number of rows and features
+  ## TODO: Export in OmicsLonDA number of rows and features
   ## TODO: Separate the positive and negative association, and mixed association
   ## TODO: HOW to deal with unequal length of intervals? This might happen when measurements of one variable is not taken at the same time
   ### TODO: Differentiate between each dominant (1,-1)
