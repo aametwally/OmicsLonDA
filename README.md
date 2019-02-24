@@ -39,7 +39,7 @@ head(diff_simulatedDataset_norm[[1]])
 
 ```
 ## Define the prediction timepoints 
-points = seq(1, 10, length.out = 100)
+points = seq(1, 200, length.out = 200)
 output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df = diff_simulatedDataset_norm[[1]], n.perm = 1000, 
                                       fit.method = "ssgaussian", points = points,
                                       text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
