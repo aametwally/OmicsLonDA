@@ -29,7 +29,7 @@ install_github("aametwally/OmicsLonDA", ref = "master")
 library(OmicsLonDA)
 
 ## Load 1000 simulated features
-load("data/simulatedDataset_diff_OmicsLonDA_normalized_1000.RData", envir = parent.frame(), verbose = FALSE)
+data(diff_simulatedDataset_norm)
 head(diff_simulatedDataset_norm[[1]])
 
 ```

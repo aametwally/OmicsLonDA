@@ -100,7 +100,6 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
 #' @import pracma
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
-#' @examples 
 #' @export
 testStat = function(curve.fit.df){
   size = length(curve.fit.df$dd.null$Time)
