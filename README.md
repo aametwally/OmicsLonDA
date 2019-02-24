@@ -15,16 +15,12 @@ OmicsLonDA (Omics Longitudinal Differential Analysis) is a statistical framework
 
 ## Installation
 
-
-#### Install OmicsLonDA from GitHub:
 Download the latest development code of OmicsLonDA from GitHub using devtools
 ```
 library(devtools)
 install_github("aametwally/OmicsLonDA", ref = "master")
 ```
 
-
-<br>
 
 
 
