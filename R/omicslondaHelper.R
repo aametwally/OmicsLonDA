@@ -38,7 +38,7 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
     
     # ## null model
     mod.null = ssanova(formula, data = group.null, skip.iter=TRUE)
-
+    
     ## full model
     mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE)
     mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE)
@@ -49,13 +49,13 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
     rss.full = summary(mod.0)$rss+summary(mod.1)$rss
     f.stat = (rss.null - rss.full)/rss.null
   }
-
+  
   
   ## Estimate values at the provided time points
   est.null = predict(mod.null, data.frame(Time = points), include = c("1", "Time"), se = TRUE)
   est.0 = predict(mod.0, data.frame(Time = points), include = c("1", "Time"), se = TRUE)
   est.1 = predict(mod.1, data.frame(Time = points), include = c("1", "Time"), se = TRUE)
-
+  
   
   
   ## prepare dataframe for plotting
@@ -85,7 +85,7 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
                   mod.0 = mod.0, mod.1 = mod.1, dd.null.u95 = dd.null.u95, dd.null.l95 = dd.null.l95,
                   dd.0.u95 = dd.0.u95, dd.0.l95 = dd.0.l95, dd.1.u95 = dd.1.u95, dd.1.l95= dd.1.l95)
   }
-
+  
   
   return(output)
 }
@@ -105,7 +105,7 @@ testStat = function(curve.fit.df){
   size = length(curve.fit.df$dd.null$Time)
   testStat = numeric(size - 1)
   
-
+  
   for(i in 1:(size - 1)){
     testStat.null = trapz(curve.fit.df$dd.null$Time[i:(i+1)], curve.fit.df$dd.null$Count[i:(i+1)])
     testStat.0 = trapz(curve.fit.df$dd.0$Time[i:(i+1)], curve.fit.df$dd.0$Count[i:(i+1)])
@@ -219,3 +219,61 @@ testStatPermutation = function(perm)
   return(testStat.list)
 }
 
+
+
+
+
+#' Normalize count matrix 
+#'
+#' Normalize count matrix
+#'
+#' @param count count matrix
+#' @param method normalization method
+#' @references
+#' Ahmed Metwally (ametwall@stanford.edu)
+#' @export
+normalize = function(count, method = "css"){
+  # col.data=0 ## this line is for CRAN package
+  if(method == "clr")
+  {
+    cat("Normalization using CLR method \n")
+  }
+  else if(method == "css")
+  {
+    cat("Normalization using CSS method \n")
+    otu = metagenomeSeq::newMRexperiment(count)
+    p.1 = metagenomeSeq::cumNormStatFast(otu, pFlag = TRUE)
+    otu.2 = metagenomeSeq::cumNorm(otu, p = p.1)
+    count.normalized = metagenomeSeq::MRcounts(otu.2, norm = TRUE)
+  }
+  else if(method == "tmm")
+  {
+    cat("Normalization using TMM method \n")
+    factors = edgeR::calcNormFactors(count, method="TMM")
+    eff.lib.size = colSums(count) * factors
+    ref.lib.size = mean(eff.lib.size) #Use the mean of the effective library sizes as a reference library size
+    count.normalized = sweep(count, MARGIN = 2, eff.lib.size, "/") * ref.lib.size 
+  }
+  else if(method == "ra")
+  {
+    cat("Normalization using Relative Abundance (RA) method \n")
+    count.normalized  = apply(count, 2, function(x) (x/sum(x)))
+  }
+  else if(method == "log10")
+  {
+    cat("Normalization using log10 of the RA method \n")
+    count.normalized  = apply(count, 2, function(x) log10(x/sum(x) + 1)) 
+  }
+  else if(method == "median_ratio")
+  {
+    cat("Normalization using Median-Ratio method \n")
+    col.data = as.data.frame(cbind(colnames(count), rep(1:2, length.out= ncol(count)), rep(1:2, length.out= ncol(count))))
+    rownames(col.data) = col.data[,1]
+    col.data =  col.data[,-1]
+    colnames(col.data) = c("test","condition")
+    data.deseq = DESeq2::DESeqDataSetFromMatrix(countData = count, colData = col.data, ~ condition)
+    cds = DESeq2::estimateSizeFactors( data.deseq )
+    count.normalized = t( t(DESeq2::counts(cds)) / DESeq2::sizeFactors(cds) )
+  }
+  return(count.normalized)
+}
