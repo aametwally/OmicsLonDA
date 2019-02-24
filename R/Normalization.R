@@ -9,7 +9,11 @@
 #' @export
 normalize = function(count, method = "css"){
  # col.data=0 ## this line is for CRAN package
-  if(method == "css")
+  if(method == "clr")
+  {
+    cat("Normalization using CLR method \n")
+  }
+  else if(method == "css")
   {
     cat("Normalization using CSS method \n")
     otu = metagenomeSeq::newMRexperiment(count)

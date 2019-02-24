@@ -1,8 +1,8 @@
 Package: OmicsLonDA
 Type: Package
 Title: Omics Longitudinal Differential Analysis
-Version: 1.1.3
-Date: 2018-10-28
+Version: 1.0.0
+Date: 2019-02-23
 Author: Ahmed A. Metwally, Michael Snyder
 Maintainer: Ahmed A. Metwally <ametwall@stanford.edu>
 URL: https://github.com/aametwally/OmicsLonDA
@@ -10,7 +10,7 @@ BugReports: https://github.com/aametwally/OmicsLonDA/issues
 Description: Statistical method that provides robust identification of time intervals where omics features (such as proteomics, lipidomics, metabolomics, transcriptomics, the microbiome, as well as physiological parameters captured by wearable devices such as heart rhythm, body temperature, and activity level) are significantly different between groups.
 License: MIT + file LICENSE
 Depends:
-    R(>= 3.2.0)
+    R(>= 3.3.2)
 Imports:  
     gss,
     plyr,

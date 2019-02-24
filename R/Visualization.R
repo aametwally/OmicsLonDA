@@ -8,6 +8,7 @@
 #' @param unit time interval unit
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
 #' @param ylabel text to be shown on the y-axis of all generated figures (default: "Normalized Count")
+#' @param prefix prefix to be used to create directory for the analysis results
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -32,9 +33,7 @@ visualizeFeature = function (df, text, group.levels, unit = "days", ylabel = "No
           legend.text=element_text(size=15, face="plain"), legend.title = element_blank(), 
           plot.title = element_text(hjust = 0.5)) +
     theme(legend.position="top") + scale_x_continuous(breaks = waiver())
-  
-  #print("Prefix = ", prefix)
-  #ggsave(filename=paste("Feature_", text, ".jpg", sep=""), dpi = 1200, height = 10, width = 15, units = 'cm')
+
   ggsave(filename=paste(prefix, "/", "Feature_", text, ".jpg", sep=""), dpi = 1200, height = 10, width = 15, units = 'cm')
 }
 
@@ -46,12 +45,13 @@ visualizeFeature = function (df, text, group.levels, unit = "days", ylabel = "No
 #'
 #' @param df dataframe has the Count , Group, ID, Time
 #' @param model the fitted model
-#' @param method The fitting method (negative binomial, LOWESS)
+#' @param method The fitting method (ssgaussian)
 #' @param group.levels The two level's name
 #' @param text feature name
 #' @param unit time unit used in the Time vector (hours, days, weeks, months, etc.)
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
 #' @param ylabel text to be shown on the y-axis of all generated figures (default: "Normalized Count")
+#' @param prefix prefix to be used to create directory for the analysis results
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -149,9 +149,8 @@ visualizeFeatureSpline_permute = function (df, model, method, text, group.levels
 #'
 #' Visualize significant time interval
 #'
-#' @param aggregate.df Dataframe has the Count, Group, Subject, Time
 #' @param model.ss The fitted model
-#' @param method Fitting method (negative binomial or LOWESS)
+#' @param method Fitting method (ssgaussian)
 #' @param start Vector of the start points of the time intervals
 #' @param end Vector of the end points of the time intervals
 #' @param text Feature name
@@ -159,13 +158,14 @@ visualizeFeatureSpline_permute = function (df, model, method, text, group.levels
 #' @param unit time unit used in the Time vector (hours, days, weeks, months, etc.)
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
 #' @param ylabel text to be shown on the y-axis of all generated figures (default: "Normalized Count")
+#' @param prefix prefix to be used to create directory for the analysis results
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
-visualizeArea = function(aggregate.df, model.ss, method, start, end, text, group.levels, unit = "days", 
+visualizeArea = function(model.ss, method, start, end, text, group.levels, unit = "days", 
                          ylabel = "Normalized Count", col = c("blue", "firebrick"), prefix = "Test")
 {
   cat("Visualizing Significant Intervals of Feature = ", text, "\n")
@@ -222,6 +222,7 @@ visualizeArea = function(aggregate.df, model.ss, method, start, end, text, group
 #' @param prefix prefix for the output figure
 #' @param unit time unit used in the Time vector (hours, days, weeks, months, etc.)
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
+#' @param fit.method fitting method (ssguassian).
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -229,7 +230,7 @@ visualizeArea = function(aggregate.df, model.ss, method, start, end, text, group
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
 visualizeTimeIntervals = function(interval.details, prefix = "Test", unit = "days", 
-                                  col = c("blue", "firebrick"), fit.method = fit.method)
+                                  col = c("blue", "firebrick"), fit.method = "ssgaussian")
 {
   feature=0;dominant=0;Subject=0;Group=0;lnn=0 ## This line is just to pass the CRAN checks for the aes in ggplot2
   interval.details$dominant = as.factor(interval.details$dominant)
@@ -257,104 +258,22 @@ visualizeTimeIntervals = function(interval.details, prefix = "Test", unit = "day
 
 
 
-#' Visualize Area Ratio (AR) empirical distribution
+#' Visualize Test Statistics empirical distribution
 #'
-#' Visualize Area Ratio (AR) empirical distribution for each time interval
+#' Visualize Test Statistics empirical distribution for each time interval
 #'
 #' @param permuted Permutation of the permuted data
 #' @param text Feature name
 #' @param method fitting method
+#' @param prefix prefix to be used to create directory for the analysis results
+#' @param modelStat test statistics
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
-visualizeARHistogram = function(permuted, text, method, prefix = "Test", modelAR){
-  cat("Visualizing AR Distribution for Feature = ", text, "\n")
-  n = ncol(permuted)
-  r = ceiling(sqrt(n))
-  c = ceiling(sqrt(n))
-  xx = paste(prefix, "/", "Feature_", text, "_AR_distribution_", method, ".jpg", sep = "")
-  jpeg(filename = xx, res = 1200, height = r*5, width = c*5, units = 'cm')
-  
-  par(mfrow=c(r,c))
-  for( i in 1:ncol(permuted)){
-    hist(permuted[,i], xlab = "AR Ratio", ylab = "Frequency", 
-         breaks = 1000, col = "gray", border = "gray", 
-         main = paste("Interval # ", i, sep=""), xlim = c(0,1))
-    abline(v = modelAR[i], col="red")
-  }
-  dev.off()
-}
-
-
-
-#' Visualize log2 fold-change and significance of each interval as volcano plot
-#'
-#' Visualize log2 fold-change and significance of each interval as volcano plot
-#'
-#' @param df Dataframe has a detailed summary about feature's significant intervals
-#' @param text Feature name
-#' @import ggplot2
-#' @import grDevices
-#' @import graphics
-#' @references
-#' Ahmed Metwally (ametwall@stanford.edu)
-#' @export
-visualizeVolcanoPlot = function(df, text, prefix = "Test", fit.method = "ssnbinomial"){
-  adjusted.pvalue_pseudo=0; Significance=0; log2FoldChange=0 ## This line is just to pass the CRAN checks
-  
-  cat("Visualizing Volcano Plot of Feature = ", text, "\n")
-  # Highlight features that have an absolute log2 fold change > 1 and p-value < 0.05
-  df$adjusted.pvalue_pseudo = df$adjusted.pvalue
-  df$adjusted.pvalue_pseudo[which(df$adjusted.pvalue == 0)] = 0.00001
-
-  df$Significance <- "NS"
-  df$Significance[(abs(df$log2FoldChange) > 1)] <- "FC"
-  df$Significance[(df$adjusted.pvalue_pseudo<0.05)] <- "FDR"
-  df$Significance[(df$adjusted.pvalue_pseudo<0.05) & (abs(df$log2FoldChange)>1)] <- "FC_FDR"
-  table(df$Significance)
-  df$Significance <- factor(df$Significance, levels=c("NS", "FC", "FDR", "FC_FDR"))
-  
-  
-  ggplot(data=df, aes(x=log2FoldChange, y=-log10(adjusted.pvalue_pseudo), colour=Significance)) +
-    geom_point(alpha=0.4, size=1.75) + theme_bw() +
-    ggtitle(paste("Feature = ", text, sep = "")) +
-    xlab("log2 fold change") + ylab("-log10 p-value") +
-    theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
-          axis.text.y = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
-          axis.title.x = element_text(colour="black", size=12, angle=0, hjust=.5, vjust=0.5, face="bold"),
-          axis.title.y = element_text(colour="black", size=12, angle=90, hjust=.5, vjust=.5, face="bold"),
-          legend.text=element_text(size=10, face="plain"), legend.title = element_blank(),
-          plot.title = element_text(hjust = 0.5), legend.position="bottom") +
-    
-    scale_color_manual(values=c(NS="grey30", FC="forestgreen", FDR="royalblue", FC_FDR="red2"), 
-                       labels=c(NS="NS", FC=paste("Log2FC>|", 1, "|", sep=""), FDR=paste("FDR Q<", 0.05, sep=""), 
-                                FC_FDR=paste("FDR Q<", 0.05, " & Log2FC>|", 1, "|", sep=""))) +
-    
-    #Tidy the text labels for a subset of genes
-    geom_text(data=subset(df, adjusted.pvalue_pseudo<0.05 & abs(log2FoldChange)>=1),
-              aes(label=rownames(subset(df, adjusted.pvalue_pseudo<0.05 & abs(log2FoldChange)>= 1))),
-              size=2.25,
-              #segment.color="black", #This and the next parameter spread out the labels and join them to their points by a line
-              #segment.size=0.01,
-              check_overlap=TRUE,
-              vjust=1.0)+
-    geom_vline(xintercept=c(-1,1), linetype="dotted") + geom_hline(yintercept=-log10(0.05), linetype="dotted") +
-    ggsave(filename = paste(prefix, "/", "Feature_", text, "_VolcanoPlot_", fit.method, ".jpg", sep=""), dpi = 1200, height = 12, width = 12, units = 'cm')
-}
-
-
-
-
-
-
-
-#' Visualize Area Ratio (AR) empirical distribution NULL Distribution
-#'
-#' Visualize Area Ratio (AR) empirical distribution for each time interval
-visualizeARHistogram2 = function(permuted, text, method, prefix = "Test", modelStat){
+visualizeTestStatHistogram = function(permuted, text, method, prefix = "Test", modelStat){
   cat("Visualizing testStat Distribution for Feature = ", text, "\n")
   n = length(modelStat)
   r = ceiling(sqrt(n))
@@ -363,8 +282,7 @@ visualizeARHistogram2 = function(permuted, text, method, prefix = "Test", modelS
   #jpeg(filename = xx, res = 1200, height = r*5, width = c*5, units = 'cm')
   jpeg(filename = xx, res = 1200, height = 40, width = 40, units = 'cm')
   
-  
-  
+
   minPoint = min(min(permuted), min(modelStat))
   maxPoint = max(max(permuted), max(modelStat))
   
