@@ -61,7 +61,7 @@ automateEval_OmicsLonDA = function(data = data, n.perm = 100, points = points, p
     } else if(pattern == "nondiff"){
       DA_truth = c(rep(0, len))# - 150), rep(1,100), rep(0,50))
     } else{
-      print("wrong choice of patters")
+      print("wrong choice of simulation pattern")
       stop(message)
     }
       

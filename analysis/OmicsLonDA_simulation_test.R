@@ -1,3 +1,5 @@
+# install.packages("devtools", repos = c("http://rstudio.org/_packages", "http://cran.rstudio.com"))
+
 library(ggplot2)
 library(gss)
 library(plyr)
@@ -8,9 +10,6 @@ library(zoo)
 library(pheatmap)
 library(viridis)
 
-
-# install.packages("devtools", repos = c("http://rstudio.org/_packages", "http://cran.rstudio.com"))
-# install.packages("pkgload", repos = c("http://rstudio.org/_packages", "http://cran.rstudio.com"))
 
 setwd("/Users/ahmedmetwally/Box Sync/Ahmed Metwally's Files/Stanford/OmicsLonDA_dev/OmicsLonDA_github/")
 #setwd("C:/Users/ametwall/Box Sync/Ahmed Metwally's Files/Stanford/OmicsLonDA_dev/")

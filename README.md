@@ -44,7 +44,7 @@ output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df = dif
                                       fit.method = "ssgaussian", points = points,
                                       text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
                                       adjust.method = "BH", col = c("blue", "green"),
-                                      prefix = "OmicsLonDA_clr_f1-2", ylabel = "CLR-NormalizedCount",
+                                      prefix = "OmicsLonDA_clr_f1", ylabel = "CLR-NormalizedCount",
                                       DrawTestStatDist = FALSE, time.unit = "days")
 ```
 

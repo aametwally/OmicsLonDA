@@ -1,39 +1,32 @@
-library(devtools)
 library(zoo)
 library(lubridate)
-library(ggplot2)
 library(ggplot2)
 library(gss)
 library(plyr)
 library(pracma)
 library(parallel)
 library(doParallel)
-library(zoo)
-library(pheatmap)
-library(viridis)
 library("biomformat"); packageVersion("biomformat")
 library(nlme)
 
 rm(list=ls())
-
-
 setwd("/Users/ahmedmetwally/Box Sync/Ahmed Metwally's Files/Stanford/OmicsLonDA_dev/")
-#setwd("C:/Users/ametwall/Box Sync/Ahmed Metwally's Files/Stanford/OmicsLonDA_dev/")
-#load("ipop_data/HMP_Microbiome_Count.RData", envir = parent.frame(), verbose = FALSE)
 load("ipop_data/Revision_MultiOmes.RData", envir = parent.frame(), verbose = FALSE)
 
+source("R/OmicsLonDA.R")
+source("R/CurveFitting.R")
+source("R/Visualization.R")
+source("R/Permutation.R")
+source("R/Normalization.R")
 
 
-omicslondaAll_Test_iPOP = function(formula = Count ~ Time, data, n.perm = 25, fit.method = "ssgaussian", 
+## Define omicslondaAll_ipop method
+omicslondaAll_ipop = function(formula = Count ~ Time, data, n.perm = 25, fit.method = "ssgaussian", 
                                    num.intervals = 100, parall = FALSE, pvalue.threshold = 0.05, 
                                    adjust.method = "BH", time.unit = "days", norm.method = "none", prefix = "TestOmicsLonDA",
                                    ylabel = "Normalized Count", col = c("blue", "firebrick"))
 {
-  
-  
-  
   ## Apply omicslonda for each feature
-  #data = metabolite_norm_filtered_rename
   n.features = length(data)
   detailed = list()
   summary = list()
@@ -41,7 +34,7 @@ omicslondaAll_Test_iPOP = function(formula = Count ~ Time, data, n.perm = 25, fi
   
   
   
-  ## TODO: Get Group name
+  ## Get Group name
   group.levels = sort(unique(data[[1]]$Group))
   if(length(group.levels) > 2){
     stop("You have more than two phenotypes.")
@@ -53,15 +46,11 @@ omicslondaAll_Test_iPOP = function(formula = Count ~ Time, data, n.perm = 25, fi
   for (i in 1:n.features)
   {
     cat ("Feature  = ", data[[i]]$feature[1], "\n")
-    
-    
     omicslondaResults[[i]] = omicslonda(formula = Count ~ Time, df = data[[i]], n.perm = n.perm, fit.method = fit.method, points = points,
                                         text = unique(data[[i]]$feature), parall = parall, pvalue.threshold = pvalue.threshold,     
                                         adjust.method = adjust.method, col = col, 
                                         prefix = prefix, ylabel = ylabel, 
                                         DrawTestStatDist = FALSE)
-    
-    
     detailed[[i]] = omicslondaResults[[i]]$detailed
     summary[[i]] = omicslondaResults[[i]]$summary
   }
@@ -87,55 +76,27 @@ omicslondaAll_Test_iPOP = function(formula = Count ~ Time, data, n.perm = 25, fi
 #######################################
 metabolites_seasonality_all = read.csv(file = "ipop_data/metabolites_seasonality_all.csv", row.names = 1, check.names=FALSE)
 
-####### Filter out smaples that dont have labels  #######
-#metabolites_seasonality_all["IRIS"=="Unknown",]
-#remov = which(metabolites_seasonality_all["IRIS",] == "Unknown" | is.na(metabolites_seasonality_all["IRIS",]))
-#metabolites_seasonality_all = metabolites_seasonality_all[,-remov]
-#dim(metabolites_seasonality_all)
-
-
-
 metabolites_count = metabolites_seasonality_all[-c(1:6),]
 metabolites_count_table = data.frame(sapply(metabolites_count, function(x) as.numeric(as.character(x))))
 rownames(metabolites_count_table) = rownames(metabolites_count)
 colnames(metabolites_count_table) = colnames(metabolites_count)
-
 metabolites_metadata_table = as.data.frame(t(metabolites_seasonality_all[c(1:6),]))
 colnames(metabolites_metadata_table)[1] = "Subject"
-#colnames(metabolites_metadata_table)[4] = "Group"
-#colnames(metabolites_metadata_table)[3] = "Time"
-
-
 metabolites_metadata_table$Date = as.Date(metabolites_metadata_table$Date, format = '%d-%b-%y')
-
-
 metabolites_metadata_table$SampleID = rownames(metabolites_metadata_table)
-#metabolites_metadata_table$SampleID = gsub("X", "", metabolites_metadata_table$SampleID)
-#metabolites_metadata_table$SampleID = gsub("\\.", "-", metabolites_metadata_table$SampleID)
 metabolites_metadata_table  = merge(metabolites_metadata_table, ls, by = "SampleID")
-
-#### Modify ls df
-# colnames(ls)[1] = "Subject"
-# colnames(ls)[2] = "SampleID"
-# colnames(ls)[3] = "Time"
-# metabolites_metadata_table  = merge(ls, metbcr.df, by = "SampleID")
 
 
 prefix = "Infection"
 xx = subset(metabolites_metadata_table, substring(state1, 1, nchar(prefix)) == prefix)
 xx$Subject = factor(xx$Subject)
 
-# ### TODO: Filter out subject with less than 5 infection time points. We may do the filteration basedon the subject_cycle parameter later on
-# length(unique(xx$Subject))
-# sum(table(xx$Subject)>4)
-# q = table(xx$Subject)>4
-# selectedSubjects = names(q[q == TRUE])
+### TODO: Filter out subject with less than 5 infection time points. We may do the filteration based on the subject_cycle parameter later on
 
 ## Select samples from subjects with infection timepoints
 subset.df = subset(metabolites_metadata_table, Subject %in% xx$Subject)
 colnames(subset.df)[which(colnames(subset.df) == "CL1")] = "DaysAfterInfect"
 subset.df$DaysAfterInfect = gsub("D", "", subset.df$DaysAfterInfect)
-#subset.df = subset.df[which(subset.df$DaysAfterInfect != ""),]
 
 ## Select Healthy and Infection time points
 yy = subset(subset.df, substring(state1, 1, nchar("Infection")) == "Infection" | substring(state1, 1, nchar("Healthy")) == "Healthy")
@@ -154,14 +115,9 @@ for(i in 1:nrow(yy)){
 }
 
 
-## remove inf one
+## remove inf
 remove = which(yy$DaysAfterInfect == "-Inf")
 yy = yy[-remove,]
-
-## TODO: Commented this
-# retain = c("SampleID", "Subject", "Batch", "Time", "Group", "Class", "state1", "DaysAfterInfect")
-# yy = yy[,retain]
-
 
 
 ## name each infection cycle by the date of the first infection sample
@@ -173,11 +129,7 @@ yy = yy[with(yy, order(Subject, Date)),]
 write.csv(yy, file = "ipop_data/ipop_metabolites_infection_2.csv")
 
 
-
-
-
-
-### TODO: rename the cycle of the block that downnot have Healthy and consecutive to infection timepoints
+### TODO: rename the cycle of the block that don't have Healthy and consecutive to infection timepoints
 ### TODO: This is 2011-12-04
 ### TODO: sort df by date
 tmp_date = yy[1,]$Date
@@ -214,8 +166,8 @@ samples_infection = yy
 samples_infection$Subject_Cycle = paste(samples_infection$Subject, as.character(samples_infection$CycleName), sep = "_")
 class(samples_infection$DaysAfterInfect) = "numeric"
 
-
-
+## Count number of unique infection cycle
+length(unique(samples_infection$Subject_Cycle))
 
 
 ### TODO: Remove sampels without Healthy group
@@ -229,7 +181,7 @@ for(i in unique(samples_infection$Subject_Cycle)){
 
 
 
-## Add gender
+## histiogram of BMI and age 
 hist(sc$BMI)
 hist(sc$Adj.age)
 
@@ -238,10 +190,7 @@ subject_info = sc[, c("SubjectID", "Gender")]
 colnames(subject_info)[1] = "Subject"
 tmp = merge(samples_infection_filtered, subject_info, by = "Subject")
 
-
-
 #### Merge
-
 colnames(sc)[1] = "Subject"
 tmp = merge(samples_infection_filtered, sc, by = "Subject")
 
@@ -271,7 +220,6 @@ dev.off()
 
 
 #### Remove all healthy timepoints except the last one
-
 dat = tmp2
 for(i in unique(dat$Subject_Cycle)){
   block = dat[which(dat$Subject_Cycle == i & dat$state1 == "Healthy"),]
@@ -308,8 +256,7 @@ dev.off()
 
 
 
-
-## Statistics
+## Stats
 length(dat$Subject_Cycle)
 length(unique(dat$Subject_Cycle))
 length(unique(dat$Subject))
@@ -318,10 +265,8 @@ table(dat$Gender)
 unique(dat[, c("Subject", "Gender")])
 
 ##### Normalize and get the samples from count matrix
-tmp2
-### Select samples from 
-#colnames(metabolites_count_table) = gsub("X", "", colnames(metabolites_count_table))
-#colnames(metabolites_count_table) = gsub("\\.", "-", colnames(metabolites_count_table))
+
+### Select samples 
 metabolites_count_table_selected = metabolites_count_table[, tmp2$SampleID]
 
 metabolite = list()
@@ -333,10 +278,7 @@ for(i in 1:nrow(metabolites_count_table_selected)){
 
 
 
-
-
-### Normalize
-
+### CLR Normalization
 ### Need to keep the name
 normalize = function(df){
   #colnames(df)[ncol(df)] = "Count"
@@ -361,14 +303,12 @@ normalize = function(df){
 }
 
 
-
 metabolite_norm = list()
 for(i in 1:length(metabolite)){
   metabolite_norm[[i]] = normalize(metabolite[[i]])
 }
 
 View(metabolite_norm[[1]])
-
 
 
 
@@ -381,8 +321,6 @@ View(metabolite_norm_filtered[[1]])
 
 
 ### TODO: Remove infection occurences < 3 timepoints
-
-
 
 jpeg("ipop_metabolites_infection_wCycles_timepoints.jpg", res = 300, height = 20, width = 20, units = 'cm')
 ggplot(metabolite_norm_filtered[[1]], aes(x = Subject_Cycle, y = DaysAfterInfect, color = state1)) +
@@ -403,15 +341,12 @@ dev.off()
 
 
 
-
-
-### Rename Variable
+### Rename Variables
 metabolite_norm_filtered_rename = list()
 for(i in 1:length(metabolite_norm_filtered)){
   metabolite_norm_filtered_rename[[i]] = metabolite_norm_filtered[[i]][, c("Subject_Cycle", "SampleID", "Gender", "DaysAfterInfect", "Count", "feature")]
   colnames(metabolite_norm_filtered_rename[[i]]) = c("Subject", "ID", "Group", "Time", "Count", "feature")
   metabolite_norm_filtered_rename[[i]]$Subject = factor(metabolite_norm_filtered_rename[[i]]$Subject)
-  #metabolite_norm_filtered_rename[[i]]$Subject = factor(metabolite_norm_filtered_rename[[i]]$Subject)
 }
 
 
@@ -420,16 +355,9 @@ for(i in 1:length(metabolite_norm_filtered)){
 
 
 
-
-### Rename variable and run OmicsLonda
-source("OmicsLonDA/R/OmicsLonDA.R")
-source("OmicsLonDA/R/CurveFitting.R")
-source("OmicsLonDA/R/Visualization.R")
-source("OmicsLonDA/R/Permutation.R")
-source("OmicsLonDA/R/Normalization.R")
-source("OmicsLonDA/R/OmicsLonDA_Evaluation.R")
-
-
+##################################
+######### Run OmicsLonDA #########
+##################################
 points = seq(0, 50, length.out = 51)
 data = metabolite_norm_filtered_rename
 omicslondaResults = list()
@@ -446,7 +374,7 @@ for(i in 1:length(metabolite_norm_filtered_rename))
 }
 
 ### Test all features
-omicslonda_metabolomics = omicslondaAll_Test_iPOP(formula = Count ~ Time, data = metabolite_norm_filtered_rename, n.perm = 100, fit.method = "ssgaussian", 
+omicslonda_metabolomics = omicslondaAll_ipop(formula = Count ~ Time, data = metabolite_norm_filtered_rename, n.perm = 100, fit.method = "ssgaussian", 
                                    num.intervals = 100, parall = FALSE, pvalue.threshold = 0.05, 
                                    adjust.method = "BH", time.unit = "days", norm.method = "none", 
                                    prefix = "OmicsLonDA_ipop_Metabolomics",
@@ -480,92 +408,21 @@ sum(z<0.05)
 
 
 
-#### Test covariates
-library(nlme)
-
-### Add BMI and Age to this equation
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=data[[1]])
-anova(m1)
-
-tested.df = as.matrix(gut_taxa_count_table_filtered)
-for(i in 1:nrow(tested.df))
-{
-  x = cbind(Count = as.vector(tested.df[i,]), gut_taxa_metadata_table)
-  m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=x)
-  a1 = anova(m1)
-  
-  if(a1["Time:Group", "p-value"]<0.05){
-    cat("Significant  feature = ", rownames(tested.df)[i], "\n")
-    print(a1)
-  }
-}
-
-
-
-
-
-## Count number of unique infection cycle
-length(unique(samples_infection$Subject_Cycle))
-## 27
-
-
-
-## Do Testing Between IS & IR
-length(unique(paste(samples_infection$Subject_Cycle, samples_infection$))
-
-subset.df_IRIS = subset.df[,c("Subject", "Group")]
-
-dim(unique(subset.df_IRIS))
-View(unique(subset.df_IRIS))
-## 2 IR, 7 IS
-# table(unique(subset.df_IRIS))
-
-
-
-### Time distribution
-
-timepoints.df = subset.df[, c("Subject", "Time", "DaysAfterInfect", "state1")]
-# TimePoints = data.frame(subjectID = as.factor(paste("",gut_taxa_id, sep="")), days = gut_taxa_time, 
-#                         IRIS = gut_taxa_group)
-# TimePoints = TimePoints[order(TimePoints$IRIS, TimePoints$subjectID),]
-# TimePoints = data.frame(subjectID = factor(TimePoints$subjectID, levels = TimePoints$subjectID), Time = TimePoints$days, 
-#                         Group= as.factor(TimePoints$IRIS))
-
-
-#jpeg("gut_taxa_timepoints_distribution.jpg", res = 300, height = 20, width = 20, units = 'cm')
-class(yy$DaysAfterInfect) = "numeric"
-ggplot(yy, aes(x = Subject, y = DaysAfterInfect, color = state1)) +
-  theme_bw() + 
-  #scale_colour_manual(values=c( "black", "green"),  breaks=c("IR", "IS")) +
-  # theme(axis.text.x=element_text(angle=45, hjust=1)) +
-  scale_x_discrete(name ="Subject")+ #coord_fixed(ratio = 0.002)+
-  geom_point(aes(colour = state1), stat='identity', size = 1, show.legend = TRUE) +
-  theme(legend.position="top")+ scale_shape_manual(values=c(1,6)) +
-  #scale_y_continuous(name= "Days", breaks = round(seq(0, max(timepoints.df$DaysAfterInfect) + 20, by = 1),1)) +
-  theme(axis.text.x = element_text(colour="black",size=12,angle=45,hjust=1,vjust=1,face="plain"),
-        axis.text.y = element_text(colour="black",size=8,angle=0,hjust=1,vjust=0.5,face="plain"),
-        axis.title.x = element_text(colour="black",size=12,angle=0,hjust=.5,vjust=0.5,face="bold"),
-        axis.title.y = element_text(colour="black",size=12,angle=90,hjust=.5,vjust=.5,face="bold"),
-        legend.text=element_text(size=15, face="bold"), legend.title = element_blank()) +
-  coord_flip()
-# h = recordPlot(load="gridGraphics", attach=NULL)
-#dev.off()
-
-
-
-
-
-View(ls)
-View(metbcr.df)
-View(metb.curated)
-View(metabolites_metadata_table)
-
-
-metabolites_omicslondaAll = omicslondaAll(formula = Count ~ Time + state1, countTable = metabolites_count_table, 
-                                          metadata = metabolites_metadata_table, 
-                                          n.perm = 100, fit.method = "ssgaussian", num.intervals = 36,
-                                          parall = FALSE, pvalue.threshold = 0.05,     
-                                          adjust.method = "BH", time.unit = "day", norm.method = "none", 
-                                          prefix = "Test_OmicsLonDA_metabolites_ipop_seasonal_all_RT", 
-                                          ylabel = "Level", col = c("black", "green"))
-
+# #### Test covariates
+# library(nlme)
+# 
+# m1 <- lme(Count ~ Time * Group+BMI+Age, random=~1|Subject, data=data[[1]])
+# anova(m1)
+# 
+# tested.df = as.matrix(gut_taxa_count_table_filtered)
+# for(i in 1:nrow(tested.df))
+# {
+#   x = cbind(Count = as.vector(tested.df[i,]), gut_taxa_metadata_table)
+#   m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=x)
+#   a1 = anova(m1)
+#   
+#   if(a1["Time:Group", "p-value"]<0.05){
+#     cat("Significant  feature = ", rownames(tested.df)[i], "\n")
+#     print(a1)
+#   }
+# }

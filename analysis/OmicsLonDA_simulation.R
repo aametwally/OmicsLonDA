@@ -2,10 +2,7 @@
 # install.packages("simstudy")
 
 
-
 library("simstudy")
-library("ggplot2")
-
 library(nlme)
 library(ggplot2)
 library(gss)
