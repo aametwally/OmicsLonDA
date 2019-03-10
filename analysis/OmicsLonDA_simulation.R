@@ -1,8 +1,4 @@
-# install.packages("mvnfast")
-# install.packages("simstudy")
-
-
-library("simstudy")
+library(simstudy)
 library(nlme)
 library(ggplot2)
 library(gss)
@@ -13,28 +9,24 @@ library(doParallel)
 library(zoo)
 library(pheatmap)
 library(viridis)
+library(lubridate)
 
 setwd("/Users/ahmedmetwally/Box Sync/Ahmed Metwally's Files/Stanford/OmicsLonDA_dev/")
 #setwd("C:/Users/ametwall/Box Sync/Ahmed Metwally's Files/Stanford/OmicsLonDA_dev/")
 
-
-source("OmicsLonDA/R/OmicsLonDA.R")
-source("OmicsLonDA/R/CurveFitting.R")
-source("OmicsLonDA/R/Visualization.R")
-source("OmicsLonDA/R/Permutation.R")
-source("OmicsLonDA/R/Normalization.R")
-source("OmicsLonDA/R/OmicsLonDA_Evaluation.R")
-
-# https://github.com/cran/simstudy/blob/master/inst/doc/simstudy.Rmd
-
-
-
 set.seed(72626)
 
+source("OmicsLonDA/R/omicslonda.R")
+source("OmicsLonDA/R/omicslondaHelper.R")
+source("OmicsLonDA/R/omicslondaMCPermutation.R")
+source("OmicsLonDA/R/omicslondaVisualization.R")
+
+
+##############################################################################################
+### Simulate inconsistent, variable interval, correlated, longitudinal dataset
+##############################################################################################
 sim_portion = function(nsubj = 10, corcoef = 0.4, long.formula = "10")
 {
-  ### Inconsistent, variable interval, correlated, longitudinal dataset
-  
   # Define data for step 1
   def1 <- defData(varname = "xbase", dist = "normal", formula = 20, variance = 3)
   def1 <- defData(def1, varname = "nCount", dist = "noZeroPoisson", formula = 20)
@@ -43,11 +35,9 @@ sim_portion = function(nsubj = 10, corcoef = 0.4, long.formula = "10")
   
   def2 <- defDataAdd(varname = "mu", dist = "nonrandom",
                      formula = long.formula)
-  ## formula = "10*(time<=50) + (10+(time-50))*(time>50&time<=100) + (10 + (150-time))*(time>100&time<=150) + 10*(time>150)"
   def2 <- defDataAdd(def2, varname = "var", dist = "nonrandom", formula = 5)
   
   ## Step 1: 
-  #set.seed(3827367)
   dt <- genData(nsubj, def1)
   dtPeriod <- addPeriods(dt)
   
@@ -71,22 +61,13 @@ sim_portion = function(nsubj = 10, corcoef = 0.4, long.formula = "10")
   ## Check correlation
   #var(as.matrix(dcast(dtx, id ~ time, value.var = "ZZ")[, -1]))[1:10, 1:10]
   
-  
-  # #### Visualize
-  # ggplot(data = simdf, aes(x = time, y = ZZ, group=id)) +
-  #   geom_point(aes(color = factor(id))) +
-  #   geom_line(aes(color = factor(id))) +
-  #   xlab("Day") +
-  #   theme(legend.position = "none") #+
-  
   return(simdf = simdf)
 }
 
 
-
+##### Integrate Datasets
 integrate = function(finalDT, finalDT_nd)
 {
-  ##### Integrate Datasets
   finalDT$Group = "Disease"
   finalDT_nd$Group = "Healthy"
   
@@ -100,8 +81,6 @@ integrate = function(finalDT, finalDT_nd)
   
   simdf$Subject = as.factor(simdf$Subject)
   simdf$Group = as.factor(simdf$Group)
-  
-  #simdf_subset =  simdf[sample(nrow(simdf), 100), ]
   
   ## convert to dataframe
   simdf_subset = as.data.frame(simdf)
@@ -120,133 +99,49 @@ integrate = function(finalDT, finalDT_nd)
 }
 
 
-# ##### Simulate differentially abundant/expressed dataset
-# diff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10*(time<=50) + (10+(time-50))*(time>50&time<=100) + (10 + (150-time))*(time>100&time<=150) + 10*(time>150)")
-# diff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
-# diff.df = integrate(diff_1, diff_2)
-# 
-# ggplot(data = diff.df, aes(x = Time, y = Count, group = Subject)) +
-#   geom_point(aes(color = factor(Subject))) +
-#   geom_line(aes(color = factor(Subject))) +
-#   xlab("Day") +
-#   theme(legend.position = "none")
-# 
-# 
-# 
-# ##### Simulate middle differentially abundant/expressed dataset
-# diff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10*(time<=100) + (10+(time-100))*(time>100&time<=150) + (10 + (200-time))*(time>150&time<=200) + 10*(time>200)")
-# diff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
-# diff.df = integrate(diff_1, diff_2)
-# 
-# ggplot(data = diff.df, aes(x = Time, y = Count, group = Subject)) +
-#   geom_point(aes(color = factor(Subject))) +
-#   geom_line(aes(color = factor(Subject))) +
-#   xlab("Day") +
-#   theme(legend.position = "none")
-# 
-# 
-# ##### Simulate late differentially abundant/expressed dataset
-# diff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10*(time<=150) + (10+(time-150))*(time>150&time<=200) + (10 + (250-time))*(time>200&time<=250) + 10*(time>250)")
-# diff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
-# diff.df = integrate(diff_1, diff_2)
-# 
-# ggplot(data = diff.df, aes(x = Time, y = Count, group = Subject)) +
-#   geom_point(aes(color = factor(Subject))) +
-#   geom_line(aes(color = factor(Subject))) +
-#   xlab("Day") +
-#   theme(legend.position = "none")
-# 
-# 
-# 
-# ##### Simulate very late differentially abundant/expressed dataset
-# diff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10*(time<=200) + (10+(time-200))*(time>200&time<=250) + (10 + (300-time))*(time>250&time<=300) + 10*(time>300)")
-# diff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
-# diff.df = integrate(diff_1, diff_2)
-# 
-# ggplot(data = diff.df, aes(x = Time, y = Count, group = Subject)) +
-#   geom_point(aes(color = factor(Subject))) +
-#   geom_line(aes(color = factor(Subject))) +
-#   xlab("Day") +
-#   theme(legend.position = "none")
-# 
-# 
-# 
-# ##### Simulate NON-differentially abundant/expressed dataset
-# nondiff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
-# nondiff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
-# nondiff.df = integrate(nondiff_1, nondiff_2)
-# 
-# ggplot(data = nondiff.df, aes(x = Time, y = Count, group = Subject)) +
-#   geom_point(aes(color = factor(Subject))) +
-#   geom_line(aes(color = factor(Subject))) +
-#   xlab("Day") +
-#   theme(legend.position = "none")
+## Normalization
+normalize = function(df){
+  subjects = unique(df$Subject)
+  
+  ### Add psuedo count
+  df$Count = df$Count + 0.000000001
+  df$rawCount = df$Count
+  df$normalizedCount = 0
+  
+  for(subj in subjects)
+  {
+    m = min(df[df$Subject==subj, "Time"])
+    df[df$Subject==subj, ]$normalizedCount = log(df[df$Subject==subj, ]$Count/df[df$Subject==subj & df$Time==m, ]$Count)
+  }
+  
+  return(df)
+}
 
 
 
 
 
-
-#### Simulated 10 features 
-n = 1000 ### Number of features
-diff_simulatedDataset = list()
-nondiff_simulatedDataset = list()
+#### Simulate n features 
+n = 10 
+earlydiff_simulatedDataset = list()
 middlediff_simulatedDataset = list()
 latediff_simulatedDataset = list()
 verylatediff_simulatedDataset = list()
+nondiff_simulatedDataset = list()
 
 for(i in 1:n)
 {
-  ## Simulate n differentially abundant/expressed features
+  ## Simulate n early differentially abundant/expressed features
   diff_1 = sim_portion(nsubj = 20, corcoef = 0.4, long.formula = "10*(time<=50) + (10+(time-50))*(time>50&time<=100) + (10 + (150-time))*(time>100&time<=150) + 10*(time>150)")
   diff_2 = sim_portion(nsubj = 20, corcoef = 0.4, long.formula = "10")
   diff.df = integrate(diff_1, diff_2)
-  # diff.df = as.data.frame(diff.df)
-  # 
-  # # Remove NA entries
-  # diff.df  = diff.df[-which(is.na(diff.df$Count)),]
-  # # remove samples at zero timepoints
-  # diff.df = diff.df[-which(diff.df$Time==0),]
-  # # remove samples with Count < 0
-  # if(length(which(diff.df$Count <= 0))){
-  #   diff.df = diff.df[-which(diff.df$Count <= 0),]
-  # }
-  diff_simulatedDataset[[i]] = diff.df
-  
+  earlydiff_simulatedDataset[[i]] = diff.df
 
-  
-  ## Simulate n NON differentially abundant/expressed features
-  nondiff_1 = sim_portion(nsubj = 20, corcoef = 0.4, long.formula = "10")
-  nondiff_2 = sim_portion(nsubj = 20, corcoef = 0.4, long.formula = "10")
-  nondiff.df = integrate(nondiff_1, nondiff_2)
-  # nondiff.df = as.data.frame(nondiff.df)
-  # 
-  # # Remove NA entries
-  # nondiff.df  = nondiff.df[-which(is.na(nondiff.df$Count)),]
-  # # remove samples at zero timepoints
-  # nondiff.df = nondiff.df[-which(nondiff.df$Time==0),]
-  # # remove samples with Count < 0
-  # if(length(which(nondiff.df$Count <= 0))){
-  #   nondiff.df = nondiff.df[-which(nondiff.df$Count <= 0),]
-  # }
-  nondiff_simulatedDataset[[i]] = nondiff.df
-  
-  
   
   ## Simulate n middle differentially abundant/expressed features
   middlediff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10*(time<=100) + (10+(time-100))*(time>100&time<=150) + (10 + (200-time))*(time>150&time<=200) + 10*(time>200)")
   middlediff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
   middlediff.df = integrate(middlediff_1, middlediff_2)
-  # middlediff.df = as.data.frame(middlediff.df)
-  # 
-  # # Remove NA entries
-  # middlediff.df  = middlediff.df[-which(is.na(middlediff.df$Count)),]
-  # #remove samples at zero timepoints
-  # middlediff.df = middlediff.df[-which(middlediff.df$Time==0),]
-  # # remove samples with Count < 0
-  # if(length(which(middlediff.df$Count <= 0))){
-  #   middlediff.df = middlediff.df[-which(middlediff.df$Count <= 0),]
-  # }
   middlediff_simulatedDataset[[i]] = middlediff.df
   
   
@@ -254,16 +149,6 @@ for(i in 1:n)
   latediff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10*(time<=150) + (10+(time-150))*(time>150&time<=200) + (10 + (250-time))*(time>200&time<=250) + 10*(time>250)")
   latediff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
   latediff.df = integrate(latediff_1, latediff_2)
-  # latediff.df = as.data.frame(latediff.df)
-  # 
-  # # Remove NA entries
-  # latediff.df  = latediff.df[-which(is.na(latediff.df$Count)),]
-  # #remove samples at zero timepoints
-  # latediff.df = latediff.df[-which(latediff.df$Time==0),]
-  # # remove samples with Count < 0
-  # if(length(which(latediff.df$Count <= 0))){
-  #   latediff.df = latediff.df[-which(latediff.df$Count <= 0),]
-  # }
   latediff_simulatedDataset[[i]] = latediff.df
   
   
@@ -271,51 +156,75 @@ for(i in 1:n)
   verylatediff_1 = diff_1 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10*(time<=200) + (10+(time-200))*(time>200&time<=250) + (10 + (300-time))*(time>250&time<=300) + 10*(time>300)")
   verylatediff_2 = sim_portion(nsubj = 10, corcoef = 0.4, long.formula = "10")
   verylatediff.df = integrate(verylatediff_1, verylatediff_2)
-  # verylatediff.df = as.data.frame(verylatediff.df)
-  # 
-  # # Remove NA entries
-  # verylatediff.df  = verylatediff.df[-which(is.na(verylatediff.df$Count)),]
-  # #remove samples at zero timepoints
-  # verylatediff.df = verylatediff.df[-which(verylatediff.df$Time==0),]
-  # # remove samples with Count < 0
-  # if(length(which(verylatediff.df$Count <= 0))){
-  #   verylatediff.df = verylatediff.df[-which(verylatediff.df$Count <= 0),]
-  # }
   verylatediff_simulatedDataset[[i]] = verylatediff.df
+  
+  
+  ## Simulate n NON differentially abundant/expressed features
+  nondiff_1 = sim_portion(nsubj = 20, corcoef = 0.4, long.formula = "10")
+  nondiff_2 = sim_portion(nsubj = 20, corcoef = 0.4, long.formula = "10")
+  nondiff.df = integrate(nondiff_1, nondiff_2)
+  nondiff_simulatedDataset[[i]] = nondiff.df
+}
+
+
+
+
+## Apply normalization
+earlydiff_simulatedDataset_norm = list()
+for(i in 1:length(earlydiff_simulatedDataset)){
+  earlydiff_simulatedDataset_norm[[i]] = normalize(earlydiff_simulatedDataset[[i]])
+}
+
+
+middlediff_simulatedDataset_norm = list()
+for(i in 1:length(middlediff_simulatedDataset)){
+  middlediff_simulatedDataset_norm[[i]] = normalize(middlediff_simulatedDataset[[i]])
+}
+
+
+latediff_simulatedDataset_norm = list()
+for(i in 1:length(latediff_simulatedDataset)){
+  latediff_simulatedDataset_norm[[i]] = normalize(latediff_simulatedDataset[[i]])
+}
+
+
+verylatediff_simulatedDataset_norm = list()
+for(i in 1:length(verylatediff_simulatedDataset)){
+  verylatediff_simulatedDataset_norm[[i]] = normalize(verylatediff_simulatedDataset[[i]])
+}
+
+
+nondiff_simulatedDataset_norm = list()
+for( i in 1:length(nondiff_simulatedDataset)){
+  nondiff_simulatedDataset_norm[[i]] = normalize(nondiff_simulatedDataset[[i]])
 }
 
 
 
 
 
+###############################################
+######## Save simulated raw/normalized data
+###############################################
+save(earlydiff_simulatedDataset_norm, file = "simulatedDataset_earlydiff_OmicsLonDA.RData")
+save(middlediff_simulatedDataset_norm, file = "simulatedDataset_middlediff_OmicsLonDA.RData")
+save(latediff_simulatedDataset_norm, file = "simulatedDataset_latediff_OmicsLonDA.RData")
+save(verylatediff_simulatedDataset_norm, file = "simulatedDataset_verylatediff_OmicsLonDA.RData")
+save(nondiff_simulatedDataset_norm, file = "simulatedDataset_nondiff_OmicsLonDA.RData")
 
 
 
 
-save(diff_simulatedDataset, file = "simulatedDataset_diff_OmicsLonDA_optimized.RData")
-save(nondiff_simulatedDataset, file = "simulatedDataset_nondiff_OmicsLonDA_optimized.RData")
-save(middlediff_simulatedDataset, file = "simulatedDataset_middlediff_OmicsLonDA_optimized.RData")
-save(latediff_simulatedDataset, file = "simulatedDataset_latediff_OmicsLonDA_optimized.RData")
-save(verylatediff_simulatedDataset, file = "simulatedDataset_verylatediff_OmicsLonDA_optimized.RData")
-load("simulatedDataset_diff_OmicsLonDA_optimized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_nondiff_OmicsLonDA_optimized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_middlediff_OmicsLonDA_optimized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_latediff_OmicsLonDA_optimized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_verylatediff_OmicsLonDA_optimized.RData", envir = parent.frame(), verbose = FALSE)
 
 
-# 
-# save(diff_simulatedDataset, file = "simulatedDataset_diff_OmicsLonDA_optimized_1000.RData")
-# save(nondiff_simulatedDataset, file = "simulatedDataset_nondiff_OmicsLonDA_optimized_1000.RData")
-# save(middlediff_simulatedDataset, file = "simulatedDataset_middlediff_OmicsLonDA_optimized_1000.RData")
-# save(latediff_simulatedDataset, file = "simulatedDataset_latediff_OmicsLonDA_optimized_1000.RData")
-# save(verylatediff_simulatedDataset, file = "simulatedDataset_verylatediff_OmicsLonDA_optimized_1000.RData")
-
+###############################################
+#### Visualize simulated raw/normalized data
+###############################################
 
 #### Visualize raw data
 ## Note: Warnings here are because we remove datapoints that have Time>500
 jpeg("omicslonda_simulation_diff_1.jpg", res = 300, height = 10, width = 15, units = 'cm')
-p = ggplot(diff_simulatedDataset[[1]], aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
+p = ggplot(earlydiff_simulatedDataset[[1]], aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
 p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  theme_bw() +
   #ggtitle(paste("Feature = ", text, sep = "")) + 
   labs(y = " Molecule Level", x = "Time") +
@@ -330,25 +239,6 @@ p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  them
         plot.title = element_text(hjust = 0.5)) +
   theme(legend.position="top") #+ scale_x_continuous(breaks = waiver())
 dev.off()
-
-
-jpeg("omicslonda_simulation_nondiff_1.jpg", res = 300, height = 10, width = 15, units = 'cm')
-p = ggplot(nondiff_simulatedDataset[[1]], aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
-p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  theme_bw() +
-  #ggtitle(paste("Feature = ", text, sep = "")) + 
-  labs(y = " Molecule Level", x = "Time") +
-  scale_colour_manual(values = c("blue", "green")) + #, breaks = c("0", "1"),
-  #                   labels = c(group.levels[1], group.levels[2])) +
-  xlim(0,500) + 
-  theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
-        axis.text.y = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
-        axis.title.x = element_text(colour="black", size=15, angle=0, hjust=.5, vjust=0.5, face="bold"),
-        axis.title.y = element_text(colour="black", size=15, angle=90, hjust=.5, vjust=.5, face="bold"),
-        legend.text=element_text(size=15, face="plain"), legend.title = element_blank(), 
-        plot.title = element_text(hjust = 0.5)) +
-  theme(legend.position="top") #+ scale_x_continuous(breaks = waiver())
-dev.off()
-
 
 
 jpeg("omicslonda_simulation_middlediff_1.jpg", res = 300, height = 10, width = 15, units = 'cm')
@@ -404,101 +294,14 @@ p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  them
 dev.off()
 
 
-
-
-
-
-
-## Normalization
-normalize = function(df){
-  ## Remove time point 0
-  y = df #[-which(df$Time==0),]
-  y$rawCount = df$Count
-  subjects = unique(y$Subject)
-  y$normalizedCount = 0
-  for(subj in subjects)
-  {
-    m = min(y[y$Subject==subj, "Time"])
-    y[y$Subject==subj, ]$normalizedCount = log(y[y$Subject==subj, ]$Count/y[y$Subject==subj & y$Time==m, ]$Count)
-  }
-  
-  
-  ### May add sudo code
-  y$normalizedCount = y$normalizedCount + 0.000000001
-  y$Count = y$normalizedCount
-  return(y)
-}
-
-diff_simulatedDataset_norm = list()
-for(i in 1:length(diff_simulatedDataset)){
-  diff_simulatedDataset_norm[[i]] = normalize(diff_simulatedDataset[[i]])
-}
-
-nondiff_simulatedDataset_norm = list()
-for( i in 1:length(nondiff_simulatedDataset)){
-  nondiff_simulatedDataset_norm[[i]] = normalize(nondiff_simulatedDataset[[i]])
-}
-
-
-middlediff_simulatedDataset_norm = list()
-for(i in 1:length(middlediff_simulatedDataset)){
-  middlediff_simulatedDataset_norm[[i]] = normalize(middlediff_simulatedDataset[[i]])
-}
-
-
-latediff_simulatedDataset_norm = list()
-for(i in 1:length(latediff_simulatedDataset)){
-  latediff_simulatedDataset_norm[[i]] = normalize(latediff_simulatedDataset[[i]])
-}
-
-## Solved warning. It was because duplicates in simulation dataframe. message: In y[y$Subject == subj, ]$Count/y[y$Subject == subj & y$Time ==  : .... longer object length is not a multiple of shorter object length
-verylatediff_simulatedDataset_norm = list()
-for(i in 1:length(verylatediff_simulatedDataset)){
-  verylatediff_simulatedDataset_norm[[i]] = normalize(verylatediff_simulatedDataset[[i]])
-}
-
-
-
-
-
-
-
-save(diff_simulatedDataset_norm, file = "simulatedDataset_diff_OmicsLonDA_optimized_normalized.RData")
-save(nondiff_simulatedDataset_norm, file = "simulatedDataset_nondiff_OmicsLonDA_optimized_normalized.RData")
-save(middlediff_simulatedDataset_norm, file = "simulatedDataset_middlediff_OmicsLonDA_optimized_normalized.RData")
-save(latediff_simulatedDataset_norm, file = "simulatedDataset_latediff_OmicsLonDA_optimized_normalized.RData")
-save(verylatediff_simulatedDataset_norm, file = "simulatedDataset_verylatediff_OmicsLonDA_optimized_normalized.RData")
-load("simulatedDataset_diff_OmicsLonDA_optimized_normalized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_nondiff_OmicsLonDA_optimized_normalized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_middlediff_OmicsLonDA_optimized_normalized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_latediff_OmicsLonDA_optimized_normalized.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_verylatediff_OmicsLonDA_optimized_normalized.RData", envir = parent.frame(), verbose = FALSE)
-
-
-# save(diff_simulatedDataset_norm, file = "simulatedDataset_diff_OmicsLonDA_optimized_normalized_1000.RData")
-# save(nondiff_simulatedDataset_norm, file = "simulatedDataset_nondiff_OmicsLonDA_optimized_normalized_1000.RData")
-# save(middlediff_simulatedDataset_norm, file = "simulatedDataset_middlediff_OmicsLonDA_optimized_normalized_1000.RData")
-# save(latediff_simulatedDataset_norm, file = "simulatedDataset_latediff_OmicsLonDA_optimized_normalized_1000.RData")
-# save(verylatediff_simulatedDataset_norm, file = "simulatedDataset_verylatediff_OmicsLonDA_optimized_normalized_1000.RData")
-
-
-
-load("simulatedDataset_diff_OmicsLonDA_optimized_normalized_1000.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_nondiff_OmicsLonDA_optimized_normalized_1000.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_middlediff_OmicsLonDA_optimized_normalized_1000.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_latediff_OmicsLonDA_optimized_normalized_1000.RData", envir = parent.frame(), verbose = FALSE)
-load("simulatedDataset_verylatediff_OmicsLonDA_optimized_normalized_1000.RData", envir = parent.frame(), verbose = FALSE)
-
-
-#### Visualization
-jpeg("omicslonda_simulation_diff_1_normalized.jpg", res = 300, height = 10, width = 15, units = 'cm')
-p = ggplot(diff_simulatedDataset_norm[[1]], aes(Time, normalizedCount, colour = Group, group = interaction(Group, Subject)))
+jpeg("omicslonda_simulation_nondiff_1.jpg", res = 300, height = 10, width = 15, units = 'cm')
+p = ggplot(nondiff_simulatedDataset[[1]], aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
 p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  theme_bw() +
   #ggtitle(paste("Feature = ", text, sep = "")) + 
-  labs(y = "Adjusted Molecule Level", x = "Time") +
-  scale_colour_manual(values = c("blue", "green")) +  #, breaks = c("0", "1"),
+  labs(y = " Molecule Level", x = "Time") +
+  scale_colour_manual(values = c("blue", "green")) + #, breaks = c("0", "1"),
   #                   labels = c(group.levels[1], group.levels[2])) +
-  xlim(0,500) +
+  xlim(0,500) + 
   theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
         axis.text.y = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
         axis.title.x = element_text(colour="black", size=15, angle=0, hjust=.5, vjust=0.5, face="bold"),
@@ -510,12 +313,15 @@ dev.off()
 
 
 
-jpeg("omicslonda_simulation_nondiff_1_normalized.jpg", res = 300, height = 10, width = 15, units = 'cm')
-p = ggplot(nondiff_simulatedDataset_norm[[1]], aes(Time, normalizedCount, colour = Group, group = interaction(Group, Subject)))
+
+
+#### Visualize normalized data
+jpeg("omicslonda_simulation_diff_1_normalized.jpg", res = 300, height = 10, width = 15, units = 'cm')
+p = ggplot(earlydiff_simulatedDataset_norm[[1]], aes(Time, normalizedCount, colour = Group, group = interaction(Group, Subject)))
 p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  theme_bw() +
   #ggtitle(paste("Feature = ", text, sep = "")) + 
   labs(y = "Adjusted Molecule Level", x = "Time") +
-  scale_colour_manual(values = c("blue", "green")) + #, breaks = c("0", "1"),
+  scale_colour_manual(values = c("blue", "green")) +  #, breaks = c("0", "1"),
   #                   labels = c(group.levels[1], group.levels[2])) +
   xlim(0,500) +
   theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
@@ -582,48 +388,41 @@ p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  them
 dev.off()
 
 
+jpeg("omicslonda_simulation_nondiff_1_normalized.jpg", res = 300, height = 10, width = 15, units = 'cm')
+p = ggplot(nondiff_simulatedDataset_norm[[1]], aes(Time, normalizedCount, colour = Group, group = interaction(Group, Subject)))
+p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  theme_bw() +
+  #ggtitle(paste("Feature = ", text, sep = "")) + 
+  labs(y = "Adjusted Molecule Level", x = "Time") +
+  scale_colour_manual(values = c("blue", "green")) + #, breaks = c("0", "1"),
+  #                   labels = c(group.levels[1], group.levels[2])) +
+  xlim(0,500) +
+  theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
+        axis.text.y = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
+        axis.title.x = element_text(colour="black", size=15, angle=0, hjust=.5, vjust=0.5, face="bold"),
+        axis.title.y = element_text(colour="black", size=15, angle=90, hjust=.5, vjust=.5, face="bold"),
+        legend.text=element_text(size=15, face="plain"), legend.title = element_blank(), 
+        plot.title = element_text(hjust = 0.5)) +
+  theme(legend.position="top") #+ scale_x_continuous(breaks = waiver())
+dev.off()
 
 
 
 
+###############################################
+######## Load simulated raw/normalized data
+###############################################
+load("simulatedDataset_earlydiff_OmicsLonDA.RData", envir = parent.frame(), verbose = FALSE)
+load("simulatedDataset_middlediff_OmicsLonDA.RData", envir = parent.frame(), verbose = FALSE)
+load("simulatedDataset_latediff_OmicsLonDA.RData", envir = parent.frame(), verbose = FALSE)
+load("simulatedDataset_verylatediff_OmicsLonDA.RData", envir = parent.frame(), verbose = FALSE)
+load("simulatedDataset_nondiff_OmicsLonDA.RData", envir = parent.frame(), verbose = FALSE)
+
+
+
+
+###############################################
 ############# Global Testing
-library(nlme)
-
-### Test on raw Counts
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=diff_simulatedDataset[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=nondiff_simulatedDataset[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=middlediff_simulatedDataset[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=latediff_simulatedDataset[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=verylatediff_simulatedDataset[[1]])
-anova(m1)
-
-
-### Test on normalized counts
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=diff_simulatedDataset_norm[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=nondiff_simulatedDataset_norm[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=middlediff_simulatedDataset_norm[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=latediff_simulatedDataset_norm[[1]])
-anova(m1)
-
-m1 <- lme(Count ~ Time * Group, random=~1|Subject, data=verylatediff_simulatedDataset_norm[[1]])
-anova(m1)
-
-
-
+###############################################
 ### Test normalize and unnormalized, Time and Time:Group, for all features, for all patterns
 globalTesting = function (df_normalized){
   sig_df_unnorm_TimeGroup = vector()
@@ -634,7 +433,6 @@ globalTesting = function (df_normalized){
   
   for(i in 1:length(df_normalized))
   {
-    #print(i)
     unnormalized_lme <- lme(rawCount ~ Time * Group, random=~1|Subject, data = df_normalized[[i]])
     normalized_lme <- lme(normalizedCount ~ Time * Group, random=~1|Subject, data = df_normalized[[i]])
     a1_unnormalized_lme = anova(unnormalized_lme)
@@ -642,20 +440,16 @@ globalTesting = function (df_normalized){
     
     if(a1_unnormalized_lme["Time:Group", "p-value"]<0.05){
       sig_df_unnorm_TimeGroup = c(sig_df_unnorm_TimeGroup, i)
-      #cat("Significant  feature = ", i, "\n")
     }
     if(a1_unnormalized_lme["Time", "p-value"]<0.05){
       sig_df_unnormTime = c(sig_df_unnormTime, i)
-      #cat("Significant  feature = ", i, "\n")
     }
     
     if(a1_normalized_lme["Time:Group", "p-value"]<0.05){
       sig_df_norm_TimeGroup = c(sig_df_norm_TimeGroup, i)
-      #cat("Significant  feature = ", i, "\n")
     }
     if(a1_normalized_lme["Time", "p-value"]<0.05){
       sig_df_normTime = c(sig_df_normTime, i)
-      #cat("Significant  feature = ", i, "\n")
     }
   }
   
@@ -663,16 +457,13 @@ globalTesting = function (df_normalized){
               sig_df_norm_TimeGroup = length(sig_df_norm_TimeGroup), sig_df_normTime = length(sig_df_normTime)))
 }
 
-globalTesting(df_normalized = nondiff_simulatedDataset_norm)
-globalTesting(df_normalized = diff_simulatedDataset_norm)
-## Middle has issues 
+
+globalTesting(df_normalized = earlydiff_simulatedDataset_norm)
+## Sumulation of middle difference is distinct between the two groups
 globalTesting(df_normalized = middlediff_simulatedDataset_norm) 
 globalTesting(df_normalized = latediff_simulatedDataset_norm)
 globalTesting(df_normalized = verylatediff_simulatedDataset_norm)
-
-
-
-
+globalTesting(df_normalized = nondiff_simulatedDataset_norm)
 
 
 
@@ -681,14 +472,10 @@ globalTesting(df_normalized = verylatediff_simulatedDataset_norm)
 ###### Testing the interaction term only
 globalTesting_interaction = function (df_normalized){
   sig_df_unnorm_TimeGroup = vector()
-  #sig_df_unnormTime = vector()
-  
   sig_df_norm_TimeGroup = vector()
-  #sig_df_normTime = vector()
   
   for(i in 1:length(df_normalized))
   {
-    #print(i)
     unnormalized_lme <- lme(rawCount ~ Time:Group, random=~1|Subject, data = df_normalized[[i]])
     normalized_lme <- lme(normalizedCount ~ Time:Group, random=~1|Subject, data = df_normalized[[i]])
     a1_unnormalized_lme = anova(unnormalized_lme)
@@ -696,82 +483,166 @@ globalTesting_interaction = function (df_normalized){
     
     if(a1_unnormalized_lme["Time:Group", "p-value"]<0.05){
       sig_df_unnorm_TimeGroup = c(sig_df_unnorm_TimeGroup, i)
-      #cat("Significant  feature = ", i, "\n")
     }
-    # if(a1_unnormalized_lme["Time", "p-value"]<0.05){
-    #   sig_df_unnormTime = c(sig_df_unnormTime, i)
-    #   #cat("Significant  feature = ", i, "\n")
-    # }
-    # 
     if(a1_normalized_lme["Time:Group", "p-value"]<0.05){
       sig_df_norm_TimeGroup = c(sig_df_norm_TimeGroup, i)
-      #cat("Significant  feature = ", i, "\n")
     }
-    # if(a1_normalized_lme["Time", "p-value"]<0.05){
-    #   sig_df_normTime = c(sig_df_normTime, i)
-    #   #cat("Significant  feature = ", i, "\n")
-    # }
   }
   
   return(list(sig_df_unnorm_TimeGroup = length(sig_df_unnorm_TimeGroup), 
               sig_df_norm_TimeGroup = length(sig_df_norm_TimeGroup)))
 }
 
-globalTesting_interaction(df_normalized = nondiff_simulatedDataset_norm)
-globalTesting_interaction(df_normalized = diff_simulatedDataset_norm)
-## Middle has issues 
+
+ 
+globalTesting_interaction(df_normalized = earlydiff_simulatedDataset_norm)
+## Sumulation of middle difference is distinct between the two groups
 globalTesting_interaction(df_normalized = middlediff_simulatedDataset_norm) 
 globalTesting_interaction(df_normalized = latediff_simulatedDataset_norm)
 globalTesting_interaction(df_normalized = verylatediff_simulatedDataset_norm)
+globalTesting_interaction(df_normalized = nondiff_simulatedDataset_norm)
 
 
 
 
 
-###### OMICSLONDA
-library(nlme)
-library(ggplot2)
-library(gss)
-library(plyr)
-library(pracma)
-library(parallel)
-library(doParallel)
-library(zoo)
-library(pheatmap)
-library(viridis)
+###############################################
+#############   Test OmicsLonDA
+###############################################
+
+## Test OmicsLonDA on one feature
+points = seq(1, 200, length.out = 200)
+output.omicslonda_earlydiff_1 = omicslonda(formula = normalizedCount ~ Time, df = earlydiff_simulatedDataset_norm[[1]], n.perm = 50, 
+                                      fit.method = "ssgaussian", points = points,
+                                      text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
+                                      adjust.method = "BH", col = c("blue", "green"),
+                                      prefix = "OmicsLonDA_clr_earlydiff_f1", ylabel = "CLR-NormalizedCount",
+                                      DrawTestStatDist = FALSE, time.unit = "days")
 
 
-source("OmicsLonDA/R/OmicsLonDA.R")
-source("OmicsLonDA/R/CurveFitting.R")
-source("OmicsLonDA/R/Visualization.R")
-source("OmicsLonDA/R/Permutation.R")
-source("OmicsLonDA/R/Normalization.R")
-source("OmicsLonDA/R/OmicsLonDA_Evaluation.R")
 
 
-# ### Workout the evaluation dimension
+
+###############################################
+#############   Evaluate OmicsLonDA
+###############################################
+automateEval_OmicsLonDA = function(data = data, n.perm = 100, points = points, pvalue_threshold = 0.05, prefix = "MMM",
+                                   pattern = "NNN")
+{
+  omicslondaResults = list()
+  for(i in 1:length(data))
+  {
+    omicslondaResults[[i]] = omicslonda(formula = normalizedCount ~ Time, df = data[[i]], n.perm = n.perm, fit.method = "ssgaussian", points = points,
+                                        text = paste("Sim_F_",i, sep = "" ), parall = FALSE, pvalue.threshold = pvalue_threshold,     
+                                        adjust.method = "BH", col = c("blue", "green"), 
+                                        prefix = paste(prefix, "_Test_F", i, sep = ""), ylabel = "NormalizedCounts", 
+                                        DrawTestStatDist = FALSE, time.unit = "days")
+  }
+  
+  
+  omicslonda_adjustedPvalue = lapply(omicslondaResults, function(x) x$detailed$adjusted.pvalue)
+  
+  x = omicslonda_adjustedPvalue
+  for(i in 1:length(x))
+  {
+    tmp = x[[i]]
+    x[[i]][which(tmp > (pvalue_threshold/2))] = 0
+    x[[i]][which(tmp <= (pvalue_threshold/2))] = 1
+  }
+  omicslonda_sigificance =  x
+  confusion_omicslonda = data.frame()
+  
+  for(i in 1:length(omicslonda_sigificance)){
+    len = length(omicslonda_sigificance[[i]])
+    min.point = min(omicslondaResults[[i]]$detailed$points)
+    max.point = max(omicslondaResults[[i]]$detailed$points)
+    
+    if(pattern == "earlydiff")
+    {
+      DA_truth = c(rep(0, 50-min.point), rep(1,100), rep(0,max.point - 150))
+    } else if (pattern == "middlediff"){
+      DA_truth = c(rep(0, 100-min.point), rep(1,100), rep(0,max.point - 200))
+    } else if (pattern == "latediff"){
+      if(len<250){
+        print("in <250")
+        DA_truth = c(rep(0, 150-min.point), rep(1,max.point-150))
+      } else {
+        print("in else")
+        DA_truth = c(rep(0, 150-min.point), rep(1,100), rep(0,max.point - 250))
+      }
+    } else if (pattern == "verylatediff"){
+      if(len<300){
+        print("in < 300 ")
+        DA_truth = c(rep(0, 200-min.point), rep(1,max.point-200)) 
+      } else{
+        print("in else 300")
+        DA_truth = c(rep(0, 200-min.point), rep(1,100), rep(0,max.point - 300))
+      }
+    } else if(pattern == "nondiff"){
+      DA_truth = c(rep(0, len))
+    } else{
+      print("wrong choice of simulation pattern")
+      stop(message)
+    }
+    
+    
+    conf = evaluation(omicslonda_sigificance[[i]], DA_truth)
+    confusion_omicslonda = rbind(confusion_omicslonda, conf)
+  }
+  
+  write.csv(confusion_omicslonda, file = paste(prefix, "_confusion_omicslonda", ".csv", sep=""), row.names=FALSE)
+  return(confusion_omicslonda=confusion_omicslonda)
+}
+
+
+
+evaluation = function(predicted, truth)
+{
+  cat("len of predicted = ", length(predicted), "\n")
+  cat("len of truth = ", length(truth), "\n")
+  print(truth)
+  print(predicted)
+  
+  TP = sum(predicted*truth == 1)
+  TN = sum((predicted + truth) == 0)
+  FP = sum((predicted * (!truth)) == 1)
+  FN = sum(((!predicted) * truth) == 1)
+  
+  con_vec = cbind(TP = TP, FP = FP, TN = TN, FN = FN)
+  return(con_vec)
+}
+
+
+
+######### Test Various patterns
 points = seq(1, 500, length.out = 500)
-evaluation_summary_earlydiff_norm_f1_f2 = automateEval_OmicsLonDA(data = diff_simulatedDataset_norm[1:100], n.perm = 100, points = points,
-                                                           pvalue_threshold = 0.05, prefix = "Sunday_diff_normalized_1_2",
+## TODO: Specify normalizedCount, numbe of permutation, for the 1000 features
+
+
+## TODO: solve warnings: 
+# 1: In chol.default(wk1, pivot = TRUE) :
+#   the matrix is either rank-deficient or indefinite
+# 2: In (function (..., deparse.level = 1)  :
+#          number of rows of result is not a multiple of vector length (arg 1)
+evaluation_summary_earlydiff_norm = automateEval_OmicsLonDA(data = earlydiff_simulatedDataset_norm[1:2], n.perm = 100, points = points,
+                                                           pvalue_threshold = 0.05, prefix = "evaluate_omicslonda_earlydiff_normalized",
                                                            pattern = "earlydiff")
 
-evaluation_summary_middlediff_norm_f1_f2 = automateEval_OmicsLonDA(data = middlediff_simulatedDataset_norm[1:100], n.perm = 100, points = points,
-                                                             pvalue_threshold = 0.05, prefix = "Sunday_middlediff_normalized_1_2",
+evaluation_summary_middlediff_norm = automateEval_OmicsLonDA(data = middlediff_simulatedDataset_norm[1:2], n.perm = 100, points = points,
+                                                             pvalue_threshold = 0.05, prefix = "middlediff_omicslonda_normalized_1_2",
                                                              pattern = "middlediff")
 
-evaluation_summary_latediff_norm_f1_f2 = automateEval_OmicsLonDA(data = latediff_simulatedDataset_norm[1:100], n.perm = 100, points = points,
-                                                                   pvalue_threshold = 0.05, prefix = "Sunday_latediff_normalized_1_2",
+evaluation_summary_latediff_norm = automateEval_OmicsLonDA(data = latediff_simulatedDataset_norm[1:2], n.perm = 100, points = points,
+                                                                   pvalue_threshold = 0.05, prefix = "evaluate_omicslonda_latediff_normalized_1_2",
                                                                    pattern = "latediff")
 
 
-## TODO: solve warning: In (function (..., deparse.level = 1)  ... :
-# number of rows of result is not a multiple of vector length (arg 1)
-evaluation_summary_verylatediff_norm_f1_f2 = automateEval_OmicsLonDA(data = verylatediff_simulatedDataset_norm[1:100], n.perm = 100, points = points,
-                                                                   pvalue_threshold = 0.05, prefix = "Sunday_verylatediff_normalized_1_2",
+evaluation_summary_verylatediff_norm = automateEval_OmicsLonDA(data = verylatediff_simulatedDataset_norm[1:2], n.perm = 100, points = points,
+                                                                   pvalue_threshold = 0.05, prefix = "evaluate_omicslonda_verylatediff_normalized_1_2",
                                                                    pattern = "verylatediff")
 
-evaluation_summary_nondiff_norm_f1_f2 = automateEval_OmicsLonDA(data = nondiff_simulatedDataset_norm[1:100], n.perm = 100, points = points,
-                                                                   pvalue_threshold = 0.05, prefix = "Sunday_nondiff_normalized_1_2",
+evaluation_summary_nondiff_norm = automateEval_OmicsLonDA(data = nondiff_simulatedDataset_norm[1:2], n.perm = 100, points = points,
+                                                                   pvalue_threshold = 0.05, prefix = "evaluate_omicslonda_nondiff_normalized",
                                                                    pattern = "nondiff")
 
 
@@ -779,109 +650,44 @@ evaluation_summary_nondiff_norm_f1_f2 = automateEval_OmicsLonDA(data = nondiff_s
 
 
 
+###############################################
+########## Test KS for studentization
+###############################################
+# ## Test normality of the normalized counts
+# data = earlydiff_simulatedDataset_norm
+# ks_pvalue = numeric(length(data))
+# for(i in 1:length(data))
+# {
+#   hist(data[[i]]$normalizedCount)
+#   #res = ks.test(data[[i]]$Count, "pnorm", mean(data[[i]]$Count), sd(data[[i]]$Count))
+#   res = ks.test.t(data[[i]]$normalizedCount)
+#   ks_pvalue[i] = res$p.value
+# }
+# z = p.adjust(ks_pvalue, method = "BH")
+# sum(z<0.05)
 
-## Test omicslonda alone
-points = seq(1, 500, length.out = 500)
-output.omicslonda_diff_1 = omicslonda(formula = Count ~ Time, df = diff_simulatedDataset_norm[[1]], n.perm = 10, 
-                                      fit.method = "ssgaussian", points = points,
-                                      text = "simdf_1", parall = FALSE, pvalue.threshold = 0.05,
-                                      adjust.method = "BH", col = c("blue", "green"),
-                                      prefix = "TestOmicsLonDA_norm_stepbystep_f1_Sunday", ylabel = "NormalizedCounts",
-                                      DrawTestStatDist = FALSE, time.unit = "days")
 
 
-# points = seq(1, 200, length.out = 200)
-# output.omicslonda_diff_4 = omicslonda(formula = Count ~ Time, df = diff_simulatedDataset[[4]], n.perm = 100, fit.method = "ssgaussian", points = points,
-#                                       text = "simdf_1", parall = FALSE, pvalue.threshold = 0.05,
-#                                       adjust.method = "BH", col = c("blue", "green"),
-#                                       prefix = "TestOmicsLonDA_ssgaussian_simdatasets_NEWWWWWWWW_f4_night_new", ylabel = "NormalizedCounts",
-#                                       DrawTestStatDist = FALSE)
+
+
+# ## TODO: KS test for Student t-distribution
+# library(LambertW)
+# ks.test.t(x)
 # 
-# 
-# output.omicslonda_nondiff_1 = omicslonda(formula = Count ~ Time, df = nondiff_simulatedDataset[[1]], n.perm = 100, fit.method = "ssgaussian", points = points,
-#                                          text = "simdf_1", parall = FALSE, pvalue.threshold = 0.05,
-#                                          adjust.method = "BH", col = c("blue", "green"),
-#                                          prefix = "TestOmicsLonDA_ssgaussian_simdatasets_nondiff_f1", ylabel = "NormalizedCounts",
-#                                          DrawTestStatDist = FALSE)
+# set.seed(1021)
+# beta.true <- c(location = 0, scale = 1, df = 4)
+# xx <- rt(n = 1000, df = beta.true['df'])
+# ks.test.t(xx)
+# ks.test.t(xx, beta.true)
 
 
 
-# points = seq(1, 200, length.out = 100)
-# output.omicslonda_diff_f1_norm = omicslonda(formula = normalizedCount ~ Time, df = diff_simulatedDataset_norm[[1]], 
-#                                       n.perm = 100, fit.method = "ssgaussian", points = points,
-#                                       text = "Simulated Omic Feature", parall = FALSE, pvalue.threshold = 0.05,
-#                                       adjust.method = "BH", col = c("blue", "green"),
-#                                       prefix = "TestOmicsLonDA_ssgaussian_simdatasets_f1_diff_normalized", 
-#                                       ylabel = "Adjusted molecule level",
-#                                       DrawTestStatDist = TRUE)
-
-
-
-
-#### Test KS for studentization
-normalize_natural = function(df){
-  ## Remove time point 0
-  y = df #[-which(df$Time==0),]
-  subjects = unique(y$Subject)
-  y$normalizedCount = 0
-  for(subj in subjects)
-  {
-    m = min(y[y$Subject==subj, "Time"])
-    y[y$Subject==subj, ]$normalizedCount = log(y[y$Subject==subj, ]$Count/y[y$Subject==subj & y$Time==m, ]$Count)
-  }
-  
-  
-  ### May add sudo code
-  y$normalizedCount = y$normalizedCount + 0.000000001
-  y$Count = y$normalizedCount
-  return(y)
-}
-
-
-
-diff_simulatedDataset_norm_natural = list()
-for(i in 1:length(diff_simulatedDataset)){
-  diff_simulatedDataset_norm_natural[[i]] = normalize(diff_simulatedDataset[[i]])
-}
-
-
-## Test normality of the normalized counts
-data = diff_simulatedDataset_norm_natural
-ks_pvalue = numeric(length(diff_simulatedDataset_norm))
-for(i in 1:length(data))
-{
-  hist(data[[i]]$Count)
-  #res = ks.test(data[[i]]$Count, "pnorm", mean(data[[i]]$Count), sd(data[[i]]$Count))
-  res = ks.test.t(data[[i]]$Count)
-  ks_pvalue[i] = res$p.value
-}
-z = p.adjust(ks_pvalue, method = "BH")
-sum(z<0.05)
-
-
-
-set.seed(1021)
-beta.true <- c(location = 0, scale = 1, df = 4)
-xx <- rt(n = 1000, df = beta.true['df'])
-ks.test.t(xx)
-ks.test.t(xx, beta.true)
-
-
-
-## Ks test for Student t-distribution
-library(LambertW)
-ks.test.t(x)
-
-
-
-
-### TODO: autocorrelation figres and spectral analysis figure
-x = diff_simulatedDataset_norm[[1]]
-
-s1 = x[x$Subject == "SA_1",]
-
-ar(s1$Count, aic = TRUE, order.max = NULL,
-   method = c( "mle"))
-
-ar(lh)
-ar(lh, method = "burg")
+###############################################
+### Autocorrelation/spectral analysis figures 
+###############################################
+# x = earlydiff_simulatedDataset_norm[[1]]
+# s1 = x[x$Subject == "SA_1",]
+# ar(s1$Count, aic = TRUE, order.max = NULL,
+#    method = c( "mle"))
+# ar(lh)
+# ar(lh, method = "burg")

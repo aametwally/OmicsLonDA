@@ -63,7 +63,8 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   
   
   ## Preprocessing: add pseudo counts
-  df$Count = df$Count + 1e-8
+  ## TODO: Make sure this is applied to the corrsponding column (Count, rawCount, normalized Count)
+  #df$Count = df$Count + 1e-8
   
   
 
@@ -175,7 +176,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
                         avg.mod0.count = avg.mod0.count, avg.mod1.count = avg.mod1.count, 
                         foldChange = foldChange,
                         testStat = stat, testStat.abs = abs(stat), testStat.sign = sign(stat), dominant = dominant,
-                        intervals.pvalue = pvalue.test.stat, adjusted.pvalue = adjusted.pvalue)
+                        intervals.pvalue = pvalue.test.stat, adjusted.pvalue = adjusted.pvalue, points = points)
   output.summary = data.frame(feature = rep(text, length(interval$start)), start = st, end = en,
                               dominant = interval$dominant, pvalue = interval$pvalue)
   
