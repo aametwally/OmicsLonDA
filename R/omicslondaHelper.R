@@ -43,6 +43,9 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
     mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE)
     mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE)
     
+    # ### Troubleshoot ssanova
+    # mod.0.test = ssanova(formula, data = group.0, skip.iter=TRUE, nbasis=10)
+    # mod.1.test = ssanova(formula, data = group.1, skip.iter=TRUE, nbasis=10)
     
     ## Calculate goodness of fit F-statistic the fitted model
     rss.null = summary(mod.null)$rss

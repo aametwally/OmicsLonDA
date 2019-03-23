@@ -15,13 +15,14 @@
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
-visualizeFeature = function (df, text, group.levels, unit = "days", ylabel = "Normalized Count", 
+visualizeFeature = function (formula = Count ~ Time, df, text, group.levels, unit = "days", ylabel = "Normalized Count", 
                              col = c("blue", "firebrick"), prefix = "Test")
 {
   cat("Visualizing Feature = ", text, "\n")
-  Count=0; Time=0; Subject=0; Group=0 ## This line is just to pass the CRAN checks for the aes in ggplot2
+  #CountMeasure = all.vars(formula)[1]
+  #CountMeasure=0; Time=0; Subject=0; Group=0 ## This line is just to pass the CRAN checks for the aes in ggplot2
   
-  p = ggplot(df, aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
+  p = ggplot(df, aes(Time, eval(as.symbol(all.vars(formula)[1])), colour = Group, group = interaction(Group, Subject)))
   p = p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  theme_bw() +
     ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
     scale_colour_manual(values = col, breaks = c("0", "1"),
@@ -102,7 +103,66 @@ visualizeFeatureSpline = function (df, model, method, text, group.levels, unit =
 
 
 
-visualizeFeatureSpline_permute = function (df, model, method, text, group.levels, unit = "days", ylabel = "Normalized Count", 
+
+
+
+
+
+visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method, text, group.levels, unit = "days", ylabel = "Normalized Count", 
+                                   col = c("blue", "firebrick"), prefix = "Test")
+{ 
+  cat("Visualizing Splines of Feature = ", text, "\n")
+  
+  #Count=0;Time=0;Subject=0;Group=0;lnn=0 ## This line is just to pass the CRAN checks for the aes in ggplot2
+  dd.null = model$dd.null
+  dd.0 = model$dd.0
+  dd.1 = model$dd.1
+  
+  #cat("v0.7", "\n")
+  ln = factor(c(rep("longdash", nrow(dd.0)), rep("longdash", nrow(dd.1))))
+  #size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
+  #cat("v0.9", "\n")
+  #head(df)
+  #head(dd.0)
+  #head(dd.1)
+  dm = rbind(dd.0[,c("Time", "Count", "Group", "Subject")], dd.1[,c("Time", "Count", "Group", "Subject")])
+  #cat("v0.92", "\n")
+  dm$lnn=ln
+  
+  df_subset = df[,c("Time", all.vars(formula)[1], "Group", "Subject")]
+  #cat("v0.96", "\n")
+  #dm$sz= size
+  
+  
+  p = ggplot()
+  
+  #cat("v1.0", "\n")
+  #dm, aes(Time, eval(as.symbol(all.vars(formula)[1])), colour = Group, group = interaction(Group, Subject))
+  p = p + theme_bw()  + geom_line(data= dm, aes(Time, Count, 
+                                                colour = Group, group = interaction(Group, Subject), linetype=lnn), size=2, alpha=0.8) + 
+    geom_point(data = df_subset, aes(Time, eval(as.symbol(all.vars(formula)[1])), 
+                                     colour = Group, group = interaction(Group, Subject)), size=1, alpha=0.1) +
+    geom_line(data = df_subset, aes(Time, eval(as.symbol(all.vars(formula)[1])), 
+                                     colour = Group, group = interaction(Group, Subject)), size=1, alpha=0.1) +
+    ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
+    scale_colour_manual(values = c(col, col), 
+                        breaks = c("0", "1", "fit.0", "fit.1"),
+                        labels = c(group.levels[1], group.levels[2], paste(group.levels[1], ".fit", sep=""), paste(group.levels[2], ".fit", sep="")))+
+    theme(axis.text.x = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
+          axis.text.y = element_text(colour="black", size=12, angle=0, hjust=0.5, vjust=0.5, face="bold"),
+          axis.title.x = element_text(colour="black", size=15, angle=0, hjust=.5, vjust=0.5, face="bold"),
+          axis.title.y = element_text(colour="black", size=15, angle=90, hjust=.5, vjust=.5, face="bold"), 
+          legend.text=element_text(size=15, face="plain"), legend.title = element_blank(),
+          plot.title = element_text(hjust = 0.5)) +
+    theme(legend.position="top") + scale_x_continuous(breaks = waiver()) + guides(linetype=FALSE, size =FALSE)
+  
+  ggsave(filename=paste(prefix, "/", "Feature_", text, "_CurveFitting_", method, ".jpg", sep=""), dpi = 1200, height = 10, width = 15, units = 'cm')
+}
+
+
+
+
+visualizeFeatureSpline_permute = function (formula = Count ~ Time, df, model, method, text, group.levels, unit = "days", ylabel = "Normalized Count", 
                                    col = c("blue", "firebrick"), prefix = "Test")
 { 
   #cat("Visualizing Splines of Feature = ", text, "\n")
@@ -165,7 +225,7 @@ visualizeFeatureSpline_permute = function (df, model, method, text, group.levels
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
-visualizeArea = function(model.ss, method, start, end, text, group.levels, unit = "days", 
+visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end, text, group.levels, unit = "days", 
                          ylabel = "Normalized Count", col = c("blue", "firebrick"), prefix = "Test")
 {
   cat("Visualizing Significant Intervals of Feature = ", text, "\n")
@@ -243,8 +303,8 @@ visualizeTimeIntervals = function(interval.details, prefix = "Test", unit = "day
     geom_linerange(aes(color = dominant), size = 1) + 
     coord_flip() +  scale_colour_manual(values = col) +
     labs(x = "Feature", y = sprintf("Time (%s)", unit), colour="Dominant") + 
-     theme(axis.text.x = element_text(colour = "black", size = 10, angle = 0, hjust = 0.5, vjust = 0.5, face = "bold"),
-           axis.text.y = element_text(colour = "black", size = 8, angle = 0, vjust = 0.5, face = "bold"),
+     theme(axis.text.x = element_text(colour = "black", size = 12, angle = 0, hjust = 0.5, vjust = 0.5, face = "bold"),
+           axis.text.y = element_text(colour = "black", size = 12, angle = 0, vjust = 0.5, face = "bold"),
            axis.title.x = element_text(colour = "black", size = 15, angle = 0, hjust = 0.5, vjust = 0.5, face = "bold"),
            axis.title.y = element_text(colour = "black", size = 15, angle = 90, hjust = 0.5, vjust = 0.5, face = "bold"),
            legend.text = element_text(size = 15, face = "plain")) + 

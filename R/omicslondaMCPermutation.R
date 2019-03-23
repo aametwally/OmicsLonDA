@@ -110,6 +110,69 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
 
 
 
+
+
+bootstrapOmicslonda = function(data, index){
+  #print("here\n")
+  bs.df = data[index, ]
+  ## TODO: This needs to be changed to reflect the nromalized formula
+  #formula = Count ~ Time
+  method = "ssgaussian"
+  
+  
+  ## Run in Parallel
+  if(parall == TRUE) {
+    max.cores = detectCores()
+    cat("# cores = ", max.cores, "\n")
+    desired.cores = max.cores - 1		
+    cl = makeCluster(desired.cores)
+    registerDoParallel(cl)
+  } 
+  
+  
+  g.0 = bs.df[bs.df$Group == 0, ]
+  g.1 = bs.df[bs.df$Group == 1, ]
+  g.min = max(sort(g.0$Time)[1], sort(g.1$Time)[1])
+  g.max = min(sort(g.0$Time)[length(g.0$Time)], sort(g.1$Time)[length(g.1$Time)])
+  
+  
+  
+  ### This part to handle the situation when min/max timepoint of eac group from the permuted subjects, lies outside the range of the points vector 
+  if(g.min > min(points) | g.max < max(points))
+  {
+    #cat("\n")
+    #cat("old: g.min = ", g.min, "   min(points) = ", min(points), "\n")
+    #cat("old: g.max = ", g.max, "   max(points) = ", max(points), "\n")
+    points = points[which(points>=g.min & points<=g.max)]
+    #cat("new: g.min = ", g.min, "   min(points) = ", min(points), "\n")
+    #cat("new: g.max = ", g.max, "   max(points) = ", max(points), "\n")
+    
+    bootstrapped = curveFitting(formula, df = bs.df, method = method, points)
+    #assign(paste("Model", j, sep = "_"), bootstrapped)
+    
+    #cat("Special Case: generated permutation is out of range \n")
+    # assign(paste("Model", j, sep = "_"), NULL)
+  }  else
+  {
+    #cat("In else", "\n")
+    bootstrapped = curveFitting(formula, df = bs.df, method = method, points)
+    # visualizeFeatureSpline_permute(df = perm.dat, model = perm, method = method, text = "ssgaussian", group.levels = c("A", "B"),
+    #                        prefix = paste(prefix, "/", "perm_", j, "_", sep = ""))
+    #assign(paste("Model", j, sep = "_"), bootstrapped)
+  }
+  
+  
+  bs.stat = testStat(bootstrapped)$testStat
+  
+  if(parall == TRUE) {
+    stopCluster(cl)
+  }
+  
+  print(bs.stat[1])
+  return(bs.stat[1])
+}
+
+
 # permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500, method = "ssnbinomial", points, parall = FALSE, prefix){
 #   
 #   cat(" number of permutation = ", n.perm, "\n")

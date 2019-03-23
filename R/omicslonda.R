@@ -30,6 +30,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
                       prefix = "Test", DrawTestStatDist = FALSE)
 {
   cat("Start OmicsLonDA \n")
+  # all.vars(formula)[1]
   
   if (!dir.exists(prefix)){
     dir.create(file.path(prefix))
@@ -63,13 +64,14 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   
   
   ## Preprocessing: add pseudo counts
-  df$Count = df$Count + 1e-8
+  ## TODO: Make sure this is applied to the corrsponding column (Count, rawCount, normalized Count)
+  #df$Count = df$Count + 1e-8
   
   
 
   
   ## Visualize feature's abundance accross different time points  
-  visualizeFeature(df, text, group.levels, unit = time.unit, ylabel = ylabel, col = col, prefix = prefix)
+  visualizeFeature(formula = formula, df, text, group.levels, unit = time.unit, ylabel = ylabel, col = col, prefix = prefix)
   
   
   group.0 = df[df$Group == 0, ]
@@ -100,12 +102,26 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   }
   
   ## Visualize feature's trajectories spline
-  visualizeFeatureSpline(df, model, fit.method, text, group.levels, unit = time.unit, ylabel = ylabel, 
+  visualizeFeatureSpline2(formula = formula, df, model, fit.method, text, group.levels, unit = time.unit, ylabel = ylabel, 
                          col = col, prefix = prefix)
 
   
   ### Test Statistic
   stat = testStat(model)$testStat
+  
+  
+  
+  ### TODO: Test Bootstrapping
+  # library(boot)
+  # #bt = boot(formula = formula, bs.df = df, method = fit.method, points = points, parall = parall, prefix = prefix)
+  # set.seed(27262)
+  # #index = sample(1:726, 726)
+  # #data = df
+  # bt = boot(df, bootstrapOmicslonda, 10)
+  # 
+  # set.seed(27262)
+  # bootstrapOmicslonda(df,1:726)
+  
   
   
   
@@ -133,7 +149,14 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   } )
 
   ## Adjust p-values
-  adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+  if(adjust.method == "qvalue"){
+    #adjusted.pvalue = qvalue(pvalue.test.stat, pfdr = TRUE)
+    adjusted.pvalue = qvalue_truncp(pvalue.test.stat)$qvalues
+  }else{
+    adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+  }
+    
+  
   
   if(DrawTestStatDist)
   {
@@ -151,7 +174,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   if(length(st) > 0)
   {
     ## Visualize sigificant area
-    visualizeArea(model, fit.method, st, en, text, group.levels, unit = time.unit, ylabel = ylabel,
+    visualizeArea(formula = formula, model, fit.method, st, en, text, group.levels, unit = time.unit, ylabel = ylabel,
                   col = col, prefix = prefix)
   }
   
@@ -175,7 +198,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
                         avg.mod0.count = avg.mod0.count, avg.mod1.count = avg.mod1.count, 
                         foldChange = foldChange,
                         testStat = stat, testStat.abs = abs(stat), testStat.sign = sign(stat), dominant = dominant,
-                        intervals.pvalue = pvalue.test.stat, adjusted.pvalue = adjusted.pvalue)
+                        intervals.pvalue = pvalue.test.stat, adjusted.pvalue = adjusted.pvalue, points = points)
   output.summary = data.frame(feature = rep(text, length(interval$start)), start = st, end = en,
                               dominant = interval$dominant, pvalue = interval$pvalue)
   
