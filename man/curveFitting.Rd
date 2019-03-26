@@ -4,7 +4,8 @@
 \alias{curveFitting}
 \title{Fit longitudinal data}
 \usage{
-curveFitting(formula = Count ~ Time, df, method = "ssnbinomial", points)
+curveFitting(formula = Count ~ Time, df, method = "ssnbinomial",
+  points)
 }
 \arguments{
 \item{formula}{formula to be passed to the regression model}

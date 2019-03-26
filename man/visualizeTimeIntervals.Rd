@@ -4,8 +4,9 @@
 \alias{visualizeTimeIntervals}
 \title{Visualize all significant time intervals for all tested features}
 \usage{
-visualizeTimeIntervals(interval.details, prefix = "Test", unit = "days",
-  col = c("blue", "firebrick"), fit.method = "ssgaussian")
+visualizeTimeIntervals(interval.details, prefix = "Test",
+  unit = "days", col = c("blue", "firebrick"),
+  fit.method = "ssgaussian")
 }
 \arguments{
 \item{interval.details}{Dataframe has infomation about significant interval (feature name, start, end, dominant, p-value)}

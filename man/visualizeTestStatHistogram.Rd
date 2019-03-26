@@ -4,7 +4,8 @@
 \alias{visualizeTestStatHistogram}
 \title{Visualize Test Statistics empirical distribution}
 \usage{
-visualizeTestStatHistogram(permuted, text, method, prefix = "Test", modelStat)
+visualizeTestStatHistogram(permuted, text, method, prefix = "Test",
+  modelStat)
 }
 \arguments{
 \item{permuted}{Permutation of the permuted data}

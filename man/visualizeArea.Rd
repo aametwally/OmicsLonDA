@@ -4,11 +4,13 @@
 \alias{visualizeArea}
 \title{Visualize significant time interval}
 \usage{
-visualizeArea(model.ss, method, start, end, text, group.levels, unit = "days",
-  ylabel = "Normalized Count", col = c("blue", "firebrick"),
-  prefix = "Test")
+visualizeArea(formula = Count ~ Time, model.ss, method, start, end, text,
+  group.levels, unit = "days", ylabel = "Normalized Count",
+  col = c("blue", "firebrick"), prefix = "Test")
 }
 \arguments{
+\item{formula}{formula used in method}
+
 \item{model.ss}{The fitted model}
 
 \item{method}{Fitting method (ssgaussian)}

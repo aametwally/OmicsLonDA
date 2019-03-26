@@ -2,6 +2,7 @@
 #'
 #' Visualize Longitudinal Feature
 #'
+#' @param formula formula used in method
 #' @param df dataframe has the Count, Group, ID, Time
 #' @param text feature name
 #' @param group.levels The two level's name
@@ -209,6 +210,7 @@ visualizeFeatureSpline_permute = function (formula = Count ~ Time, df, model, me
 #'
 #' Visualize significant time interval
 #'
+#' @param formula formula used in method
 #' @param model.ss The fitted model
 #' @param method Fitting method (ssgaussian)
 #' @param start Vector of the start points of the time intervals

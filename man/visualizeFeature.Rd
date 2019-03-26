@@ -4,11 +4,13 @@
 \alias{visualizeFeature}
 \title{Visualize Longitudinal Feature}
 \usage{
-visualizeFeature(df, text, group.levels, unit = "days",
-  ylabel = "Normalized Count", col = c("blue", "firebrick"),
-  prefix = "Test")
+visualizeFeature(formula = Count ~ Time, df, text, group.levels,
+  unit = "days", ylabel = "Normalized Count", col = c("blue",
+  "firebrick"), prefix = "Test")
 }
 \arguments{
+\item{formula}{formula used in method}
+
 \item{df}{dataframe has the Count, Group, ID, Time}
 
 \item{text}{feature name}
