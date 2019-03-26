@@ -151,7 +151,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   ## Adjust p-values
   if(adjust.method == "qvalue"){
     #adjusted.pvalue = qvalue(pvalue.test.stat, pfdr = TRUE)
-    adjusted.pvalue = qvalue_truncp(pvalue.test.stat)$qvalues
+    adjusted.pvalue = .data$qvalue_truncp(pvalue.test.stat)$qvalues
   }else{
     adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
   }

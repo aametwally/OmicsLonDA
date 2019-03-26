@@ -121,7 +121,7 @@ bootstrapOmicslonda = function(data, index){
   
   
   ## Run in Parallel
-  if(parall == TRUE) {
+  if(.data$parall == TRUE) {
     max.cores = detectCores()
     cat("# cores = ", max.cores, "\n")
     desired.cores = max.cores - 1		
@@ -164,7 +164,7 @@ bootstrapOmicslonda = function(data, index){
   
   bs.stat = testStat(bootstrapped)$testStat
   
-  if(parall == TRUE) {
+  if(.data$parall == TRUE) {
     stopCluster(cl)
   }
   

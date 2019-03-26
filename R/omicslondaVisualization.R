@@ -23,7 +23,7 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels, uni
   #CountMeasure = all.vars(formula)[1]
   #CountMeasure=0; Time=0; Subject=0; Group=0 ## This line is just to pass the CRAN checks for the aes in ggplot2
   
-  p = ggplot(df, aes(Time, eval(as.symbol(all.vars(formula)[1])), colour = Group, group = interaction(Group, Subject)))
+  p = ggplot(df, aes(.data$Time, eval(as.symbol(all.vars(formula)[1])), colour = .data$Group, group = interaction(.data$Group, .data$Subject)))
   p = p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1, alpha = 0.7) +  theme_bw() +
     ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
     scale_colour_manual(values = col, breaks = c("0", "1"),
@@ -83,7 +83,7 @@ visualizeFeatureSpline = function (df, model, method, text, group.levels, unit =
   #cat("v0.96", "\n")
   dm$sz= size
   
-  p = ggplot(dm, aes(Time, Count, colour = Group, group = interaction(Group, Subject)))
+  p = ggplot(dm, aes(.data$Time, .data$Count, colour = .data$Group, group = interaction(.data$Group, .data$Subject)))
   
   #cat("v1.0", "\n")
   p = p + theme_bw() + geom_point(size=1, alpha=0.5) + geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
@@ -139,12 +139,12 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method, t
   
   #cat("v1.0", "\n")
   #dm, aes(Time, eval(as.symbol(all.vars(formula)[1])), colour = Group, group = interaction(Group, Subject))
-  p = p + theme_bw()  + geom_line(data= dm, aes(Time, Count, 
-                                                colour = Group, group = interaction(Group, Subject), linetype=lnn), size=2, alpha=0.8) + 
-    geom_point(data = df_subset, aes(Time, eval(as.symbol(all.vars(formula)[1])), 
-                                     colour = Group, group = interaction(Group, Subject)), size=1, alpha=0.1) +
-    geom_line(data = df_subset, aes(Time, eval(as.symbol(all.vars(formula)[1])), 
-                                     colour = Group, group = interaction(Group, Subject)), size=1, alpha=0.1) +
+  p = p + theme_bw()  + geom_line(data= dm, aes(.data$Time, .data$Count, 
+                                                colour = .data$Group, group = interaction(.data$Group, .data$Subject), linetype=.data$lnn), size=2, alpha=0.8) + 
+    geom_point(data = df_subset, aes(.data$Time, eval(as.symbol(all.vars(formula)[1])), 
+                                     colour = .data$Group, group = interaction(.data$Group, .data$Subject)), size=1, alpha=0.1) +
+    geom_line(data = df_subset, aes(.data$Time, eval(as.symbol(all.vars(formula)[1])), 
+                                     colour = .data$Group, group = interaction(.data$Group, .data$Subject)), size=1, alpha=0.1) +
     ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
     scale_colour_manual(values = c(col, col), 
                         breaks = c("0", "1", "fit.0", "fit.1"),
