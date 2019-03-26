@@ -1,9 +1,9 @@
 Package: OmicsLonDA
 Type: Package
 Title: Omics Longitudinal Differential Analysis
-Version: 1.0.1
+Version: 0.99.1
 Date: 2019-02-23
-Author: Ahmed A. Metwally, Michael Snyder
+Author: Ahmed A. Metwally, Michael Snyder, Tom Zhang
 Maintainer: Ahmed A. Metwally <ametwall@stanford.edu>
 URL: https://github.com/aametwally/OmicsLonDA
 BugReports: https://github.com/aametwally/OmicsLonDA/issues
@@ -11,7 +11,7 @@ Description: Statistical method that provides robust identification of time inte
 License: MIT + file LICENSE
 Depends:
     R(>= 3.3.2)
-Imports:  
+Imports:
     gss,
     plyr,
     zoo,
