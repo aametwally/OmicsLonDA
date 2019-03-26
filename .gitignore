@@ -6,3 +6,6 @@ data/.DS_Store
 inst/.DS_Store
 man/.DS_Store
 vignettes/.DS_Store
+.Rproj.user
+*.Rproj
+.Rbuildignore
