@@ -3,20 +3,27 @@
 #' Find significant time intervals of omic feature
 #' 
 #' @param formula formula to be passed to the regression model
-#' @param df dataframe that contains (subject, time, group, count, normalizedCount, or any any other covariates) for each feature
+#' @param df dataframe that contains (subject, time, group, count,
+#' normalizedCount, or any any other covariates) for each feature
 #' @param n.perm number of permutations.
 #' @param fit.method fitting method (ssguassian).
 #' @param points points at which the prediction should happen.
 #' @param text Feature's name.
 #' @param parall boolean to indicate whether to use multicore.
-#' @param pvalue.threshold p-value threshold cutoff for identifing significant time intervals.
+#' @param pvalue.threshold p-value threshold cutoff for identifing significant
+#' time intervals.
 #' @param adjust.method multiple testing correction method.
-#' @param time.unit time unit used in the Time vector (hours, days, weeks, months, etc.)
+#' @param time.unit time unit used in the Time vector (hours, days, weeks,
+#' months, etc.)
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
-#' @param ylabel text to be shown on the y-axis of all generated figures (default: "Normalized Count")
+#' @param ylabel text to be shown on the y-axis of all generated figures
+#' (default: "Normalized Count")
 #' @param prefix prefix to be used to create directory for the analysis results
-#' @param DrawTestStatDist boolean to indicate if the histogram of the testStat needs to be plotted or not. Default is "FALSE" since the histogram is usually a big file
-#' @return returns a list of the significant time intervals for the tested feature.
+#' @param DrawTestStatDist boolean to indicate if the histogram of the testStat
+#' needs to be plotted or not. Default is "FALSE" since the histogram is usually
+#' a big file
+#' @return returns a list of the significant time intervals for the tested
+#' feature.
 #' @import parallel
 #' @import doParallel
 #' @import stats
