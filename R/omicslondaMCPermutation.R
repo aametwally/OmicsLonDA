@@ -103,7 +103,7 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
     stopCluster(cl)
   }
   
-  pp[vapply(pp, is.null)] = NULL
+  pp[vapply(pp, is.null, logical(1))] = NULL
   return(pp)
 }  
 

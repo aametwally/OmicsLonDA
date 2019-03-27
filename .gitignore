@@ -10,3 +10,4 @@ vignettes/.DS_Store
 *.Rproj
 .Rbuildignore
 *.jpg
+OmicsLonDA_clr_f1/Feature_sim_f1_Summary_ssgaussian.csv

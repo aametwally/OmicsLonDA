@@ -153,7 +153,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
     {
       sum(t3 < stat[i])/length(t3)
     }
-  } )
+  }, 1)
 
   ## Adjust p-values
   if(adjust.method == "qvalue"){
