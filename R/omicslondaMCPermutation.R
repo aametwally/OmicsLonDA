@@ -41,7 +41,7 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
   
   sample_group = unique(perm.dat[,c("Subject","Group")])
   pp = llply(1:n.perm, function(j){
-    sample_group$Group = sample(sample_group$Group, length(sample_group$Group), replace = F)
+    sample_group$Group = sample(sample_group$Group, length(sample_group$Group), replace = FALSE)
     for (i in 1:nrow(perm.dat))
     {
       perm.dat[i, "Group"] = sample_group[which(sample_group$Subject == perm.dat[i, "Subject"]),]$Group
@@ -96,14 +96,14 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
     }
   }, .parallel = parall, .progress = "text", .inform = TRUE,
   .paropts = list(.export=ls(.GlobalEnv),
-                  .packages=.packages(all.available=T)))
+                  .packages=.packages(all.available=TRUE)))
   
   
   if(parall == TRUE) {
     stopCluster(cl)
   }
   
-  pp[sapply(pp, is.null)] = NULL
+  pp[vapply(pp, is.null)] = NULL
   return(pp)
 }  
 

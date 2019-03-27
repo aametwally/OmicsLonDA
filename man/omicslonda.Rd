@@ -37,7 +37,8 @@ omicslonda(formula = Count ~ Time, df, n.perm = 500,
 
 \item{prefix}{prefix to be used to create directory for the analysis results}
 
-\item{DrawTestStatDist}{boolean to indicate if the histogram of the testStat needs to be plotted or not. Default is "FALSE" since the histogram is usually a big file}
+\item{DrawTestStatDist}{boolean to indicate if the histogram of the testStat needs to be plotted or not. Default is "FALSE"
+since the histogram is usually a big file}
 }
 \value{
 returns a list of the significant time intervals for the tested feature.

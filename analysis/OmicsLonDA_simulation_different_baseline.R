@@ -874,7 +874,7 @@ evaluation_summary_nondiff_norm = automateEval_MetaLonDA(data = nondiff_simulate
 require(zoo)
 ts <- as.zoo(c(1,2,8,1,2,2,3,2,3,2,2,1,3,2,3,1,1,2))
 n <- 3
-ts_n <- lag(ts, k=-n, na.pad=T)
+ts_n <- lag(ts, k=-n, na.pad=TRUE)
 #then compute correlation while omiting NAs
 
 cor(ts[!is.na(ts_n)], ts_n[!is.na(ts_n)])

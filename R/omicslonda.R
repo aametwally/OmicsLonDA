@@ -137,7 +137,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   t2 = unlist(t1[,1])
   t3 = as.vector(t2)
   length(t3)
-  pvalue.test.stat = sapply(1:(length(points)-1), function(i){
+  pvalue.test.stat = vapply(1:(length(points)-1), function(i){
     if(stat[i]>=0)
     {
       sum(t3 > stat[i])/length(t3)

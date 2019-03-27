@@ -29,7 +29,15 @@ Imports:
 Suggests:
     knitr,
     rmarkdown
-biocViews: TimeCourse, Survival, Microbiome, Metabolomics, Proteomics, Lipidomics, Transcriptomics, Regression
+biocViews:
+    TimeCourse,
+    Survival,
+    Microbiome,
+    Metabolomics,
+    Proteomics,
+    Lipidomics,
+    Transcriptomics,
+    Regression
 Repository: CRAN
 NeedsCompilation: no
 Encoding: UTF-8
