@@ -25,6 +25,9 @@ visualizeFeature(formula = Count ~ Time, df, text, group.levels,
 
 \item{prefix}{prefix to be used to create directory for the analysis results}
 }
+\value{
+null
+}
 \description{
 Visualize Longitudinal Feature
 }

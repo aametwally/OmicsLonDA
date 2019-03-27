@@ -31,6 +31,9 @@ visualizeArea(formula = Count ~ Time, model.ss, method, start, end, text,
 
 \item{prefix}{prefix to be used to create directory for the analysis results}
 }
+\value{
+null
+}
 \description{
 Visualize significant time interval
 }

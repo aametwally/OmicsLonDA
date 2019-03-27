@@ -10,6 +10,7 @@
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
 #' @param ylabel text to be shown on the y-axis of all generated figures (default: "Normalized Count")
 #' @param prefix prefix to be used to create directory for the analysis results
+#' @return null
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -54,6 +55,7 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels, uni
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
 #' @param ylabel text to be shown on the y-axis of all generated figures (default: "Normalized Count")
 #' @param prefix prefix to be used to create directory for the analysis results
+#' @return null
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -221,6 +223,7 @@ visualizeFeatureSpline_permute = function (formula = Count ~ Time, df, model, me
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
 #' @param ylabel text to be shown on the y-axis of all generated figures (default: "Normalized Count")
 #' @param prefix prefix to be used to create directory for the analysis results
+#' @return null
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -285,6 +288,7 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end, t
 #' @param unit time unit used in the Time vector (hours, days, weeks, months, etc.)
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
 #' @param fit.method fitting method (ssguassian).
+#' @return null
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -329,6 +333,7 @@ visualizeTimeIntervals = function(interval.details, prefix = "Test", unit = "day
 #' @param method fitting method
 #' @param prefix prefix to be used to create directory for the analysis results
 #' @param modelStat test statistics
+#' @return null
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics

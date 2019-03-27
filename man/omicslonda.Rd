@@ -13,7 +13,8 @@ omicslonda(formula = Count ~ Time, df, n.perm = 500,
 \arguments{
 \item{formula}{formula to be passed to the regression model}
 
-\item{df}{dataframe that contains (subject, time, group, count, normalizedCount, or any any other covariates) for each feature}
+\item{df}{dataframe that contains (subject, time, group, count,
+normalizedCount, or any any other covariates) for each feature}
 
 \item{n.perm}{number of permutations.}
 
@@ -25,23 +26,28 @@ omicslonda(formula = Count ~ Time, df, n.perm = 500,
 
 \item{parall}{boolean to indicate whether to use multicore.}
 
-\item{pvalue.threshold}{p-value threshold cutoff for identifing significant time intervals.}
+\item{pvalue.threshold}{p-value threshold cutoff for identifing significant
+time intervals.}
 
 \item{adjust.method}{multiple testing correction method.}
 
-\item{time.unit}{time unit used in the Time vector (hours, days, weeks, months, etc.)}
+\item{time.unit}{time unit used in the Time vector (hours, days, weeks,
+months, etc.)}
 
-\item{ylabel}{text to be shown on the y-axis of all generated figures (default: "Normalized Count")}
+\item{ylabel}{text to be shown on the y-axis of all generated figures
+(default: "Normalized Count")}
 
 \item{col}{two color to be used for the two groups (eg., c("red", "blue")).}
 
 \item{prefix}{prefix to be used to create directory for the analysis results}
 
-\item{DrawTestStatDist}{boolean to indicate if the histogram of the testStat needs to be plotted or not. Default is "FALSE"
-since the histogram is usually a big file}
+\item{DrawTestStatDist}{boolean to indicate if the histogram of the testStat
+needs to be plotted or not. Default is "FALSE" since the histogram is usually
+a big file}
 }
 \value{
-returns a list of the significant time intervals for the tested feature.
+returns a list of the significant time intervals for the tested
+feature.
 }
 \description{
 Find significant time intervals of omic feature

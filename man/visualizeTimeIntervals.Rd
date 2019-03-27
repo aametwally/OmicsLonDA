@@ -19,6 +19,9 @@ visualizeTimeIntervals(interval.details, prefix = "Test",
 
 \item{fit.method}{fitting method (ssguassian).}
 }
+\value{
+null
+}
 \description{
 Visualize all significant time intervals for all tested features
 }

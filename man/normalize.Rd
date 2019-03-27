@@ -11,6 +11,9 @@ normalize(count, method = "css")
 
 \item{method}{normalization method}
 }
+\value{
+the normalized count matrix
+}
 \description{
 Normalize count matrix
 }

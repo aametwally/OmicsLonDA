@@ -18,6 +18,9 @@ visualizeTestStatHistogram(permuted, text, method, prefix = "Test",
 
 \item{modelStat}{test statistics}
 }
+\value{
+null
+}
 \description{
 Visualize Test Statistics empirical distribution for each time interval
 }

@@ -232,6 +232,7 @@ testStatPermutation = function(perm)
 #'
 #' @param count count matrix
 #' @param method normalization method
+#' @return the normalized count matrix
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export

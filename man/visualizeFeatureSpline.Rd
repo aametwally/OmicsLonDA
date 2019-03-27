@@ -27,6 +27,9 @@ visualizeFeatureSpline(df, model, method, text, group.levels,
 
 \item{prefix}{prefix to be used to create directory for the analysis results}
 }
+\value{
+null
+}
 \description{
 Plot the longitudinal features along with the fitted splines
 }
