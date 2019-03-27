@@ -10,7 +10,7 @@ BugReports: https://github.com/aametwally/OmicsLonDA/issues
 Description: Statistical method that provides robust identification of time intervals where omics features (such as proteomics, lipidomics, metabolomics, transcriptomics, the microbiome, as well as physiological parameters captured by wearable devices such as heart rhythm, body temperature, and activity level) are significantly different between groups.
 License: MIT + file LICENSE
 Depends:
-    R(>= 3.3.2)
+    R(>= 3.5)
 Imports:
     gss,
     plyr,
@@ -21,11 +21,15 @@ Imports:
     doParallel,
     metagenomeSeq,
     DESeq2,
-    edgeR
+    edgeR,
+    grDevices,
+    graphics,
+    stats,
+    utils
 Suggests:
     knitr,
     rmarkdown
-biocViews:
+biocViews: TimeCourse, Survival, Microbiome, Metabolomics, Proteomics, Lipidomics, Transcriptomics, Regression
 Repository: CRAN
 NeedsCompilation: no
 Encoding: UTF-8
