@@ -1,6 +1,7 @@
 #' Fit longitudinal data
 #'
-#' Fits longitudinal samples from the same group using negative binomial smoothing splines or LOWESS
+#' Fits longitudinal samples from the same group using negative binomial
+#' smoothing splines or LOWESS
 #' 
 #' @param formula formula to be passed to the regression model
 #' @param df dataframe has the Count, Group, Subject, Time
@@ -12,7 +13,8 @@
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
-curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", points){
+curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
+                        points){
   
   ## Seprate the two groups
   group.null = df
@@ -22,7 +24,8 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
   ## Fitting 
   if(method == "ssgaussian"){
     
-    ### Difference between random = mkran(~1|Subject, group.null) and random = ~1|Subject
+    ### Difference between random = mkran(~1|Subject, group.null) and
+    ### random = ~1|Subject
     ran.null = mkran(~1|Subject, group.null)
     ran.0 = mkran(~1|Subject, group.0)
     ran.1 = mkran(~1|Subject, group.1)
@@ -30,11 +33,14 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
     
     ### With Subjet Random Effect
     ## null model
-    # mod.null = ssanova(formula, data = group.null, skip.iter=TRUE, random = ran.null, na.action = na.omit)
+    # mod.null = ssanova(formula, data = group.null, skip.iter=TRUE, 
+    #                    random = ran.null, na.action = na.omit)
     # 
     # ## full model
-    # mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE, random = ran.0, na.action = na.omit)
-    # mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE, random = ran.1, na.action = na.omit)
+    # mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE, random = ran.0,
+    #                 na.action = na.omit)
+    # mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE, random = ran.1,
+    #                 na.action = na.omit)
     
     # ## null model
     mod.null = ssanova(formula, data = group.null, skip.iter=TRUE)
@@ -55,9 +61,12 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
   
   
   ## Estimate values at the provided time points
-  est.null = predict(mod.null, data.frame(Time = points), include = c("1", "Time"), se = TRUE)
-  est.0 = predict(mod.0, data.frame(Time = points), include = c("1", "Time"), se = TRUE)
-  est.1 = predict(mod.1, data.frame(Time = points), include = c("1", "Time"), se = TRUE)
+  est.null = predict(mod.null, data.frame(Time = points), include =
+                       c("1", "Time"), se = TRUE)
+  est.0 = predict(mod.0, data.frame(Time = points), include = c("1", "Time"),
+                  se = TRUE)
+  est.1 = predict(mod.1, data.frame(Time = points), include = c("1", "Time"),
+                  se = TRUE)
   
   
   
@@ -65,17 +74,28 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
   if (method == "ssgaussian")
   {
     ## Curve dataframe
-    dd.null = data.frame(Time = points, Count = est.null$fit, Group = "NULL", Subject = "NULL", SE = est.null$se)
-    dd.0 = data.frame(Time = points, Count = est.0$fit, Group = "fit.0", Subject = "fit.0", SE = est.0$se)
-    dd.1 = data.frame(Time = points, Count = est.1$fit, Group = "fit.1", Subject = "fit.1", SE = est.1$se)
+    dd.null = data.frame(Time = points, Count = est.null$fit, Group = "NULL",
+                         Subject = "NULL", SE = est.null$se)
+    dd.0 = data.frame(Time = points, Count = est.0$fit, Group = "fit.0",
+                      Subject = "fit.0", SE = est.0$se)
+    dd.1 = data.frame(Time = points, Count = est.1$fit, Group = "fit.1",
+                      Subject = "fit.1", SE = est.1$se)
     
     ## Confidence interval dataframe
-    dd.null.u95 = data.frame(Time = points, Count = (est.null$fit + 1.96*est.null$se), Group = "null.u", Subject = "null.u")
-    dd.null.l95 = data.frame(Time = points, Count = (est.null$fit - 1.96*est.null$se), Group = "null.l", Subject = "null.l")
-    dd.0.u95 = data.frame(Time = points, Count = (est.0$fit + 1.96*est.0$se), Group = "fit.0.u", Subject = "fit.0.u")
-    dd.0.l95 = data.frame(Time = points, Count = (est.0$fit - 1.96*est.0$se), Group = "fit.0.l", Subject = "fit.0.l")
-    dd.1.u95 = data.frame(Time = points, Count = (est.1$fit + 1.96*est.1$se), Group = "fit.1.u", Subject = "fit.1.u")
-    dd.1.l95 = data.frame(Time = points, Count = (est.1$fit - 1.96*est.1$se), Group = "fit.1.l", Subject = "fit.1.l")
+    dd.null.u95 = data.frame(Time = points,
+                             Count = (est.null$fit + 1.96*est.null$se),
+                             Group = "null.u", Subject = "null.u")
+    dd.null.l95 = data.frame(Time = points,
+                             Count = (est.null$fit - 1.96*est.null$se),
+                             Group = "null.l", Subject = "null.l")
+    dd.0.u95 = data.frame(Time = points, Count = (est.0$fit + 1.96*est.0$se),
+                          Group = "fit.0.u", Subject = "fit.0.u")
+    dd.0.l95 = data.frame(Time = points, Count = (est.0$fit - 1.96*est.0$se),
+                          Group = "fit.0.l", Subject = "fit.0.l")
+    dd.1.u95 = data.frame(Time = points, Count = (est.1$fit + 1.96*est.1$se),
+                          Group = "fit.1.u", Subject = "fit.1.u")
+    dd.1.l95 = data.frame(Time = points, Count = (est.1$fit - 1.96*est.1$se),
+                          Group = "fit.1.l", Subject = "fit.1.l")
   } 
   
   
@@ -84,9 +104,11 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial", poin
   if(method == "ssgaussian")
   {
     output = list(f.stat = f.stat, rss.null = rss.null, rss.full = rss.full, 
-                  dd.null = dd.null, dd.0 = dd.0, dd.1 = dd.1, mod.null = mod.null, 
-                  mod.0 = mod.0, mod.1 = mod.1, dd.null.u95 = dd.null.u95, dd.null.l95 = dd.null.l95,
-                  dd.0.u95 = dd.0.u95, dd.0.l95 = dd.0.l95, dd.1.u95 = dd.1.u95, dd.1.l95= dd.1.l95)
+                  dd.null = dd.null, dd.0 = dd.0, dd.1 = dd.1,
+                  mod.null = mod.null, mod.0 = mod.0, mod.1 = mod.1,
+                  dd.null.u95 = dd.null.u95, dd.null.l95 = dd.null.l95,
+                  dd.0.u95 = dd.0.u95, dd.0.l95 = dd.0.l95,
+                  dd.1.u95 = dd.1.u95, dd.1.l95= dd.1.l95)
   }
   
   
@@ -110,11 +132,16 @@ testStat = function(curve.fit.df){
   
   
   for(i in 1:(size - 1)){
-    testStat.null = trapz(curve.fit.df$dd.null$Time[i:(i+1)], curve.fit.df$dd.null$Count[i:(i+1)])
-    testStat.0 = trapz(curve.fit.df$dd.0$Time[i:(i+1)], curve.fit.df$dd.0$Count[i:(i+1)])
-    testStat.1 = trapz(curve.fit.df$dd.1$Time[i:(i+1)], curve.fit.df$dd.1$Count[i:(i+1)])
+    testStat.null = trapz(curve.fit.df$dd.null$Time[i:(i+1)],
+                          curve.fit.df$dd.null$Count[i:(i+1)])
+    testStat.0 = trapz(curve.fit.df$dd.0$Time[i:(i+1)],
+                       curve.fit.df$dd.0$Count[i:(i+1)])
+    testStat.1 = trapz(curve.fit.df$dd.1$Time[i:(i+1)],
+                       curve.fit.df$dd.1$Count[i:(i+1)])
     
-    testStat[i] = (testStat.0 - testStat.1) / sqrt((mean(curve.fit.df$dd.0$SE[i:(i+1)]))^2 + (mean(curve.fit.df$dd.1$SE[i:(i+1)]))^2)
+    testStat[i] = (testStat.0 - testStat.1) /
+      sqrt((mean(curve.fit.df$dd.0$SE[i:(i+1)]))^2 +
+             (mean(curve.fit.df$dd.1$SE[i:(i+1)]))^2)
     if(is.na(testStat[i])){
       testStat[i] = 0
     }
@@ -132,7 +159,8 @@ testStat = function(curve.fit.df){
 # #' @param adjusted.pvalue vector of the adjusted p-value
 # #' @param threshold p-value cut off
 # #' @param sign vector hold area sign of each time interval 
-# #' @return returns a list of the start and end points of all significant time intervals
+# #' @return returns a list of the start and end points of all significant
+# #' time intervals
 # #' @references
 # #' Ahmed Metwally (ametwall@stanford.edu)
 # #' @export
@@ -181,7 +209,8 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
         {
           end = c(end, sig[i])
           dom = c(dom, sign[i])
-          p = c(p, mean(adjusted.pvalue[start[length(start)] : end[length(end)]]))
+          p = c(p, mean(adjusted.pvalue[start[length(start)] :
+                                          end[length(end)]]))
         }
       }
       else
@@ -255,8 +284,9 @@ normalize = function(count, method = "css"){
     cat("Normalization using TMM method \n")
     factors = edgeR::calcNormFactors(count, method="TMM")
     eff.lib.size = colSums(count) * factors
-    ref.lib.size = mean(eff.lib.size) #Use the mean of the effective library sizes as a reference library size
-    count.normalized = sweep(count, MARGIN = 2, eff.lib.size, "/") * ref.lib.size 
+    ref.lib.size = mean(eff.lib.size) #Use the mean of the effective library
+                                      #sizes as a reference library size
+    count.normalized = sweep(count, MARGIN = 2, eff.lib.size, "/")*ref.lib.size 
   }
   else if(method == "ra")
   {
@@ -271,11 +301,14 @@ normalize = function(count, method = "css"){
   else if(method == "median_ratio")
   {
     cat("Normalization using Median-Ratio method \n")
-    col.data = as.data.frame(cbind(colnames(count), rep(1:2, length.out= ncol(count)), rep(1:2, length.out= ncol(count))))
+    col.data = as.data.frame(cbind(colnames(count),
+                                   rep(1:2, length.out= ncol(count)),
+                                   rep(1:2, length.out= ncol(count))))
     rownames(col.data) = col.data[,1]
     col.data =  col.data[,-1]
     colnames(col.data) = c("test","condition")
-    data.deseq = DESeq2::DESeqDataSetFromMatrix(countData = count, colData = col.data, ~ condition)
+    data.deseq = DESeq2::DESeqDataSetFromMatrix(countData = count,
+                                                colData = col.data, ~ condition)
     cds = DESeq2::estimateSizeFactors( data.deseq )
     count.normalized = t( t(DESeq2::counts(cds)) / DESeq2::sizeFactors(cds) )
   }

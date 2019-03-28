@@ -23,9 +23,11 @@ visualizeArea(formula = Count ~ Time, model.ss, method, start, end, text,
 
 \item{group.levels}{Level's name}
 
-\item{unit}{time unit used in the Time vector (hours, days, weeks, months, etc.)}
+\item{unit}{time unit used in the Time vector
+(hours, days, weeks, months, etc.)}
 
-\item{ylabel}{text to be shown on the y-axis of all generated figures (default: "Normalized Count")}
+\item{ylabel}{text to be shown on the y-axis of all generated figures
+(default: "Normalized Count")}
 
 \item{col}{two color to be used for the two groups (eg., c("red", "blue")).}
 

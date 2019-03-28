@@ -19,7 +19,8 @@ visualizeFeature(formula = Count ~ Time, df, text, group.levels,
 
 \item{unit}{time interval unit}
 
-\item{ylabel}{text to be shown on the y-axis of all generated figures (default: "Normalized Count")}
+\item{ylabel}{text to be shown on the y-axis of all generated figures
+(default: "Normalized Count")}
 
 \item{col}{two color to be used for the two groups (eg., c("red", "blue")).}
 

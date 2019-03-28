@@ -1,6 +1,7 @@
 #' Permute group labels
 #'
-#' Permutes the group label of the samples in order to construct the testStatistics empirical distibution
+#' Permutes the group label of the samples in order to construct the
+#' testStatistics empirical distibution
 #'
 #' @param formula formula to be passed to the regression model
 #' @param perm.dat dataframe has the Count, Group, Subject, Time
@@ -15,7 +16,8 @@
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
-permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method = "ssgaussian", points, parall = FALSE, prefix){
+permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
+                          method="ssgaussian", points, parall = FALSE, prefix){
   
   cat("Number of permutation = ", n.perm, "\n")
   
@@ -30,10 +32,9 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
   
   
   ## Run in Parallel
-  if(parall == TRUE) {
-    max.cores = detectCores()
+  if(parall == TRUE) {max.cores = detectCores()
     cat("# cores = ", max.cores, "\n")
-    desired.cores = max.cores - 1		
+    desired.cores = max.cores - 1
     cl = makeCluster(desired.cores)
     registerDoParallel(cl)
   } 
@@ -41,10 +42,12 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
   
   sample_group = unique(perm.dat[,c("Subject","Group")])
   pp = llply(1:n.perm, function(j){
-    sample_group$Group = sample(sample_group$Group, length(sample_group$Group), replace = FALSE)
+    sample_group$Group = sample(sample_group$Group, length(sample_group$Group),
+                                replace = FALSE)
     for (i in 1:nrow(perm.dat))
     {
-      perm.dat[i, "Group"] = sample_group[which(sample_group$Subject == perm.dat[i, "Subject"]),]$Group
+      perm.dat[i, "Group"] = sample_group[which(sample_group$Subject ==
+                                                perm.dat[i, "Subject"]),]$Group
     }
     #cat("Group after = ", perm.dat$Group , "\n")
     
@@ -53,7 +56,8 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
     g.0 = perm.dat[perm.dat$Group == 0, ]
     g.1 = perm.dat[perm.dat$Group == 1, ]
     g.min = max(sort(g.0$Time)[1], sort(g.1$Time)[1])
-    g.max = min(sort(g.0$Time)[length(g.0$Time)], sort(g.1$Time)[length(g.1$Time)])
+    g.max = min(sort(g.0$Time)[length(g.0$Time)],
+                sort(g.1$Time)[length(g.1$Time)])
     
     
     
@@ -65,7 +69,8 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
     
     
     
-    ### This part to handle the situation when min/max timepoint of eac group from the permuted subjects, lies outside the range of the points vector 
+    ### This part to handle the situation when min/max timepoint of eac group
+    ### from the permuted subjects, lies outside the range of the points vector 
     if(g.min > min(points) | g.max < max(points))
     {
       #cat("\n")
@@ -90,8 +95,11 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500, method
     {
       #cat("In else", "\n")
       perm = curveFitting(formula, df = perm.dat, method = method, points)
-      # visualizeFeatureSpline_permute(df = perm.dat, model = perm, method = method, text = "ssgaussian", group.levels = c("A", "B"),
-      #                        prefix = paste(prefix, "/", "perm_", j, "_", sep = ""))
+      # visualizeFeatureSpline_permute(df = perm.dat, model = perm,
+      #                                method = method, text = "ssgaussian",
+      #                                group.levels = c("A", "B"),
+      #                                prefix = paste(prefix, "/", "perm_", j,
+      #                                "_", sep = ""))
       assign(paste("Model", j, sep = "_"), perm)
     }
   }, .parallel = parall, .progress = "text", .inform = TRUE,
@@ -124,7 +132,7 @@ bootstrapOmicslonda = function(data, index){
   if(.data$parall == TRUE) {
     max.cores = detectCores()
     cat("# cores = ", max.cores, "\n")
-    desired.cores = max.cores - 1		
+    desired.cores = max.cores - 1
     cl = makeCluster(desired.cores)
     registerDoParallel(cl)
   } 
@@ -133,11 +141,12 @@ bootstrapOmicslonda = function(data, index){
   g.0 = bs.df[bs.df$Group == 0, ]
   g.1 = bs.df[bs.df$Group == 1, ]
   g.min = max(sort(g.0$Time)[1], sort(g.1$Time)[1])
-  g.max = min(sort(g.0$Time)[length(g.0$Time)], sort(g.1$Time)[length(g.1$Time)])
+  g.max = min(sort(g.0$Time)[length(g.0$Time)],sort(g.1$Time)[length(g.1$Time)])
   
   
   
-  ### This part to handle the situation when min/max timepoint of eac group from the permuted subjects, lies outside the range of the points vector 
+  ### This part to handle the situation when min/max timepoint of eac group from
+  ### the permuted subjects, lies outside the range of the points vector 
   if(g.min > min(points) | g.max < max(points))
   {
     #cat("\n")
@@ -156,8 +165,11 @@ bootstrapOmicslonda = function(data, index){
   {
     #cat("In else", "\n")
     bootstrapped = curveFitting(formula, df = bs.df, method = method, points)
-    # visualizeFeatureSpline_permute(df = perm.dat, model = perm, method = method, text = "ssgaussian", group.levels = c("A", "B"),
-    #                        prefix = paste(prefix, "/", "perm_", j, "_", sep = ""))
+    # visualizeFeatureSpline_permute(df = perm.dat, model = perm,
+    #                        method = method, text = "ssgaussian",
+    #                        group.levels = c("A", "B"),
+    #                        prefix = paste(prefix, "/", "perm_", j, "_",
+    #                                       sep = ""))
     #assign(paste("Model", j, sep = "_"), bootstrapped)
   }
   
@@ -173,7 +185,8 @@ bootstrapOmicslonda = function(data, index){
 }
 
 
-# permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500, method = "ssnbinomial", points, parall = FALSE, prefix){
+# permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500,
+#                      method = "ssnbinomial", points, parall = FALSE, prefix){
 #   
 #   cat(" number of permutation = ", n.perm, "\n")
 #   #cat("beging group=  ", perm.dat$Group, "\n")
@@ -193,7 +206,7 @@ bootstrapOmicslonda = function(data, index){
 #   if(parall == TRUE) {
 #     max.cores = detectCores()
 #     cat("# cores = ", max.cores, "\n")
-#     desired.cores = max.cores - 1		
+#     desired.cores = max.cores - 1
 #     cl = makeCluster(desired.cores)
 #     registerDoParallel(cl)
 #   } 
@@ -205,21 +218,25 @@ bootstrapOmicslonda = function(data, index){
 #     # for (i in levels(perm.dat$Subject)){
 #     #   perm.uniq.len = 1
 #     #   while(perm.uniq.len == 1){
-#     #     perm.dat[which(perm.dat$Subject == i),]$Group = rep(sample(c(0,1),1), sum(perm.dat$Subject == i))# ,  replace = TRUE) #rep(sample(1:2), each = time.point)
-#     #     perm.uniq.len = length(unique(perm.dat$Group))
+#     #    perm.dat[which(perm.dat$Subject == i),]$Group = rep(sample(c(0,1),1),
+#                 sum(perm.dat$Subject == i))# ,  replace = TRUE) 
+#                 #rep(sample(1:2), each = time.point)
+#     #    perm.uniq.len = length(unique(perm.dat$Group))
 #     #   }
 #     # }
 #     
 #     # cat("Group before = ", perm.dat$Group , "\n")
-#     # perm.dat$Group = sample(perm.dat$Group, length(perm.dat$Group), replace = F)
+#     # perm.dat$Group = sample(perm.dat$Group,length(perm.dat$Group),replace=F)
 #     # cat("Group after = ", perm.dat$Group , "\n")
 #     
 #     ## Perumute group labels
 #     #cat("Group before = ", perm.dat$Group , "\n")
-#     sample_group$Group = sample(sample_group$Group, length(sample_group$Group), replace = F)
+#     sample_group$Group = sample(sample_group$Group,length(sample_group$Group),
+#                                 replace = F)
 #     for (i in 1:nrow(perm.dat))
 #     {
-#       perm.dat[i, "Group"] = sample_group[which(sample_group$Subject == perm.dat[i, "Subject"]),]$Group
+#       perm.dat[i, "Group"] = sample_group[which(sample_group$Subject ==
+#                                           perm.dat[i, "Subject"]),]$Group
 #     }
 #     #cat("Group after = ", perm.dat$Group , "\n")
 #     
@@ -228,7 +245,8 @@ bootstrapOmicslonda = function(data, index){
 #     g.0 = perm.dat[perm.dat$Group == 0, ]
 #     g.1 = perm.dat[perm.dat$Group == 1, ]
 #     g.min = max(sort(g.0$Time)[1], sort(g.1$Time)[1])
-#     g.max = min(sort(g.0$Time)[length(g.0$Time)], sort(g.1$Time)[length(g.1$Time)])
+#     g.max=min(sort(g.0$Time)[length(g.0$Time)],
+#               sort(g.1$Time)[length(g.1$Time)])
 #     
 #     
 #     
@@ -240,7 +258,7 @@ bootstrapOmicslonda = function(data, index){
 #     
 #     
 #     
-#     ### TODO: Fix this issue. The method should be able to handle this situation 
+#     #TODO: Fix this issue. The method should be able to handle this situation 
 #     if(g.min > min(points) | g.max < max(points))
 #     {
 #       cat("\n")
@@ -259,8 +277,9 @@ bootstrapOmicslonda = function(data, index){
 #     {
 #       #cat("In else", "\n")
 #       perm = curveFitting(formula, df = perm.dat, method = method, points)
-#       # visualizeFeatureSpline_permute(df = perm.dat, model = perm, method = method, text = "permutation", group.levels = c("A", "B"),
-#       #                        prefix = paste(prefix, "/", "perm_", j, "_", sep = ""))
+#       # visualizeFeatureSpline_permute(df = perm.dat, model = perm,
+#             method = method, text = "permutation", group.levels = c("A", "B"),
+#       #     prefix = paste(prefix, "/", "perm_", j, "_", sep = ""))
 #       assign(paste("Model", j, sep = "_"), perm)
 #     }
 #   }, .parallel = parall, .progress = "text", .inform = TRUE,

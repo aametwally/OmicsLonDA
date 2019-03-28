@@ -20,7 +20,8 @@ curveFitting(formula = Count ~ Time, df, method = "ssnbinomial",
 returns the fitted model
 }
 \description{
-Fits longitudinal samples from the same group using negative binomial smoothing splines or LOWESS
+Fits longitudinal samples from the same group using negative binomial
+smoothing splines or LOWESS
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

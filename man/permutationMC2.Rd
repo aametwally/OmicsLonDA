@@ -26,7 +26,8 @@ permutationMC2(formula = Count ~ Time, perm.dat, n.perm = 500,
 returns the fitted model for all the permutations
 }
 \description{
-Permutes the group label of the samples in order to construct the testStatistics empirical distibution
+Permutes the group label of the samples in order to construct the
+testStatistics empirical distibution
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

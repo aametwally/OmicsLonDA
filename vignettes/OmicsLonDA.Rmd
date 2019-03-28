@@ -17,12 +17,16 @@ knitr::opts_chunk$set(
 ```
 
 ***
-OmicsLonDA (Omics Longitudinal Differential Analysis) is a statistical framework that provides robust identification of time intervals where omics features are significantly different between groups. OmicsLonDA is based on 5 main steps:
+OmicsLonDA (Omics Longitudinal Differential Analysis) is a statistical framework
+that provides robust identification of time intervals where omics features are
+significantly different between groups. OmicsLonDA is based on 5 main steps:
 
 1. Adjust measurements based on each subject's specific baseline
-1. Global testing using linear mixed-effect model to select candidate features and covariates for time intervals analysis
+1. Global testing using linear mixed-effect model to select candidate features
+and covariates for time intervals analysis
 1. Fitting smoothing spline regression model
-1. Monte Carlo simulation to generate the empirical distribution of the test statistic
+1. Monte Carlo simulation to generate the empirical distribution of the test
+statistic
 1. Inference of significant time intervals of omics features.
 
 ## Getting Started
@@ -49,15 +53,21 @@ head(diff_simulatedDataset_norm[[1]])
 ```r
 ## Define the prediction timepoints 
 points = seq(1, 200, length.out = 200)
-output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df = diff_simulatedDataset_norm[[1]], n.perm = 10, 
-                                      fit.method = "ssgaussian", points = points,
-                                      text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
-                                      adjust.method = "BH", col = c("blue", "green"),
-                                      prefix = "OmicsLonDA_clr_f1", ylabel = "CLR-NormalizedCount",
-                                      DrawTestStatDist = FALSE, time.unit = "days")
+output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df =
+                                      diff_simulatedDataset_norm[[1]],
+                                      n.perm = 10, fit.method = "ssgaussian",
+                                      points = points, text = "sim_f1",
+                                      parall = FALSE, pvalue.threshold = 0.05,
+                                      adjust.method = "BH",
+                                      col = c("blue", "green"),
+                                      prefix = "OmicsLonDA_clr_f1",
+                                      ylabel = "CLR-NormalizedCount",
+                                      DrawTestStatDist = FALSE,
+                                      time.unit = "days")
 ```
 
 ## Bugs and Suggestions
-OmicsLonDA is under active research development. Please report any bugs/suggestions to Ahmed Metwally (ametwall@stanford.edu).
+OmicsLonDA is under active research development. Please report any
+bugs/suggestions to Ahmed Metwally (ametwall@stanford.edu).
 
 ***

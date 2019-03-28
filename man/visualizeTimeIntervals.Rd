@@ -9,11 +9,13 @@ visualizeTimeIntervals(interval.details, prefix = "Test",
   fit.method = "ssgaussian")
 }
 \arguments{
-\item{interval.details}{Dataframe has infomation about significant interval (feature name, start, end, dominant, p-value)}
+\item{interval.details}{Dataframe has infomation about significant interval
+(feature name, start, end, dominant, p-value)}
 
 \item{prefix}{prefix for the output figure}
 
-\item{unit}{time unit used in the Time vector (hours, days, weeks, months, etc.)}
+\item{unit}{time unit used in the Time vector
+(hours, days, weeks, months, etc.)}
 
 \item{col}{two color to be used for the two groups (eg., c("red", "blue")).}
 

@@ -31,9 +31,11 @@
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
-omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ssnbinomial", 
-                      points, text = 0, parall = FALSE, pvalue.threshold = 0.05, 
-                      adjust.method = "BH", time.unit = "days", ylabel = "Normalized Count", col = c("blue", "firebrick"),
+omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
+                      fit.method = "ssnbinomial", points, text = 0,
+                      parall = FALSE, pvalue.threshold = 0.05, 
+                      adjust.method = "BH", time.unit = "days",
+                      ylabel = "Normalized Count", col = c("blue", "firebrick"),
                       prefix = "Test", DrawTestStatDist = FALSE)
 {
   cat("Start OmicsLonDA \n")
@@ -71,20 +73,23 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   
   
   ## Preprocessing: add pseudo counts
-  ## TODO: Make sure this is applied to the corrsponding column (Count, rawCount, normalized Count)
+  ## TODO: Make sure this is applied to the corrsponding column
+  ## (Count, rawCount, normalized Count)
   #df$Count = df$Count + 1e-8
   
   
 
   
   ## Visualize feature's abundance accross different time points  
-  visualizeFeature(formula = formula, df, text, group.levels, unit = time.unit, ylabel = ylabel, col = col, prefix = prefix)
+  visualizeFeature(formula = formula, df, text, group.levels, unit = time.unit,
+                   ylabel = ylabel, col = col, prefix = prefix)
   
   
   group.0 = df[df$Group == 0, ]
   group.1 = df[df$Group == 1, ]
   points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
-  points.max = min(sort(group.0$Time)[length(group.0$Time)], sort(group.1$Time)[length(group.1$Time)])
+  points.max = min(sort(group.0$Time)[length(group.0$Time)],
+                   sort(group.1$Time)[length(group.1$Time)])
   points = points[which(points >= points.min & points <= points.max)]
   
   
@@ -109,8 +114,9 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   }
   
   ## Visualize feature's trajectories spline
-  visualizeFeatureSpline2(formula = formula, df, model, fit.method, text, group.levels, unit = time.unit, ylabel = ylabel, 
-                         col = col, prefix = prefix)
+  visualizeFeatureSpline2(formula = formula, df, model, fit.method, text,
+                          group.levels, unit = time.unit, ylabel = ylabel, 
+                          col = col, prefix = prefix)
 
   
   ### Test Statistic
@@ -120,7 +126,8 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   
   ### TODO: Test Bootstrapping
   # library(boot)
-  # #bt = boot(formula = formula, bs.df = df, method = fit.method, points = points, parall = parall, prefix = prefix)
+  # #bt = boot(formula = formula, bs.df = df, method = fit.method,
+  #            points = points, parall = parall, prefix = prefix)
   # set.seed(27262)
   # #index = sample(1:726, 726)
   # #data = df
@@ -133,9 +140,12 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   
   
   
-  ## TODO: fix the occasional warning  # 1: <anonymous>: ... may be used in an incorrect context: ‘.fun(piece, ...)’
+  ## TODO: fix the occasional warning  # 1: <anonymous>: ... may be used in an
+  #  incorrect context: ‘.fun(piece, ...)’
   ## Permutation 
-  perm  = permutationMC2(formula = formula, perm.dat = df, n.perm = n.perm, method = fit.method, points = points, parall = parall, prefix = prefix)
+  perm  = permutationMC2(formula = formula, perm.dat = df, n.perm = n.perm,
+                         method = fit.method, points = points, parall = parall,
+                         prefix = prefix)
 
   test.stat.prem = testStatPermutation(perm)
   t1 = do.call(rbind, test.stat.prem)
@@ -168,11 +178,13 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   if(DrawTestStatDist)
   {
     ##  Visualize testStat empirical distribution for the null distribution
-    visualizeTestStatHistogram(t3, text, fit.method, prefix = prefix, modelStat = stat)
+    visualizeTestStatHistogram(t3, text, fit.method, prefix = prefix,
+                               modelStat = stat)
   }
 
 
-  interval = findSigInterval2(adjusted.pvalue, threshold = pvalue.threshold, sign = sign(stat))
+  interval = findSigInterval2(adjusted.pvalue, threshold = pvalue.threshold,
+                              sign = sign(stat))
   
   st = points[interval$start]
   en = points[interval$end + 1]
@@ -181,7 +193,8 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   if(length(st) > 0)
   {
     ## Visualize sigificant area
-    visualizeArea(formula = formula, model, fit.method, st, en, text, group.levels, unit = time.unit, ylabel = ylabel,
+    visualizeArea(formula = formula, model, fit.method, st, en, text,
+                  group.levels, unit = time.unit, ylabel = ylabel,
                   col = col, prefix = prefix)
   }
   
@@ -201,18 +214,26 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500, fit.method = "ss
   
   
   output.details = list(feature = rep(text, length(interval.start)), 
-                        interval.start = interval.start, interval.end = interval.end,
-                        avg.mod0.count = avg.mod0.count, avg.mod1.count = avg.mod1.count, 
+                        interval.start = interval.start,
+                        interval.end = interval.end,
+                        avg.mod0.count = avg.mod0.count,
+                        avg.mod1.count = avg.mod1.count, 
                         foldChange = foldChange,
-                        testStat = stat, testStat.abs = abs(stat), testStat.sign = sign(stat), dominant = dominant,
-                        intervals.pvalue = pvalue.test.stat, adjusted.pvalue = adjusted.pvalue, points = points)
-  output.summary = data.frame(feature = rep(text, length(interval$start)), start = st, end = en,
-                              dominant = interval$dominant, pvalue = interval$pvalue)
+                        testStat = stat, testStat.abs = abs(stat),
+                        testStat.sign = sign(stat), dominant = dominant,
+                        intervals.pvalue = pvalue.test.stat,
+                        adjusted.pvalue = adjusted.pvalue, points = points)
+  output.summary = data.frame(feature = rep(text, length(interval$start)),
+                              start = st, end = en, dominant=interval$dominant,
+                              pvalue = interval$pvalue)
   
   
   ## Output table that summarize time intervals statistics
-  feature.summary = as.data.frame(do.call(cbind, output.details), stringsAsFactors = FALSE)
-  write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv", prefix, text, fit.method), row.names = FALSE)
+  feature.summary = as.data.frame(do.call(cbind, output.details),
+                                  stringsAsFactors = FALSE)
+  write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv",
+                                            prefix, text, fit.method),
+            row.names = FALSE)
   cat("\n\n")
   
   return(list(detailed = output.details, summary = output.summary))
