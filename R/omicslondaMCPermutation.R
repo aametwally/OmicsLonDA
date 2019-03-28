@@ -41,10 +41,10 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
   
   
   sample_group = unique(perm.dat[,c("Subject","Group")])
-  pp = llply(1:n.perm, function(j){
+  pp = llply(seq_len(n.perm), function(j){
     sample_group$Group = sample(sample_group$Group, length(sample_group$Group),
                                 replace = FALSE)
-    for (i in 1:nrow(perm.dat))
+    for (i in seq_len(nrow(perm.dat)))
     {
       perm.dat[i, "Group"] = sample_group[which(sample_group$Subject ==
                                                 perm.dat[i, "Subject"]),]$Group

@@ -131,7 +131,7 @@ testStat = function(curve.fit.df){
   testStat = numeric(size - 1)
   
   
-  for(i in 1:(size - 1)){
+  for(i in seq_len(size-1)){
     testStat.null = trapz(curve.fit.df$dd.null$Time[i:(i+1)],
                           curve.fit.df$dd.null$Count[i:(i+1)])
     testStat.0 = trapz(curve.fit.df$dd.0$Time[i:(i+1)],
@@ -243,7 +243,7 @@ testStatPermutation = function(perm)
 {
   testStat.list = list()
   list.len = length(perm)
-  for (j in 1:list.len)
+  for (j in seq_len(list.len))
   {
     testStat.list[[j]] = testStat(perm[[j]])
   }
@@ -302,8 +302,8 @@ normalize = function(count, method = "css"){
   {
     cat("Normalization using Median-Ratio method \n")
     col.data = as.data.frame(cbind(colnames(count),
-                                   rep(1:2, length.out= ncol(count)),
-                                   rep(1:2, length.out= ncol(count))))
+                                   rep(seq_len(2), length.out= ncol(count)),
+                                   rep(seq_len(2), length.out= ncol(count))))
     rownames(col.data) = col.data[,1]
     col.data =  col.data[,-1]
     colnames(col.data) = c("test","condition")

@@ -309,7 +309,7 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
   sub.11 = list()
   sub.10 = list()
   xx = NULL
-  for(i in 1:length(start))
+  for(i in seq_len(length(start)))
   {
     sub.11[[i]] = subset(model.ss$dd.1, Time >= start[i] & Time <= end[i])  
     sub.10[[i]] = subset(model.ss$dd.0, Time >= start[i] & Time <= end[i])
@@ -446,7 +446,7 @@ visualizeTestStatHistogram = function(permuted, text, method, prefix = "Test",
   maxPoint = max(max(permuted), max(modelStat))
   
   par(mfrow=c(r,c))
-  for(i in 1:n){
+  for(i in seq_len(n)){
     hist(permuted, xlab = "testStat", 
          breaks = 100, col = "gray", border = "gray", 
          main = paste("Interval # ", i, sep=""), xlim = c(minPoint, maxPoint),
