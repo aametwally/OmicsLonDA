@@ -20,6 +20,8 @@
 #' @examples 
 #' data(diff_simulatedDataset_norm)
 #' df = diff_simulatedDataset_norm[[1]]
+#' Group = as.character(df$Group)
+#' group.levels = sort(unique(Group))
 #' gr.1 = as.character(group.levels[1])
 #' gr.2 = as.character(group.levels[2])
 #' levels(df$Group) = c(levels(df$Group), "0", "1")
@@ -153,6 +155,8 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
 #' @examples 
 #' data(diff_simulatedDataset_norm)
 #' df = diff_simulatedDataset_norm[[1]]
+#' Group = as.character(df$Group)
+#' group.levels = sort(unique(Group))
 #' gr.1 = as.character(group.levels[1])
 #' gr.2 = as.character(group.levels[2])
 #' levels(df$Group) = c(levels(df$Group), "0", "1")
@@ -334,6 +338,8 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
 #' @examples 
 #' data(diff_simulatedDataset_norm)
 #' df = diff_simulatedDataset_norm[[1]]
+#' Group = as.character(df$Group)
+#' group.levels = sort(unique(Group))
 #' gr.1 = as.character(group.levels[1])
 #' gr.2 = as.character(group.levels[2])
 #' levels(df$Group) = c(levels(df$Group), "0", "1")
@@ -506,6 +512,8 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
 #' @examples 
 #' data(diff_simulatedDataset_norm)
 #' df = diff_simulatedDataset_norm[[1]]
+#' Group = as.character(df$Group)
+#' group.levels = sort(unique(Group))
 #' gr.1 = as.character(group.levels[1])
 #' gr.2 = as.character(group.levels[2])
 #' levels(df$Group) = c(levels(df$Group), "0", "1")

@@ -35,6 +35,8 @@ Visualize Longitudinal Feature
 \examples{
 data(diff_simulatedDataset_norm)
 df = diff_simulatedDataset_norm[[1]]
+Group = as.character(df$Group)
+group.levels = sort(unique(Group))
 gr.1 = as.character(group.levels[1])
 gr.2 = as.character(group.levels[2])
 levels(df$Group) = c(levels(df$Group), "0", "1")
