@@ -2,7 +2,57 @@
 % Please edit documentation in R/omicslondaVisualization.R
 \name{visualizeTestStatHistogram}
 \alias{visualizeTestStatHistogram}
-\title{Visualize Test Statistics empirical distribution}
+\title{#' Visualize all significant time intervals for all tested features
+#'
+#' Visualize all significant time intervals for all tested features
+#'
+#' @param interval.details Dataframe has infomation about significant interval
+#' (feature name, start, end, dominant, p-value)
+#' @param prefix prefix for the output figure
+#' @param unit time unit used in the Time vector
+#' (hours, days, weeks, months, etc.)
+#' @param col two color to be used for the two groups (eg., c("red", "blue")).
+#' @param fit.method fitting method (ssguassian).
+#' @return null
+#' @import ggplot2
+#' @import grDevices
+#' @import graphics
+#' @references
+#' Ahmed Metwally (ametwall@stanford.edu)
+#' @export
+visualizeTimeIntervals = function(interval.details, prefix = "Test",
+                                  unit = "days", col = c("blue", "firebrick"),
+                                  fit.method = "ssgaussian")
+{
+  feature=0;dominant=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
+  interval.details$dominant = as.factor(interval.details$dominant)
+  interval.details$pvalue = as.numeric((interval.details$pvalue))
+  interval.details = interval.details[order(interval.details$feature), ]
+  
+  ### TODO: Specify min and max
+  
+  ggplot(interval.details, aes(ymin = start , ymax = end, x = feature,
+                               xend = feature)) +
+    geom_linerange(aes(color = dominant), size = 1) + 
+    coord_flip() +  scale_colour_manual(values = col) +
+    labs(x = "Feature", y = sprintf("Time (%s)", unit), colour="Dominant") + 
+     theme(axis.text.x = element_text(colour = "black", size = 12, angle = 0,
+                                      hjust = 0.5, vjust = 0.5, face = "bold"),
+           axis.text.y = element_text(colour = "black", size = 12, angle = 0,
+                                      vjust = 0.5, face = "bold"),
+           axis.title.x = element_text(colour = "black", size = 15, angle = 0,
+                                      hjust = 0.5, vjust = 0.5, face = "bold"),
+           axis.title.y = element_text(colour = "black", size = 15, angle = 90,
+                                      hjust = 0.5, vjust = 0.5, face = "bold"),
+           legend.text = element_text(size = 15, face = "plain")) + 
+    theme(panel.grid.minor =   element_blank(),
+          panel.grid.major.y = element_line(colour = "white", size = 6),
+          panel.grid.major.x = element_line(colour = "white",size = 0.75)) +
+    theme(legend.position="top", panel.border = element_rect(colour = "black",
+                                                          fill = NA, size = 2))
+  ggsave(filename = paste(prefix, "/OmicsLonDA_TimeIntervals_", fit.method, "_",
+     prefix, ".jpg", sep=""), dpi = 1200, height = 30, width = 20, units = 'cm')
+}}
 \usage{
 visualizeTestStatHistogram(permuted, text, method, prefix = "Test",
   modelStat)
@@ -22,7 +72,48 @@ visualizeTestStatHistogram(permuted, text, method, prefix = "Test",
 null
 }
 \description{
+Visualize Test Statistics empirical distribution
+}
+\details{
 Visualize Test Statistics empirical distribution for each time interval
+}
+\examples{
+data(diff_simulatedDataset_norm)
+df = diff_simulatedDataset_norm[[1]]
+gr.1 = as.character(group.levels[1])
+gr.2 = as.character(group.levels[2])
+levels(df$Group) = c(levels(df$Group), "0", "1")
+df$Group[which(df$Group == gr.1)] = 0
+df$Group[which(df$Group == gr.2)] = 1
+group.0 = df[df$Group == 0, ]
+group.1 = df[df$Group == 1, ]
+points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+points.max = min(sort(group.0$Time)[length(group.0$Time)],
+                 sort(group.1$Time)[length(group.1$Time)])
+points = points[which(points >= points.min & points <= points.max)]
+points = points[1:20]
+model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+stat = testStat(model)$testStat
+perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+                       method = "ssgaussian", points = points, parall = "FALSE",
+                       prefix = "Test")
+test.stat.prem = testStatPermutation(perm)
+t1 = do.call(rbind, test.stat.prem)
+t2 = unlist(t1[,1])
+t3 = as.vector(t2)
+pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
+  if(stat[i]>=0)
+  {
+    sum(t3 > stat[i])/length(t3)
+  }
+  else if(stat[i]<0)
+  {
+    sum(t3 < stat[i])/length(t3)
+  }
+}, 1)
+adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian", prefix = "Test",
+                           modelStat = stat)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

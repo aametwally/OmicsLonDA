@@ -17,6 +17,16 @@
 #' @import graphics
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(diff_simulatedDataset_norm)
+#' df = diff_simulatedDataset_norm[[1]]
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' visualizeFeature(formula = formula, df, text, group.levels, unit = time.unit,
+#' ylabel = ylabel, col = col, prefix = prefix)
 #' @export
 visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
                              unit = "days", ylabel = "Normalized Count", 
@@ -52,6 +62,74 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
 
 
 
+
+
+
+# visualizeFeatureSpline = function (df, model, method, text, group.levels,
+#                                    unit = "days", ylabel = "Normalized Count", 
+#                                    col = c("blue", "firebrick"), prefix="Test")
+# { 
+#   cat("Visualizing Splines of Feature = ", text, "\n")
+#     
+#   Count=0;Time=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
+#   dd.null = model$dd.null
+#   dd.0 = model$dd.0
+#   dd.1 = model$dd.1
+#   
+#   #cat("v0.7", "\n")
+#   ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)),
+#                 rep("longdash", nrow(dd.1))))
+#   size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
+#   #cat("v0.9", "\n")
+#   head(df)
+#   head(dd.0)
+#   head(dd.1)
+#   dm = rbind(df[,c("Time", "Count", "Group", "Subject")],
+#              dd.0[,c("Time","Count", "Group", "Subject")],
+#              dd.1[,c("Time", "Count", "Group", "Subject")])
+#   #cat("v0.92", "\n")
+#   dm$lnn=ln
+#   #cat("v0.96", "\n")
+#   dm$sz= size
+#   
+#   p = ggplot(dm, aes(.data$Time, .data$Count, colour = .data$Group,
+#                      group = interaction(.data$Group, .data$Subject)))
+#   
+#   #cat("v1.0", "\n")
+#   p = p + theme_bw() + geom_point(size=1, alpha=0.5) +
+#     geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
+#     ggtitle(paste("Feature = ", text, sep = "")) +
+#     labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
+#     scale_colour_manual(values = c(col, "darkblue", "darkgreen"), 
+#                         breaks = c("0", "1", "fit.0", "fit.1"),
+#                         labels = c(group.levels[1], group.levels[2],
+#                                    paste(group.levels[1], ".fit", sep=""),
+#                                    paste(group.levels[2], ".fit", sep="")))+
+#     theme(axis.text.x = element_text(colour="black", size=12, angle=0,
+#                                      hjust=0.5, vjust=0.5, face="bold"),
+#           axis.text.y = element_text(colour="black", size=12, angle=0,
+#                                      hjust=0.5, vjust=0.5, face="bold"),
+#           axis.title.x = element_text(colour="black", size=15, angle=0,
+#                                       hjust=.5, vjust=0.5, face="bold"),
+#           axis.title.y = element_text(colour="black", size=15, angle=90,
+#                                       hjust=.5, vjust=.5, face="bold"), 
+#           legend.text=element_text(size=15, face="plain"),
+#           legend.title = element_blank(),
+#           plot.title = element_text(hjust = 0.5)) +
+#     theme(legend.position="top") + scale_x_continuous(breaks = waiver()) +
+#     guides(linetype=FALSE, size =FALSE)
+#   
+#   ggsave(filename=paste(prefix, "/", "Feature_", text, "_CurveFitting_", method,
+#                         ".jpg", sep=""), dpi = 1200, height = 10, width = 15,
+#          units = 'cm')
+# }
+# 
+
+
+
+
+
+
 #' Visualize the feature trajectory with the fitted Splines
 #'
 #' Plot the longitudinal features along with the fitted splines
@@ -72,73 +150,25 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
 #' @import graphics
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(diff_simulatedDataset_norm)
+#' df = diff_simulatedDataset_norm[[1]]
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
+#'                  sort(group.1$Time)[length(group.1$Time)])
+#' points = points[which(points >= points.min & points <= points.max)]
+#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+#' visualizeFeatureSpline2(formula = formula, df, model, fit.method, text,
+#' group.levels, unit = time.unit, ylabel = ylabel, 
+#' col = col, prefix = prefix)
 #' @export
-visualizeFeatureSpline = function (df, model, method, text, group.levels,
-                                   unit = "days", ylabel = "Normalized Count", 
-                                   col = c("blue", "firebrick"), prefix="Test")
-{ 
-  cat("Visualizing Splines of Feature = ", text, "\n")
-    
-  Count=0;Time=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
-  dd.null = model$dd.null
-  dd.0 = model$dd.0
-  dd.1 = model$dd.1
-  
-  #cat("v0.7", "\n")
-  ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)),
-                rep("longdash", nrow(dd.1))))
-  size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
-  #cat("v0.9", "\n")
-  head(df)
-  head(dd.0)
-  head(dd.1)
-  dm = rbind(df[,c("Time", "Count", "Group", "Subject")],
-             dd.0[,c("Time","Count", "Group", "Subject")],
-             dd.1[,c("Time", "Count", "Group", "Subject")])
-  #cat("v0.92", "\n")
-  dm$lnn=ln
-  #cat("v0.96", "\n")
-  dm$sz= size
-  
-  p = ggplot(dm, aes(.data$Time, .data$Count, colour = .data$Group,
-                     group = interaction(.data$Group, .data$Subject)))
-  
-  #cat("v1.0", "\n")
-  p = p + theme_bw() + geom_point(size=1, alpha=0.5) +
-    geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
-    ggtitle(paste("Feature = ", text, sep = "")) +
-    labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
-    scale_colour_manual(values = c(col, "darkblue", "darkgreen"), 
-                        breaks = c("0", "1", "fit.0", "fit.1"),
-                        labels = c(group.levels[1], group.levels[2],
-                                   paste(group.levels[1], ".fit", sep=""),
-                                   paste(group.levels[2], ".fit", sep="")))+
-    theme(axis.text.x = element_text(colour="black", size=12, angle=0,
-                                     hjust=0.5, vjust=0.5, face="bold"),
-          axis.text.y = element_text(colour="black", size=12, angle=0,
-                                     hjust=0.5, vjust=0.5, face="bold"),
-          axis.title.x = element_text(colour="black", size=15, angle=0,
-                                      hjust=.5, vjust=0.5, face="bold"),
-          axis.title.y = element_text(colour="black", size=15, angle=90,
-                                      hjust=.5, vjust=.5, face="bold"), 
-          legend.text=element_text(size=15, face="plain"),
-          legend.title = element_blank(),
-          plot.title = element_text(hjust = 0.5)) +
-    theme(legend.position="top") + scale_x_continuous(breaks = waiver()) +
-    guides(linetype=FALSE, size =FALSE)
-  
-  ggsave(filename=paste(prefix, "/", "Feature_", text, "_CurveFitting_", method,
-                        ".jpg", sep=""), dpi = 1200, height = 10, width = 15,
-         units = 'cm')
-}
-
-
-
-
-
-
-
-
 visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
                                   text, group.levels, unit = "days",
                                   ylabel = "Normalized Count", 
@@ -216,63 +246,66 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
 
 
 
-visualizeFeatureSpline_permute = function (formula = Count ~ Time, df, model,
-        method, text, group.levels, unit = "days", ylabel = "Normalized Count", 
-        col = c("blue", "firebrick"), prefix = "Test")
-{ 
-  #cat("Visualizing Splines of Feature = ", text, "\n")
-  
-  Count=0;Time=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
-  dd.null = model$dd.null
-  dd.0 = model$dd.0
-  dd.1 = model$dd.1
-  
-  #cat("v0.7", "\n")
-  ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)),
-                rep("longdash", nrow(dd.1))))
-  size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
-  #cat("v0.9", "\n")
-  head(df)
-  head(dd.0)
-  head(dd.1)
-  dm = rbind(df[,c("Time", "Count", "Group", "Subject")], dd.0[,c("Time",
-                           "Count", "Group", "Subject")],
-             dd.1[,c("Time", "Count", "Group", "Subject")])
-  #cat("v0.92", "\n")
-  dm$lnn=ln
-  #cat("v0.96", "\n")
-  dm$sz= size
-  
-  p = ggplot(dm, aes(Time, Count, colour = Group, group =
-                       interaction(Group, Subject)))
-  
-  #cat("v1.0", "\n")
-  p = p + theme_bw() + geom_point(size=1, alpha=0.5) +
-    geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
-    ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel,
-                                               x = sprintf("Time (%s)", unit)) +
-    scale_colour_manual(values = c(col, "yellow", "brown"), 
-                        breaks = c("0", "1", "fit.0", "fit.1"),
-                        labels = c(group.levels[1], group.levels[2],
-                                   paste(group.levels[1], ".fit", sep=""),
-                                   paste(group.levels[2], ".fit", sep="")))+
-    theme(axis.text.x=element_text(colour="black", size=12, angle=0, hjust=0.5,
-                                   vjust=0.5, face="bold"),
-          axis.text.y=element_text(colour="black", size=12, angle=0, hjust=0.5,
-                                   vjust=0.5, face="bold"),
-          axis.title.x=element_text(colour="black", size=15, angle=0, hjust=.5,
-                                   vjust=0.5, face="bold"),
-          axis.title.y=element_text(colour="black", size=15, angle=90, hjust=.5,
-                                    vjust=.5, face="bold"), 
-          legend.text=element_text(size=15, face="plain"),
-          legend.title = element_blank(),
-          plot.title = element_text(hjust = 0.5)) +
-    theme(legend.position="top") + scale_x_continuous(breaks = waiver()) +
-    guides(linetype=FALSE, size =FALSE)
-  
-  ggsave(filename=paste(prefix, "_Feature_", text, "_CurveFitting_", method,
-             ".jpg", sep=""), dpi = 1200, height = 10, width = 15, units = 'cm')
-}
+# visualizeFeatureSpline_permute = function (formula = Count ~ Time, df, model,
+#         method, text, group.levels, unit = "days", ylabel = "Normalized Count", 
+#         col = c("blue", "firebrick"), prefix = "Test")
+# { 
+#   #cat("Visualizing Splines of Feature = ", text, "\n")
+#   
+#   Count=0;Time=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
+#   dd.null = model$dd.null
+#   dd.0 = model$dd.0
+#   dd.1 = model$dd.1
+#   
+#   #cat("v0.7", "\n")
+#   ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)),
+#                 rep("longdash", nrow(dd.1))))
+#   size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
+#   #cat("v0.9", "\n")
+#   head(df)
+#   head(dd.0)
+#   head(dd.1)
+#   dm = rbind(df[,c("Time", "Count", "Group", "Subject")], dd.0[,c("Time",
+#                            "Count", "Group", "Subject")],
+#              dd.1[,c("Time", "Count", "Group", "Subject")])
+#   #cat("v0.92", "\n")
+#   dm$lnn=ln
+#   #cat("v0.96", "\n")
+#   dm$sz= size
+#   
+#   p = ggplot(dm, aes(Time, Count, colour = Group, group =
+#                        interaction(Group, Subject)))
+#   
+#   #cat("v1.0", "\n")
+#   p = p + theme_bw() + geom_point(size=1, alpha=0.5) +
+#     geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
+#     ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel,
+#                                                x = sprintf("Time (%s)", unit)) +
+#     scale_colour_manual(values = c(col, "yellow", "brown"), 
+#                         breaks = c("0", "1", "fit.0", "fit.1"),
+#                         labels = c(group.levels[1], group.levels[2],
+#                                    paste(group.levels[1], ".fit", sep=""),
+#                                    paste(group.levels[2], ".fit", sep="")))+
+#     theme(axis.text.x=element_text(colour="black", size=12, angle=0, hjust=0.5,
+#                                    vjust=0.5, face="bold"),
+#           axis.text.y=element_text(colour="black", size=12, angle=0, hjust=0.5,
+#                                    vjust=0.5, face="bold"),
+#           axis.title.x=element_text(colour="black", size=15, angle=0, hjust=.5,
+#                                    vjust=0.5, face="bold"),
+#           axis.title.y=element_text(colour="black", size=15, angle=90, hjust=.5,
+#                                     vjust=.5, face="bold"), 
+#           legend.text=element_text(size=15, face="plain"),
+#           legend.title = element_blank(),
+#           plot.title = element_text(hjust = 0.5)) +
+#     theme(legend.position="top") + scale_x_continuous(breaks = waiver()) +
+#     guides(linetype=FALSE, size =FALSE)
+#   
+#   ggsave(filename=paste(prefix, "_Feature_", text, "_CurveFitting_", method,
+#              ".jpg", sep=""), dpi = 1200, height = 10, width = 15, units = 'cm')
+# }
+
+
+
 
 
 #' Visualize significant time interval
@@ -298,6 +331,47 @@ visualizeFeatureSpline_permute = function (formula = Count ~ Time, df, model,
 #' @import graphics
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(diff_simulatedDataset_norm)
+#' df = diff_simulatedDataset_norm[[1]]
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
+#'                  sort(group.1$Time)[length(group.1$Time)])
+#' points = points[which(points >= points.min & points <= points.max)]
+#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+#' stat = testStat(model)$testStat
+#' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+#'                        method = "ssgaussian", points = points, parall = "FALSE",
+#'                        prefix = "Test")
+#' test.stat.prem = testStatPermutation(perm)
+#' t1 = do.call(rbind, test.stat.prem)
+#' t2 = unlist(t1[,1])
+#' t3 = as.vector(t2)
+#' pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
+#'   if(stat[i]>=0)
+#'   {
+#'     sum(t3 > stat[i])/length(t3)
+#'   }
+#'   else if(stat[i]<0)
+#'   {
+#'     sum(t3 < stat[i])/length(t3)
+#'   }
+#' }, 1)
+#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+#' interval = findSigInterval2(adjusted.pvalue, threshold = pvalue.threshold,
+#' sign = sign(stat))
+#' st = points[interval$start]
+#' en = points[interval$end + 1]
+#' visualizeArea(formula = Count ~ Time, model, "ssgaussian", st, en, text = "F1",
+#'              group.levels, unit = "Hours", ylabel = "Normalized Count",
+#'               col = c("blue", "firebrick"), prefix = "Test")
 #' @export
 visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
                          text, group.levels, unit = "days", 
@@ -358,59 +432,59 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
 }
 
 
-
-#' Visualize all significant time intervals for all tested features
-#'
-#' Visualize all significant time intervals for all tested features
-#'
-#' @param interval.details Dataframe has infomation about significant interval
-#' (feature name, start, end, dominant, p-value)
-#' @param prefix prefix for the output figure
-#' @param unit time unit used in the Time vector
-#' (hours, days, weeks, months, etc.)
-#' @param col two color to be used for the two groups (eg., c("red", "blue")).
-#' @param fit.method fitting method (ssguassian).
-#' @return null
-#' @import ggplot2
-#' @import grDevices
-#' @import graphics
-#' @references
-#' Ahmed Metwally (ametwall@stanford.edu)
-#' @export
-visualizeTimeIntervals = function(interval.details, prefix = "Test",
-                                  unit = "days", col = c("blue", "firebrick"),
-                                  fit.method = "ssgaussian")
-{
-  feature=0;dominant=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
-  interval.details$dominant = as.factor(interval.details$dominant)
-  interval.details$pvalue = as.numeric((interval.details$pvalue))
-  interval.details = interval.details[order(interval.details$feature), ]
-  
-  ### TODO: Specify min and max
-  
-  ggplot(interval.details, aes(ymin = start , ymax = end, x = feature,
-                               xend = feature)) +
-    geom_linerange(aes(color = dominant), size = 1) + 
-    coord_flip() +  scale_colour_manual(values = col) +
-    labs(x = "Feature", y = sprintf("Time (%s)", unit), colour="Dominant") + 
-     theme(axis.text.x = element_text(colour = "black", size = 12, angle = 0,
-                                      hjust = 0.5, vjust = 0.5, face = "bold"),
-           axis.text.y = element_text(colour = "black", size = 12, angle = 0,
-                                      vjust = 0.5, face = "bold"),
-           axis.title.x = element_text(colour = "black", size = 15, angle = 0,
-                                      hjust = 0.5, vjust = 0.5, face = "bold"),
-           axis.title.y = element_text(colour = "black", size = 15, angle = 90,
-                                      hjust = 0.5, vjust = 0.5, face = "bold"),
-           legend.text = element_text(size = 15, face = "plain")) + 
-    theme(panel.grid.minor =   element_blank(),
-          panel.grid.major.y = element_line(colour = "white", size = 6),
-          panel.grid.major.x = element_line(colour = "white",size = 0.75)) +
-    theme(legend.position="top", panel.border = element_rect(colour = "black",
-                                                          fill = NA, size = 2))
-  ggsave(filename = paste(prefix, "/OmicsLonDA_TimeIntervals_", fit.method, "_",
-     prefix, ".jpg", sep=""), dpi = 1200, height = 30, width = 20, units = 'cm')
-}
-
+#' 
+#' #' Visualize all significant time intervals for all tested features
+#' #'
+#' #' Visualize all significant time intervals for all tested features
+#' #'
+#' #' @param interval.details Dataframe has infomation about significant interval
+#' #' (feature name, start, end, dominant, p-value)
+#' #' @param prefix prefix for the output figure
+#' #' @param unit time unit used in the Time vector
+#' #' (hours, days, weeks, months, etc.)
+#' #' @param col two color to be used for the two groups (eg., c("red", "blue")).
+#' #' @param fit.method fitting method (ssguassian).
+#' #' @return null
+#' #' @import ggplot2
+#' #' @import grDevices
+#' #' @import graphics
+#' #' @references
+#' #' Ahmed Metwally (ametwall@stanford.edu)
+#' #' @export
+#' visualizeTimeIntervals = function(interval.details, prefix = "Test",
+#'                                   unit = "days", col = c("blue", "firebrick"),
+#'                                   fit.method = "ssgaussian")
+#' {
+#'   feature=0;dominant=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
+#'   interval.details$dominant = as.factor(interval.details$dominant)
+#'   interval.details$pvalue = as.numeric((interval.details$pvalue))
+#'   interval.details = interval.details[order(interval.details$feature), ]
+#'   
+#'   ### TODO: Specify min and max
+#'   
+#'   ggplot(interval.details, aes(ymin = start , ymax = end, x = feature,
+#'                                xend = feature)) +
+#'     geom_linerange(aes(color = dominant), size = 1) + 
+#'     coord_flip() +  scale_colour_manual(values = col) +
+#'     labs(x = "Feature", y = sprintf("Time (%s)", unit), colour="Dominant") + 
+#'      theme(axis.text.x = element_text(colour = "black", size = 12, angle = 0,
+#'                                       hjust = 0.5, vjust = 0.5, face = "bold"),
+#'            axis.text.y = element_text(colour = "black", size = 12, angle = 0,
+#'                                       vjust = 0.5, face = "bold"),
+#'            axis.title.x = element_text(colour = "black", size = 15, angle = 0,
+#'                                       hjust = 0.5, vjust = 0.5, face = "bold"),
+#'            axis.title.y = element_text(colour = "black", size = 15, angle = 90,
+#'                                       hjust = 0.5, vjust = 0.5, face = "bold"),
+#'            legend.text = element_text(size = 15, face = "plain")) + 
+#'     theme(panel.grid.minor =   element_blank(),
+#'           panel.grid.major.y = element_line(colour = "white", size = 6),
+#'           panel.grid.major.x = element_line(colour = "white",size = 0.75)) +
+#'     theme(legend.position="top", panel.border = element_rect(colour = "black",
+#'                                                           fill = NA, size = 2))
+#'   ggsave(filename = paste(prefix, "/OmicsLonDA_TimeIntervals_", fit.method, "_",
+#'      prefix, ".jpg", sep=""), dpi = 1200, height = 30, width = 20, units = 'cm')
+#' }
+#' 
 
 
 
@@ -429,6 +503,43 @@ visualizeTimeIntervals = function(interval.details, prefix = "Test",
 #' @import graphics
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(diff_simulatedDataset_norm)
+#' df = diff_simulatedDataset_norm[[1]]
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
+#'                  sort(group.1$Time)[length(group.1$Time)])
+#' points = points[which(points >= points.min & points <= points.max)]
+#' points = points[1:20]
+#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+#' stat = testStat(model)$testStat
+#' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+#'                        method = "ssgaussian", points = points, parall = "FALSE",
+#'                        prefix = "Test")
+#' test.stat.prem = testStatPermutation(perm)
+#' t1 = do.call(rbind, test.stat.prem)
+#' t2 = unlist(t1[,1])
+#' t3 = as.vector(t2)
+#' pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
+#'   if(stat[i]>=0)
+#'   {
+#'     sum(t3 > stat[i])/length(t3)
+#'   }
+#'   else if(stat[i]<0)
+#'   {
+#'     sum(t3 < stat[i])/length(t3)
+#'   }
+#' }, 1)
+#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+#' visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian", prefix = "Test",
+#'                            modelStat = stat)
 #' @export
 visualizeTestStatHistogram = function(permuted, text, method, prefix = "Test",
                                       modelStat){
@@ -440,15 +551,15 @@ visualizeTestStatHistogram = function(permuted, text, method, prefix = "Test",
              "_testStat_distribution_ALL_INTERVALL_", method, ".jpg", sep = "")
   #jpeg(filename = xx, res = 1200, height = r*5, width = c*5, units = 'cm')
   jpeg(filename = xx, res = 1200, height = 40, width = 40, units = 'cm')
-  
+
 
   minPoint = min(min(permuted), min(modelStat))
   maxPoint = max(max(permuted), max(modelStat))
-  
+
   par(mfrow=c(r,c))
   for(i in seq_len(n)){
-    hist(permuted, xlab = "testStat", 
-         breaks = 100, col = "gray", border = "gray", 
+    hist(permuted, xlab = "testStat",
+         breaks = 100, col = "gray", border = "gray",
          main = paste("Interval # ", i, sep=""), xlim = c(minPoint, maxPoint),
          freq = TRUE)
     abline(v = modelStat[i], col="red")

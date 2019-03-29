@@ -12,6 +12,21 @@
 #' @import stats
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(diff_simulatedDataset_norm)
+#' df = diff_simulatedDataset_norm[[1]]
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
+#'                  sort(group.1$Time)[length(group.1$Time)])
+#' points = points[which(points >= points.min & points <= points.max)]
+#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
 #' @export
 curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
                         points){
@@ -125,6 +140,23 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
 #' @import pracma
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(diff_simulatedDataset_norm)
+#' df = diff_simulatedDataset_norm[[1]]
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
+#'                  sort(group.1$Time)[length(group.1$Time)])
+#' points = points[which(points >= points.min & points <= points.max)]
+#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+#' tstat = testStat(model)$testStat
+#' stat = tstat$testStat
 #' @export
 testStat = function(curve.fit.df){
   size = length(curve.fit.df$dd.null$Time)
@@ -150,20 +182,24 @@ testStat = function(curve.fit.df){
   return(list(testStat = testStat))
 }
 
-# 
-# 
-# #' Find Significant Interval based on testStat
-# #'
-# #' Find Significant Interval based on testStat
-# #' 
-# #' @param adjusted.pvalue vector of the adjusted p-value
-# #' @param threshold p-value cut off
-# #' @param sign vector hold area sign of each time interval 
-# #' @return returns a list of the start and end points of all significant
-# #' time intervals
-# #' @references
-# #' Ahmed Metwally (ametwall@stanford.edu)
-# #' @export
+ 
+ 
+#' Find Significant Interval based on testStat
+#'
+#' Find Significant Interval based on testStat
+#' 
+#' @param adjusted.pvalue vector of the adjusted p-value
+#' @param threshold p-value cut off
+#' @param sign vector hold area sign of each time interval 
+#' @return returns a list of the start and end points of all significant
+#' time intervals
+#' @references
+#' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' padjusted = abs(rnorm(10, mean = 0.05, sd = 0.04))
+#' sign = sample(x = c(1,-1), 10, replace = TRUE)
+#' significantIntervals = findSigInterval2(adjusted.pvalue = padjusted, threshold = 0.05, sign = sign)
+#' @export
 findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 {
   sig = which(adjusted.pvalue < threshold/2)
@@ -238,6 +274,25 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 #' @return returns a list of all permutation area ratio
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(diff_simulatedDataset_norm)
+#' df = diff_simulatedDataset_norm[[1]]
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
+#'                  sort(group.1$Time)[length(group.1$Time)])
+#' points = points[which(points >= points.min & points <= points.max)]
+#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+#' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+#'                        method = "ssgaussian", points = points, parall = "FALSE",
+#'                        prefix = "Test")
+#' test.stat.prem = testStatPermutation(perm)
 #' @export
 testStatPermutation = function(perm)
 {
@@ -255,62 +310,62 @@ testStatPermutation = function(perm)
 
 
 
-#' Normalize count matrix 
-#'
-#' Normalize count matrix
-#'
-#' @param count count matrix
-#' @param method normalization method
-#' @return the normalized count matrix
-#' @references
-#' Ahmed Metwally (ametwall@stanford.edu)
-#' @export
-normalize = function(count, method = "css"){
-  # col.data=0 ## this line is for CRAN package
-  if(method == "clr")
-  {
-    cat("Normalization using CLR method \n")
-  }
-  else if(method == "css")
-  {
-    cat("Normalization using CSS method \n")
-    otu = metagenomeSeq::newMRexperiment(count)
-    p.1 = metagenomeSeq::cumNormStatFast(otu, pFlag = TRUE)
-    otu.2 = metagenomeSeq::cumNorm(otu, p = p.1)
-    count.normalized = metagenomeSeq::MRcounts(otu.2, norm = TRUE)
-  }
-  else if(method == "tmm")
-  {
-    cat("Normalization using TMM method \n")
-    factors = edgeR::calcNormFactors(count, method="TMM")
-    eff.lib.size = colSums(count) * factors
-    ref.lib.size = mean(eff.lib.size) #Use the mean of the effective library
-                                      #sizes as a reference library size
-    count.normalized = sweep(count, MARGIN = 2, eff.lib.size, "/")*ref.lib.size 
-  }
-  else if(method == "ra")
-  {
-    cat("Normalization using Relative Abundance (RA) method \n")
-    count.normalized  = apply(count, 2, function(x) (x/sum(x)))
-  }
-  else if(method == "log10")
-  {
-    cat("Normalization using log10 of the RA method \n")
-    count.normalized  = apply(count, 2, function(x) log10(x/sum(x) + 1)) 
-  }
-  else if(method == "median_ratio")
-  {
-    cat("Normalization using Median-Ratio method \n")
-    col.data = as.data.frame(cbind(colnames(count),
-                                   rep(seq_len(2), length.out= ncol(count)),
-                                   rep(seq_len(2), length.out= ncol(count))))
-    rownames(col.data) = col.data[,1]
-    col.data =  col.data[,-1]
-    colnames(col.data) = c("test","condition")
-    data.deseq = DESeq2::DESeqDataSetFromMatrix(countData = count,
-                                                colData = col.data, ~ condition)
-    cds = DESeq2::estimateSizeFactors( data.deseq )
-    count.normalized = t( t(DESeq2::counts(cds)) / DESeq2::sizeFactors(cds) )
-  }
-  return(count.normalized)
-}
+#' #' Normalize count matrix 
+#' #'
+#' #' Normalize count matrix
+#' #'
+#' #' @param count count matrix
+#' #' @param method normalization method
+#' #' @return the normalized count matrix
+#' #' @references
+#' #' Ahmed Metwally (ametwall@stanford.edu)
+#' #' @export
+#' normalize = function(count, method = "css"){
+#'   # col.data=0 ## this line is for CRAN package
+#'   if(method == "clr")
+#'   {
+#'     cat("Normalization using CLR method \n")
+#'   }
+#'   else if(method == "css")
+#'   {
+#'     cat("Normalization using CSS method \n")
+#'     otu = metagenomeSeq::newMRexperiment(count)
+#'     p.1 = metagenomeSeq::cumNormStatFast(otu, pFlag = TRUE)
+#'     otu.2 = metagenomeSeq::cumNorm(otu, p = p.1)
+#'     count.normalized = metagenomeSeq::MRcounts(otu.2, norm = TRUE)
+#'   }
+#'   else if(method == "tmm")
+#'   {
+#'     cat("Normalization using TMM method \n")
+#'     factors = edgeR::calcNormFactors(count, method="TMM")
+#'     eff.lib.size = colSums(count) * factors
+#'     ref.lib.size = mean(eff.lib.size) #Use the mean of the effective library
+#'                                       #sizes as a reference library size
+#'     count.normalized = sweep(count, MARGIN = 2, eff.lib.size, "/")*ref.lib.size 
+#'   }
+#'   else if(method == "ra")
+#'   {
+#'     cat("Normalization using Relative Abundance (RA) method \n")
+#'     count.normalized  = apply(count, 2, function(x) (x/sum(x)))
+#'   }
+#'   else if(method == "log10")
+#'   {
+#'     cat("Normalization using log10 of the RA method \n")
+#'     count.normalized  = apply(count, 2, function(x) log10(x/sum(x) + 1)) 
+#'   }
+#'   else if(method == "median_ratio")
+#'   {
+#'     cat("Normalization using Median-Ratio method \n")
+#'     col.data = as.data.frame(cbind(colnames(count),
+#'                                    rep(seq_len(2), length.out= ncol(count)),
+#'                                    rep(seq_len(2), length.out= ncol(count))))
+#'     rownames(col.data) = col.data[,1]
+#'     col.data =  col.data[,-1]
+#'     colnames(col.data) = c("test","condition")
+#'     data.deseq = DESeq2::DESeqDataSetFromMatrix(countData = count,
+#'                                                 colData = col.data, ~ condition)
+#'     cds = DESeq2::estimateSizeFactors( data.deseq )
+#'     count.normalized = t( t(DESeq2::counts(cds)) / DESeq2::sizeFactors(cds) )
+#'   }
+#'   return(count.normalized)
+#' }

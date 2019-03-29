@@ -2,8 +2,8 @@ Package: OmicsLonDA
 Type: Package
 Title: Omics Longitudinal Differential Analysis
 Version: 0.99.1
-Date: 2019-02-23
-Author: Ahmed A. Metwally, Michael Snyder, Tom Zhang
+Date: 2019-03-28
+Author: Ahmed A. Metwally, Tom Zhang, Michael Snyder
 Maintainer: Ahmed A. Metwally <ametwall@stanford.edu>
 URL: https://github.com/aametwally/OmicsLonDA
 BugReports: https://github.com/aametwally/OmicsLonDA/issues
@@ -19,9 +19,6 @@ Imports:
     ggplot2,
     parallel,
     doParallel,
-    metagenomeSeq,
-    DESeq2,
-    edgeR,
     grDevices,
     graphics,
     stats,

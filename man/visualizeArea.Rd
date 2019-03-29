@@ -39,6 +39,48 @@ null
 \description{
 Visualize significant time interval
 }
+\examples{
+data(diff_simulatedDataset_norm)
+df = diff_simulatedDataset_norm[[1]]
+gr.1 = as.character(group.levels[1])
+gr.2 = as.character(group.levels[2])
+levels(df$Group) = c(levels(df$Group), "0", "1")
+df$Group[which(df$Group == gr.1)] = 0
+df$Group[which(df$Group == gr.2)] = 1
+group.0 = df[df$Group == 0, ]
+group.1 = df[df$Group == 1, ]
+points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
+points.max = min(sort(group.0$Time)[length(group.0$Time)],
+                 sort(group.1$Time)[length(group.1$Time)])
+points = points[which(points >= points.min & points <= points.max)]
+model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+stat = testStat(model)$testStat
+perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+                       method = "ssgaussian", points = points, parall = "FALSE",
+                       prefix = "Test")
+test.stat.prem = testStatPermutation(perm)
+t1 = do.call(rbind, test.stat.prem)
+t2 = unlist(t1[,1])
+t3 = as.vector(t2)
+pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
+  if(stat[i]>=0)
+  {
+    sum(t3 > stat[i])/length(t3)
+  }
+  else if(stat[i]<0)
+  {
+    sum(t3 < stat[i])/length(t3)
+  }
+}, 1)
+adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+interval = findSigInterval2(adjusted.pvalue, threshold = pvalue.threshold,
+sign = sign(stat))
+st = points[interval$start]
+en = points[interval$end + 1]
+visualizeArea(formula = Count ~ Time, model, "ssgaussian", st, en, text = "F1",
+             group.levels, unit = "Hours", ylabel = "Normalized Count",
+              col = c("blue", "firebrick"), prefix = "Test")
+}
 \references{
 Ahmed Metwally (ametwall@stanford.edu)
 }
