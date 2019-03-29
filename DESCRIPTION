@@ -28,7 +28,8 @@ Imports:
     utils
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 biocViews:
     TimeCourse,
     Survival,
