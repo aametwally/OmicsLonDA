@@ -31,8 +31,8 @@ points.max = min(sort(group.0$Time)[length(group.0$Time)],
 points = points[which(points >= points.min & points <= points.max)]
 model = curveFitting(formula = formula, df, method= "ssgaussian", points)
 perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-                       method = "ssgaussian", points = points, parall = "FALSE",
-                       prefix = "Test")
+           method = "ssgaussian", points = points, parall = "FALSE",
+           prefix = "Test")
 test.stat.prem = testStatPermutation(perm)
 }
 \references{

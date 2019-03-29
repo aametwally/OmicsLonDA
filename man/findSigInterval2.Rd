@@ -23,7 +23,8 @@ Find Significant Interval based on testStat
 \examples{
 padjusted = abs(rnorm(10, mean = 0.05, sd = 0.04))
 sign = sample(x = c(1,-1), 10, replace = TRUE)
-significantIntervals = findSigInterval2(adjusted.pvalue = padjusted, threshold = 0.05, sign = sign)
+significantIntervals = findSigInterval2(adjusted.pvalue = padjusted, 
+                       threshold = 0.05, sign = sign)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

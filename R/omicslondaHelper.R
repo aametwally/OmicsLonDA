@@ -198,7 +198,8 @@ testStat = function(curve.fit.df){
 #' @examples 
 #' padjusted = abs(rnorm(10, mean = 0.05, sd = 0.04))
 #' sign = sample(x = c(1,-1), 10, replace = TRUE)
-#' significantIntervals = findSigInterval2(adjusted.pvalue = padjusted, threshold = 0.05, sign = sign)
+#' significantIntervals = findSigInterval2(adjusted.pvalue = padjusted, 
+#'                        threshold = 0.05, sign = sign)
 #' @export
 findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 {
@@ -290,8 +291,8 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 #' points = points[which(points >= points.min & points <= points.max)]
 #' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
 #' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'                        method = "ssgaussian", points = points, parall = "FALSE",
-#'                        prefix = "Test")
+#'            method = "ssgaussian", points = points, parall = "FALSE",
+#'            prefix = "Test")
 #' test.stat.prem = testStatPermutation(perm)
 #' @export
 testStatPermutation = function(perm)
