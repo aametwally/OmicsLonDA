@@ -54,7 +54,7 @@ Find significant time intervals of omic feature
 }
 \examples{
 data(diff_simulatedDataset_norm)
-points = seq(1, 200, length.out = 200)
+points = seq(100, 130)
 output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, 
                df = diff_simulatedDataset_norm[[1]], n.perm = 10, 
                fit.method = "ssgaussian", points = points,

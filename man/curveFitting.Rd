@@ -26,6 +26,8 @@ smoothing splines or LOWESS
 \examples{
 data(diff_simulatedDataset_norm)
 df = diff_simulatedDataset_norm[[1]]
+Group = as.character(df$Group)
+group.levels = sort(unique(Group))
 gr.1 = as.character(group.levels[1])
 gr.2 = as.character(group.levels[2])
 levels(df$Group) = c(levels(df$Group), "0", "1")
@@ -33,11 +35,8 @@ df$Group[which(df$Group == gr.1)] = 0
 df$Group[which(df$Group == gr.2)] = 1
 group.0 = df[df$Group == 0, ]
 group.1 = df[df$Group == 1, ]
-points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
-points.max = min(sort(group.0$Time)[length(group.0$Time)],
-                 sort(group.1$Time)[length(group.1$Time)])
-points = points[which(points >= points.min & points <= points.max)]
-model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+points = seq(100, 130)
+model = curveFitting(formula = Count ~ Time, df, method = "ssgaussian", points)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

@@ -136,6 +136,7 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
 #'
 #' Plot the longitudinal features along with the fitted splines
 #'
+#' @param formula formula to be passed to the regression model
 #' @param df dataframe has the Count , Group, ID, Time
 #' @param model the fitted model
 #' @param method The fitting method (ssgaussian)
@@ -164,12 +165,9 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
 #' df$Group[which(df$Group == gr.2)] = 1
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
-#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
-#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
-#'                  sort(group.1$Time)[length(group.1$Time)])
-#' points = points[which(points >= points.min & points <= points.max)]
-#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
-#' visualizeFeatureSpline2(formula = formula, df, model, fit.method, text,
+#' points = seq(100, 130)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' visualizeFeatureSpline2(formula = Count ~ Time, df, model, fit.method, text,
 #' group.levels, unit = time.unit, ylabel = ylabel, 
 #' col = col, prefix = prefix)
 #' @export
@@ -347,14 +345,11 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
 #' df$Group[which(df$Group == gr.2)] = 1
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
-#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
-#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
-#'                  sort(group.1$Time)[length(group.1$Time)])
-#' points = points[which(points >= points.min & points <= points.max)]
-#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+#' points = seq(100, 130)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
 #' stat = testStat(model)$testStat
 #' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'                        method = "ssgaussian", points = points, parall = "FALSE",
+#'                        method = "ssgaussian", points = points, parall = FALSE,
 #'                        prefix = "Test")
 #' test.stat.prem = testStatPermutation(perm)
 #' t1 = do.call(rbind, test.stat.prem)
@@ -370,8 +365,8 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
 #'     sum(t3 < stat[i])/length(t3)
 #'   }
 #' }, 1)
-#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
-#' interval = findSigInterval2(adjusted.pvalue, threshold = pvalue.threshold,
+#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
+#' interval = findSigInterval2(adjusted.pvalue, threshold = 0.05,
 #' sign = sign(stat))
 #' st = points[interval$start]
 #' en = points[interval$end + 1]
@@ -521,15 +516,11 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
 #' df$Group[which(df$Group == gr.2)] = 1
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
-#' points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
-#' points.max = min(sort(group.0$Time)[length(group.0$Time)],
-#'                  sort(group.1$Time)[length(group.1$Time)])
-#' points = points[which(points >= points.min & points <= points.max)]
-#' points = points[1:20]
-#' model = curveFitting(formula = formula, df, method= "ssgaussian", points)
+#' points = seq(100, 130)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
 #' stat = testStat(model)$testStat
 #' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'                        method = "ssgaussian", points = points, parall = "FALSE",
+#'                        method = "ssgaussian", points = points, parall = FALSE,
 #'                        prefix = "Test")
 #' test.stat.prem = testStatPermutation(perm)
 #' t1 = do.call(rbind, test.stat.prem)
@@ -545,7 +536,7 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
 #'     sum(t3 < stat[i])/length(t3)
 #'   }
 #' }, 1)
-#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
 #' visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian", prefix = "Test",
 #'                            modelStat = stat)
 #' @export

@@ -9,6 +9,8 @@ visualizeFeatureSpline2(formula = Count ~ Time, df, model, method, text,
   col = c("blue", "firebrick"), prefix = "Test")
 }
 \arguments{
+\item{formula}{formula to be passed to the regression model}
+
 \item{df}{dataframe has the Count , Group, ID, Time}
 
 \item{model}{the fitted model}
@@ -46,12 +48,9 @@ df$Group[which(df$Group == gr.1)] = 0
 df$Group[which(df$Group == gr.2)] = 1
 group.0 = df[df$Group == 0, ]
 group.1 = df[df$Group == 1, ]
-points.min = max(sort(group.0$Time)[1], sort(group.1$Time)[1])
-points.max = min(sort(group.0$Time)[length(group.0$Time)],
-                 sort(group.1$Time)[length(group.1$Time)])
-points = points[which(points >= points.min & points <= points.max)]
-model = curveFitting(formula = formula, df, method= "ssgaussian", points)
-visualizeFeatureSpline2(formula = formula, df, model, fit.method, text,
+points = seq(100, 130)
+model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+visualizeFeatureSpline2(formula = Count ~ Time, df, model, fit.method, text,
 group.levels, unit = time.unit, ylabel = ylabel, 
 col = col, prefix = prefix)
 }
