@@ -12,3 +12,4 @@ vignettes/.DS_Store
 .Rbuildignore
 OmicsLonDA_clr_f1/
 indent.py
+indent_man.py

@@ -56,22 +56,22 @@ model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian",
         points)
 stat = testStat(model)$testStat
 perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-                       method = "ssgaussian", points = points, 
-                       parall = FALSE,
-                       prefix = "Test")
+                        method = "ssgaussian", points = points, 
+                        parall = FALSE,
+                        prefix = "Test")
 test.stat.prem = testStatPermutation(perm)
 t1 = do.call(rbind, test.stat.prem)
 t2 = unlist(t1[,1])
 t3 = as.vector(t2)
 pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
-  if(stat[i]>=0)
-  {
-    sum(t3 > stat[i])/length(t3)
-  }
-  else if(stat[i]<0)
-  {
-    sum(t3 < stat[i])/length(t3)
-  }
+    if(stat[i]>=0)
+    {
+        sum(t3 > stat[i])/length(t3)
+    }
+    else if(stat[i]<0)
+    {
+        sum(t3 < stat[i])/length(t3)
+    }
 }, 1)
 adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
 interval = findSigInterval2(adjusted.pvalue, threshold = 0.05,
