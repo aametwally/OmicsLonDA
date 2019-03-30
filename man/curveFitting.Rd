@@ -4,7 +4,8 @@
 \alias{curveFitting}
 \title{Fit longitudinal data}
 \usage{
-curveFitting(formula = Count ~ Time, df, method = "ssnbinomial", points)
+curveFitting(formula = Count ~ Time, df, method = "ssnbinomial",
+  points)
 }
 \arguments{
 \item{formula}{formula to be passed to the regression model}
@@ -19,7 +20,24 @@ curveFitting(formula = Count ~ Time, df, method = "ssnbinomial", points)
 returns the fitted model
 }
 \description{
-Fits longitudinal samples from the same group using negative binomial smoothing splines or LOWESS
+Fits longitudinal samples from the same group using negative binomial
+smoothing splines or LOWESS
+}
+\examples{
+data(diff_simulatedDataset_norm)
+df = diff_simulatedDataset_norm[[1]]
+Group = as.character(df$Group)
+group.levels = sort(unique(Group))
+gr.1 = as.character(group.levels[1])
+gr.2 = as.character(group.levels[2])
+levels(df$Group) = c(levels(df$Group), "0", "1")
+df$Group[which(df$Group == gr.1)] = 0
+df$Group[which(df$Group == gr.2)] = 1
+group.0 = df[df$Group == 0, ]
+group.1 = df[df$Group == 1, ]
+points = seq(100, 130)
+model = curveFitting(formula = Count ~ Time, df, method = "ssgaussian", 
+        points)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

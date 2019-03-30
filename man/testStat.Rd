@@ -15,6 +15,24 @@ returns testStat for all time intervals
 \description{
 Calculate Test-Statistic of each feature's time interval
 }
+\examples{
+data(diff_simulatedDataset_norm)
+df = diff_simulatedDataset_norm[[1]]
+Group = as.character(df$Group)
+group.levels = sort(unique(Group))
+gr.1 = as.character(group.levels[1])
+gr.2 = as.character(group.levels[2])
+levels(df$Group) = c(levels(df$Group), "0", "1")
+df$Group[which(df$Group == gr.1)] = 0
+df$Group[which(df$Group == gr.2)] = 1
+group.0 = df[df$Group == 0, ]
+group.1 = df[df$Group == 1, ]
+points = seq(100, 130)
+model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+        points)
+tstat = testStat(model)
+stat = tstat$testStat
+}
 \references{
 Ahmed Metwally (ametwall@stanford.edu)
 }

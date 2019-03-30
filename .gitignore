@@ -1,3 +1,4 @@
+inst/doc
 .Rhistory
 .DS_Store
 R/.DS_Store
@@ -6,3 +7,8 @@ data/.DS_Store
 inst/.DS_Store
 man/.DS_Store
 vignettes/.DS_Store
+.Rproj.user
+*.Rproj
+.Rbuildignore
+OmicsLonDA_clr_f1/
+indent.py
