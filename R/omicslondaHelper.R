@@ -92,7 +92,7 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
     {
         ## Curve dataframe
         dd.null = data.frame(Time = points, Count = est.null$fit,
-                             Group = "NULL", Subject = "NULL", SE = est.null$se)
+                            Group = "NULL", Subject = "NULL", SE = est.null$se)
         dd.0 = data.frame(Time = points, Count = est.0$fit, Group = "fit.0",
                         Subject = "fit.0", SE = est.0$se)
         dd.1 = data.frame(Time = points, Count = est.1$fit, Group = "fit.1",
