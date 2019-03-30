@@ -52,10 +52,12 @@ df$Group[which(df$Group == gr.2)] = 1
 group.0 = df[df$Group == 0, ]
 group.1 = df[df$Group == 1, ]
 points = seq(100, 130)
-model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+        points)
 stat = testStat(model)$testStat
 perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-                       method = "ssgaussian", points = points, parall = FALSE,
+                       method = "ssgaussian", points = points, 
+                       parall = FALSE,
                        prefix = "Test")
 test.stat.prem = testStatPermutation(perm)
 t1 = do.call(rbind, test.stat.prem)
@@ -76,9 +78,6 @@ interval = findSigInterval2(adjusted.pvalue, threshold = 0.05,
 sign = sign(stat))
 st = points[interval$start]
 en = points[interval$end + 1]
-visualizeArea(formula = Count ~ Time, model, "ssgaussian", st, en,
-   text = "F1", group.levels, unit = "Hours", ylabel = "Normalized Count",
-   col = c("blue", "firebrick"), prefix = "Test")
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

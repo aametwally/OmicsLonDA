@@ -49,10 +49,8 @@ df$Group[which(df$Group == gr.2)] = 1
 group.0 = df[df$Group == 0, ]
 group.1 = df[df$Group == 1, ]
 points = seq(100, 130)
-model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
-visualizeFeatureSpline2(formula = Count ~ Time, df, model, fit.method, text,
-group.levels, unit = time.unit, ylabel = ylabel, 
-col = col, prefix = prefix)
+model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+        points)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

@@ -25,7 +25,8 @@
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method = "ssgaussian", points)
+#' model = curveFitting(formula = Count ~ Time, df, method = "ssgaussian", 
+#'         points)
 #' @export
 curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
                         points){
@@ -158,7 +159,8 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+#'         points)
 #' tstat = testStat(model)
 #' stat = tstat$testStat
 #' @export
@@ -292,7 +294,8 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+#'         points)
 #' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
 #'            method = "ssgaussian", points = points, parall = FALSE,
 #'            prefix = "Test")

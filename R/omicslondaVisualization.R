@@ -27,8 +27,6 @@
 #' levels(df$Group) = c(levels(df$Group), "0", "1")
 #' df$Group[which(df$Group == gr.1)] = 0
 #' df$Group[which(df$Group == gr.2)] = 1
-#' visualizeFeature(formula = formula, df, text, group.levels, unit = time.unit,
-#' ylabel = ylabel, col = col, prefix = prefix)
 #' @export
 visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
                                 unit = "days", ylabel = "Normalized Count", 
@@ -37,6 +35,9 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
     cat("Visualizing Feature = ", text, "\n")
     #CountMeasure = all.vars(formula)[1]
     #CountMeasure=0; Time=0; Subject=0; Group=0 ## Just to pass CRAN checks
+    
+    ## TODO: Need to replace this line that is used for CRAN checks 
+    Count = 0
     
     p = ggplot(df, aes(.data$Time, eval(as.symbol(all.vars(formula)[1])),
                         colour = .data$Group, group = interaction(.data$Group,
@@ -59,8 +60,11 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
             plot.title = element_text(hjust = 0.5)) +
         theme(legend.position="top") + scale_x_continuous(breaks = waiver())
 
+    ## TODO: Fix saving in directory with ggsave
     ggsave(filename=paste(prefix, "/", "Feature_", text, ".jpg", sep=""),
             dpi = 1200, height = 10, width = 15, units = 'cm')
+    # ggsave(filename=paste("Feature_", text, ".jpg", sep=""),
+    #        dpi = 1200, height = 10, width = 15, units = 'cm')
 }
 
 
@@ -167,10 +171,8 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
-#' visualizeFeatureSpline2(formula = Count ~ Time, df, model, fit.method, text,
-#' group.levels, unit = time.unit, ylabel = ylabel, 
-#' col = col, prefix = prefix)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+#'         points)
 #' @export
 visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
                                     text, group.levels, unit = "days",
@@ -246,9 +248,15 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
         theme(legend.position="top") + scale_x_continuous(breaks = waiver()) +
         guides(linetype=FALSE, size =FALSE)
     
+    
+    ## Fix saving in directory with ggsave
     ggsave(filename=paste(prefix, "/", "Feature_", text, "_CurveFitting_",
             method, ".jpg", sep=""), dpi = 1200, height = 10, width = 15,
-            units = 'cm')
+    units = 'cm')
+    
+    # ggsave(filename=paste("Feature_", text, "_CurveFitting_",
+    #         method, ".jpg", sep=""), dpi = 1200, height = 10, width = 15,
+    #        units = 'cm')
 }
 
 
@@ -352,10 +360,12 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+#'         points)
 #' stat = testStat(model)$testStat
 #' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'                        method = "ssgaussian", points = points, parall = FALSE,
+#'                        method = "ssgaussian", points = points, 
+#'                        parall = FALSE,
 #'                        prefix = "Test")
 #' test.stat.prem = testStatPermutation(perm)
 #' t1 = do.call(rbind, test.stat.prem)
@@ -376,9 +386,6 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
 #' sign = sign(stat))
 #' st = points[interval$start]
 #' en = points[interval$end + 1]
-#' visualizeArea(formula = Count ~ Time, model, "ssgaussian", st, en,
-#'    text = "F1", group.levels, unit = "Hours", ylabel = "Normalized Count",
-#'    col = c("blue", "firebrick"), prefix = "Test")
 #' @export
 visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
                             text, group.levels, unit = "days", 
@@ -386,7 +393,7 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
                             c("blue", "firebrick"), prefix = "Test")
 {
     cat("Visualizing Significant Intervals of Feature = ", text, "\n")
-    Time = 0 ## This line is just to pass the CRAN checks for the aes in ggplot2
+    Time = 0 ## This line is to pass the CRAN checks for the aes in ggplot2
     sub.11 = list()
     sub.10 = list()
     xx = NULL
@@ -435,14 +442,20 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
     p2 = xx  
     p3 = paste(p1, p2, sep="+")
     p = eval(parse(text = p3))
+    
+    ## TODO: Fix R check error when I save this figure in directory
     ggsave(filename=paste(prefix, "/", "Feature_", text,
                             "_SignificantInterval_", method, ".jpg", sep=""),
                             dpi = 1200, height = 10, width = 15,
                             units = 'cm')
+    
+    # ggsave(filename=paste("Feature_", text,
+    #                       "_SignificantInterval_", method, ".jpg", sep=""),
+    #        dpi = 1200, height = 10, width = 15,
+    #        units = 'cm')
 }
 
 
-#' 
 #' #' Visualize all significant time intervals for all tested features
 #' #'
 #' #' Visualize all significant time intervals for all tested features
@@ -530,12 +543,13 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
+#'         points)
 #' stat = testStat(model)$testStat
 #' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'                        method = "ssgaussian", points = points, parall = FALSE,
+#'                        method = "ssgaussian", points = points, 
+#'                        parall = FALSE,
 #'                        prefix = "Test")
-
 #' test.stat.prem = testStatPermutation(perm)
 #' t1 = do.call(rbind, test.stat.prem)
 #' t2 = unlist(t1[,1])
@@ -551,8 +565,6 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
 #'   }
 #' }, 1)
 #' adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
-#' visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian", prefix = "Test",
-#'                            modelStat = stat)
 #' @export
 visualizeTestStatHistogram = function(permuted, text, method, prefix = "Test",
                                         modelStat){
@@ -560,8 +572,13 @@ visualizeTestStatHistogram = function(permuted, text, method, prefix = "Test",
     n = length(modelStat)
     r = ceiling(sqrt(n))
     c = ceiling(sqrt(n))
+    
+    ## TODO: Fox saving figures in  directory
     xx = paste(prefix, "/", "Feature_", text,
         "_testStat_distribution_ALL_INTERVALL_", method, ".jpg", sep = "")
+    # xx = paste("Feature_", text,
+    #            "_testStat_distribution_ALL_INTERVALL_", method, ".jpg", 
+    #            sep = "")
     #jpeg(filename = xx, res = 1200, height = r*5, width = c*5, units = 'cm')
     jpeg(filename = xx, res = 1200, height = 40, width = 40, units = 'cm')
 

@@ -42,8 +42,6 @@ gr.2 = as.character(group.levels[2])
 levels(df$Group) = c(levels(df$Group), "0", "1")
 df$Group[which(df$Group == gr.1)] = 0
 df$Group[which(df$Group == gr.2)] = 1
-visualizeFeature(formula = formula, df, text, group.levels, unit = time.unit,
-ylabel = ylabel, col = col, prefix = prefix)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)
