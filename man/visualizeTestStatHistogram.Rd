@@ -6,12 +6,12 @@
 #'
 #' Visualize all significant time intervals for all tested features
 #'
-#' @param interval.details Dataframe has infomation about significant interval
-#' (feature name, start, end, dominant, p-value)
+#' @param interval.details Dataframe has infomation about significant
+#' interval (feature name, start, end, dominant, p-value)
 #' @param prefix prefix for the output figure
 #' @param unit time unit used in the Time vector
 #' (hours, days, weeks, months, etc.)
-#' @param col two color to be used for the two groups (eg., c("red", "blue")).
+#' @param col two color to be used for the two groups (eg., c("red", "blue"))
 #' @param fit.method fitting method (ssguassian).
 #' @return null
 #' @import ggplot2
@@ -21,8 +21,8 @@
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @export
 visualizeTimeIntervals = function(interval.details, prefix = "Test",
-                                  unit = "days", col = c("blue", "firebrick"),
-                                  fit.method = "ssgaussian")
+                                  unit = "days", col = c("blue",
+                                  "firebrick"), fit.method = "ssgaussian")
 {
   feature=0;dominant=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
   interval.details$dominant = as.factor(interval.details$dominant)
@@ -37,21 +37,25 @@ visualizeTimeIntervals = function(interval.details, prefix = "Test",
     coord_flip() +  scale_colour_manual(values = col) +
     labs(x = "Feature", y = sprintf("Time (%s)", unit), colour="Dominant") + 
      theme(axis.text.x = element_text(colour = "black", size = 12, angle = 0,
-                                      hjust = 0.5, vjust = 0.5, face = "bold"),
+                                      hjust = 0.5, vjust = 0.5,
+                                      face = "bold"),
            axis.text.y = element_text(colour = "black", size = 12, angle = 0,
                                       vjust = 0.5, face = "bold"),
-           axis.title.x = element_text(colour = "black", size = 15, angle = 0,
-                                      hjust = 0.5, vjust = 0.5, face = "bold"),
-           axis.title.y = element_text(colour = "black", size = 15, angle = 90,
-                                      hjust = 0.5, vjust = 0.5, face = "bold"),
+           axis.title.x = element_text(colour = "black", size = 15,
+                                      angle = 0, hjust = 0.5, vjust = 0.5,
+                                      face = "bold"),
+           axis.title.y = element_text(colour = "black", size = 15,
+                                      angle = 90, hjust = 0.5, vjust = 0.5,
+                                      face = "bold"),
            legend.text = element_text(size = 15, face = "plain")) + 
     theme(panel.grid.minor =   element_blank(),
           panel.grid.major.y = element_line(colour = "white", size = 6),
           panel.grid.major.x = element_line(colour = "white",size = 0.75)) +
-    theme(legend.position="top", panel.border = element_rect(colour = "black",
-                                                          fill = NA, size = 2))
-  ggsave(filename = paste(prefix, "/OmicsLonDA_TimeIntervals_", fit.method, "_",
-     prefix, ".jpg", sep=""), dpi = 1200, height = 30, width = 20, units = 'cm')
+    theme(legend.position="top", panel.border = element_rect(colour =
+                                               "black", fill = NA, size = 2))
+  ggsave(filename = paste(prefix, "/OmicsLonDA_TimeIntervals_", fit.method,
+     "_", prefix, ".jpg", sep=""), dpi = 1200, height = 30, width = 20,
+     units = 'cm')
 }}
 \usage{
 visualizeTestStatHistogram(permuted, text, method, prefix = "Test",
@@ -93,8 +97,13 @@ points = seq(100, 130)
 model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
 stat = testStat(model)$testStat
 perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+<<<<<<< HEAD
                        method = "ssgaussian", points = points, parall = FALSE,
                        prefix = "Test")
+=======
+                       method = "ssgaussian", points = points,
+                       parall = "FALSE", prefix = "Test")
+>>>>>>> d5f4549fdf25e2db8d20d480d067ca894f81e8bd
 test.stat.prem = testStatPermutation(perm)
 t1 = do.call(rbind, test.stat.prem)
 t2 = unlist(t1[,1])
@@ -109,9 +118,15 @@ pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
     sum(t3 < stat[i])/length(t3)
   }
 }, 1)
+<<<<<<< HEAD
 adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
 visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian", prefix = "Test",
                            modelStat = stat)
+=======
+adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
+visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian",
+                           prefix = "Test", modelStat = stat)
+>>>>>>> d5f4549fdf25e2db8d20d480d067ca894f81e8bd
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)
