@@ -97,13 +97,8 @@ points = seq(100, 130)
 model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
 stat = testStat(model)$testStat
 perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-<<<<<<< HEAD
                        method = "ssgaussian", points = points, parall = FALSE,
                        prefix = "Test")
-=======
-                       method = "ssgaussian", points = points,
-                       parall = "FALSE", prefix = "Test")
->>>>>>> d5f4549fdf25e2db8d20d480d067ca894f81e8bd
 test.stat.prem = testStatPermutation(perm)
 t1 = do.call(rbind, test.stat.prem)
 t2 = unlist(t1[,1])
@@ -118,15 +113,9 @@ pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
     sum(t3 < stat[i])/length(t3)
   }
 }, 1)
-<<<<<<< HEAD
 adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
 visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian", prefix = "Test",
                            modelStat = stat)
-=======
-adjusted.pvalue = p.adjust(pvalue.test.stat, method = adjust.method)
-visualizeTestStatHistogram(t3, text = "F1", fit.method = "ssgaussian",
-                           prefix = "Test", modelStat = stat)
->>>>>>> d5f4549fdf25e2db8d20d480d067ca894f81e8bd
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

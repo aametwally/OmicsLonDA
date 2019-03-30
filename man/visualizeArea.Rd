@@ -55,13 +55,8 @@ points = seq(100, 130)
 model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
 stat = testStat(model)$testStat
 perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-<<<<<<< HEAD
                        method = "ssgaussian", points = points, parall = FALSE,
                        prefix = "Test")
-=======
-                       method = "ssgaussian", points = points,
-                       parall = "FALSE", prefix = "Test")
->>>>>>> d5f4549fdf25e2db8d20d480d067ca894f81e8bd
 test.stat.prem = testStatPermutation(perm)
 t1 = do.call(rbind, test.stat.prem)
 t2 = unlist(t1[,1])
