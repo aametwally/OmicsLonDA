@@ -31,17 +31,17 @@ statistic
 
 ## Getting Started
 ### Prerequisites
-* R(>= 3.5)
+* R(>= 3.6)
 
 ### Installation
 Download the latest development code of OmicsLonDA from GitHub using devtools:
-```r
+```{r}
 library(devtools)
-install_github("aametwally/OmicsLonDA", ref = "master")
+library(OmicsLonDA)
 ```
 
 ### Example
-```r
+```{r}
 library(OmicsLonDA)
 
 ## Load 1000 simulated features
@@ -50,7 +50,7 @@ head(diff_simulatedDataset_norm[[1]])
 ```
 
 ### Apply OmicsLonDA on feature #1
-```r
+```{r}
 ## Define the prediction timepoints 
 points = seq(1, 200, length.out = 200)
 output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df =
