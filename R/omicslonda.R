@@ -34,12 +34,12 @@
 #' data(diff_simulatedDataset_norm)
 #' points = seq(100, 130)
 #' output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, 
-#'                df = diff_simulatedDataset_norm[[1]], n.perm = 10, 
-#'                fit.method = "ssgaussian", points = points,
-#'                text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
-#'                adjust.method = "BH", col = c("blue", "green"),
-#'                prefix = "OmicsLonDA_clr_f1", ylabel = "CLR-NormalizedCount",
-#'                DrawTestStatDist = FALSE, time.unit = "days")
+#'                 df = diff_simulatedDataset_norm[[1]], n.perm = 10, 
+#'                 fit.method = "ssgaussian", points = points,
+#'                 text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
+#'                 adjust.method = "BH", col = c("blue", "green"),
+#'                 prefix = "OmicsLonDA_clr_f1", ylabel = "CLR-NormalizedCount",
+#'                 DrawTestStatDist = FALSE, time.unit = "days")
 #' @export
 omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
                         fit.method = "ssgaussian", points, text = 0,

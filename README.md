@@ -10,7 +10,7 @@ OmicsLonDA (Omics Longitudinal Differential Analysis) is a statistical framework
 
 ## Prerequisites
 
-* R(>= 3.3.2)
+* R(>= 3.6)
 
 
 ## Installation
