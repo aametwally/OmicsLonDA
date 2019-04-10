@@ -303,12 +303,7 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 #' @export
 testStatPermutation = function(perm)
 {
-    testStat.list = list()
-    list.len = length(perm)
-    for (j in seq_len(list.len))
-    {
-        testStat.list[[j]] = testStat(perm[[j]])
-    }
+    testStat.list <- lapply(perm, testStat)
     
     return(testStat.list)
 }
