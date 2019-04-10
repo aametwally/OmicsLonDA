@@ -34,9 +34,11 @@ statistic
 * R(>= 3.6)
 
 ### Installation
-Download the latest development code of OmicsLonDA from GitHub using devtools:
+Install the latest version of OmicsLonDA from Bioconductor:
 ```{r}
-library(OmicsLonDA)
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager", repos = "http://cran.us.r-project.org")
+BiocManager::install("OmicsLonDA")
 ```
 
 ### Example

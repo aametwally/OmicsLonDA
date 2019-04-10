@@ -49,7 +49,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
                         col = c("blue", "firebrick"), prefix = "Test",
                         DrawTestStatDist = FALSE)
 {
-    cat("Start OmicsLonDA \n")
+    message("Start OmicsLonDA")
     # all.vars(formula)[1]
     
     if (!dir.exists(prefix)){
@@ -105,15 +105,15 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
     points = points[which(points >= points.min & points <= points.max)]
     
     
-    cat("points.min = ", points.min, "\n")
-    cat("points.max = ", points.max, "\n")
-    cat("points = ", points, "\n")
+    message("points.min = ", points.min, "\n")
+    message("points.max = ", points.max, "\n")
+    message("points = ", points, "\n")
     
-    cat("Start Curve Fitting \n") 
+    message("Start Curve Fitting \n") 
     
     if (fit.method == "ssgaussian")
     {
-        cat("Fitting: Smoothing Spline Gaussian Regression \n")
+        message("Fitting: Smoothing Spline Gaussian Regression \n")
         model = tryCatch({
         curveFitting(formula = formula, df, method= "ssgaussian", points)
         },  error = function(err) {
@@ -121,7 +121,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
         return("ERROR")
         })
     } else {
-        cat("You have entered unsupported fitting method\n")
+        message("You have entered unsupported fitting method\n")
         quit()
     }
     
@@ -247,7 +247,7 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
     write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv",
                                             prefix, text, fit.method),
             row.names = FALSE)
-    cat("\n\n")
+    message("\n\n")
     
     return(list(detailed = output.details, summary = output.summary))
 }

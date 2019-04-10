@@ -32,7 +32,7 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
                                 unit = "days", ylabel = "Normalized Count", 
                                 col = c("blue", "firebrick"), prefix = "Test")
 {
-    cat("Visualizing Feature = ", text, "\n")
+    message("Visualizing Feature = ", text, "\n")
     #CountMeasure = all.vars(formula)[1]
     #CountMeasure=0; Time=0; Subject=0; Group=0 ## Just to pass CRAN checks
     
@@ -76,33 +76,33 @@ visualizeFeature = function (formula = Count ~ Time, df, text, group.levels,
 #                                    unit = "days", ylabel = "Normalized Count",
 #                                    col = c("blue","firebrick"), prefix="Test")
 # { 
-#   cat("Visualizing Splines of Feature = ", text, "\n")
+#   message("Visualizing Splines of Feature = ", text, "\n")
 #     
 #   Count=0;Time=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
 #   dd.null = model$dd.null
 #   dd.0 = model$dd.0
 #   dd.1 = model$dd.1
 #   
-#   #cat("v0.7", "\n")
+#   #message("v0.7", "\n")
 #   ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)),
 #                 rep("longdash", nrow(dd.1))))
 #   size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
-#   #cat("v0.9", "\n")
+#   #message("v0.9", "\n")
 #   head(df)
 #   head(dd.0)
 #   head(dd.1)
 #   dm = rbind(df[,c("Time", "Count", "Group", "Subject")],
 #              dd.0[,c("Time","Count", "Group", "Subject")],
 #              dd.1[,c("Time", "Count", "Group", "Subject")])
-#   #cat("v0.92", "\n")
+#   #message("v0.92", "\n")
 #   dm$lnn=ln
-#   #cat("v0.96", "\n")
+#   #message("v0.96", "\n")
 #   dm$sz= size
 #   
 #   p = ggplot(dm, aes(.data$Time, .data$Count, colour = .data$Group,
 #                      group = interaction(.data$Group, .data$Subject)))
 #   
-#   #cat("v1.0", "\n")
+#   #message("v1.0", "\n")
 #   p = p + theme_bw() + geom_point(size=1, alpha=0.5) +
 #     geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
 #     ggtitle(paste("Feature = ", text, sep = "")) +
@@ -180,33 +180,33 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
                                     col = c("blue", "firebrick"),
                                     prefix = "Test")
 { 
-    cat("Visualizing Splines of Feature = ", text, "\n")
+    message("Visualizing Splines of Feature = ", text, "\n")
     
     #Count=0;Time=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
     dd.null = model$dd.null
     dd.0 = model$dd.0
     dd.1 = model$dd.1
     
-    #cat("v0.7", "\n")
+    #message("v0.7", "\n")
     ln = factor(c(rep("longdash", nrow(dd.0)), rep("longdash", nrow(dd.1))))
     #size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
-    #cat("v0.9", "\n")
+    #message("v0.9", "\n")
     #head(df)
     #head(dd.0)
     #head(dd.1)
     dm = rbind(dd.0[,c("Time", "Count", "Group", "Subject")], dd.1[,c("Time",
                                                 "Count", "Group", "Subject")])
-    #cat("v0.92", "\n")
+    #message("v0.92", "\n")
     dm$lnn=ln
     
     df_subset = df[,c("Time", all.vars(formula)[1], "Group", "Subject")]
-    #cat("v0.96", "\n")
+    #message("v0.96", "\n")
     #dm$sz= size
     
     
     p = ggplot()
     
-    #cat("v1.0", "\n")
+    #message("v1.0", "\n")
     #dm, aes(Time, eval(as.symbol(all.vars(formula)[1])), colour = Group,
     #        group = interaction(Group, Subject))
     p = p + theme_bw()  + geom_line(data= dm, aes(.data$Time, .data$Count, 
@@ -266,33 +266,33 @@ visualizeFeatureSpline2 = function (formula = Count ~ Time, df, model, method,
 #         method, text, group.levels, unit = "days", ylabel =
 #         "Normalized Count", col = c("blue", "firebrick"), prefix = "Test")
 # { 
-#   #cat("Visualizing Splines of Feature = ", text, "\n")
+#   #message("Visualizing Splines of Feature = ", text, "\n")
 #   
 #   Count=0;Time=0;Subject=0;Group=0;lnn=0 ## Just to pass CRAN checks
 #   dd.null = model$dd.null
 #   dd.0 = model$dd.0
 #   dd.1 = model$dd.1
 #   
-#   #cat("v0.7", "\n")
+#   #message("v0.7", "\n")
 #   ln = factor(c(rep("longdash", nrow(df)), rep("longdash", nrow(dd.0)),
 #                 rep("longdash", nrow(dd.1))))
 #   size = c(rep(1, nrow(df)), rep(1, nrow(dd.0)), rep(1, nrow(dd.1)))
-#   #cat("v0.9", "\n")
+#   #message("v0.9", "\n")
 #   head(df)
 #   head(dd.0)
 #   head(dd.1)
 #   dm = rbind(df[,c("Time", "Count", "Group", "Subject")], dd.0[,c("Time",
 #                            "Count", "Group", "Subject")],
 #              dd.1[,c("Time", "Count", "Group", "Subject")])
-#   #cat("v0.92", "\n")
+#   #message("v0.92", "\n")
 #   dm$lnn=ln
-#   #cat("v0.96", "\n")
+#   #message("v0.96", "\n")
 #   dm$sz= size
 #   
 #   p = ggplot(dm, aes(Time, Count, colour = Group, group =
 #                        interaction(Group, Subject)))
 #   
-#   #cat("v1.0", "\n")
+#   #message("v1.0", "\n")
 #   p = p + theme_bw() + geom_point(size=1, alpha=0.5) +
 #     geom_line(aes(linetype=lnn), size=1, alpha=0.5) + 
 #     ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel,
@@ -392,7 +392,7 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
                             ylabel = "Normalized Count", col =
                             c("blue", "firebrick"), prefix = "Test")
 {
-    cat("Visualizing Significant Intervals of Feature = ", text, "\n")
+    message("Visualizing Significant Intervals of Feature = ", text, "\n")
     Time = 0 ## This line is to pass the CRAN checks for the aes in ggplot2
     sub.11 = list()
     sub.10 = list()
@@ -568,7 +568,7 @@ visualizeArea = function(formula = Count ~ Time, model.ss, method, start, end,
 #' @export
 visualizeTestStatHistogram = function(permuted, text, method, prefix = "Test",
                                         modelStat){
-    cat("Visualizing testStat Distribution for Feature = ", text, "\n")
+    message("Visualizing testStat Distribution for Feature = ", text, "\n")
     n = length(modelStat)
     r = ceiling(sqrt(n))
     c = ceiling(sqrt(n))

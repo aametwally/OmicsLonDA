@@ -36,21 +36,21 @@
 permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
                         method="ssgaussian", points, parall = FALSE, prefix){
     
-    cat("Number of permutation = ", n.perm, "\n")
+    message("Number of permutation = ", n.perm, "\n")
     
     ## Start permutation
-    cat("Start Permutation \n")
+    message("Start Permutation \n")
 
     
     pp = list() 
     perm = 0 # to be able to store the value
     n.subjects = length(unique(perm.dat$Subject))
-    cat("# of Subjects = ", n.subjects, "\n")
+    message("# of Subjects = ", n.subjects, "\n")
     
     
     ## Run in Parallel
     if(parall == TRUE) {max.cores = detectCores()
-        cat("# cores = ", max.cores, "\n")
+        message("# cores = ", max.cores, "\n")
         desired.cores = max.cores - 1
         cl = makeCluster(desired.cores)
         registerDoParallel(cl)
@@ -66,7 +66,7 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
         perm.dat[i, "Group"] = sample_group[which(sample_group$Subject ==
                                                 perm.dat[i, "Subject"]),]$Group
         }
-        #cat("Group after = ", perm.dat$Group , "\n")
+        #message("Group after = ", perm.dat$Group , "\n")
         
         
         
@@ -78,11 +78,11 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
         
         
         
-        #cat("\n", "2nd time points = ", points, "\n")
-        #cat("g.min = ", g.min, "\n")
-        #cat("g.max = ", g.max, "\n")
+        #message("\n", "2nd time points = ", points, "\n")
+        #message("g.min = ", g.min, "\n")
+        #message("g.max = ", g.max, "\n")
         
-        #cat("min(points) = ", min(points), "\n")
+        #message("min(points) = ", min(points), "\n")
         
         
         
@@ -91,27 +91,27 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
         ### points vector
         if(g.min > min(points) | g.max < max(points))
         {
-        #cat("\n")
-        #cat("old: g.min = ", g.min, "   min(points) = ", min(points), "\n")
-        #cat("old: g.max = ", g.max, "   max(points) = ", max(points), "\n")
+        #message("\n")
+        #message("old: g.min = ", g.min, "   min(points) = ", min(points), "\n")
+        #message("old: g.max = ", g.max, "   max(points) = ", max(points), "\n")
         points = points[which(points>=g.min & points<=g.max)]
-        #cat("new: g.min = ", g.min, "   min(points) = ", min(points), "\n")
-        #cat("new: g.max = ", g.max, "   max(points) = ", max(points), "\n")
+        #message("new: g.min = ", g.min, "   min(points) = ", min(points), "\n")
+        #message("new: g.max = ", g.max, "   max(points) = ", max(points), "\n")
         
         perm = curveFitting(formula, df = perm.dat, method = method, points)
         assign(paste("Model", j, sep = "_"), perm)
         
-        #cat("Special Case: generated permutation is out of range \n")
+        #message("Special Case: generated permutation is out of range \n")
         # assign(paste("Model", j, sep = "_"), NULL)
         }
         # else if (length(which(sum(g.0$Count) == 0 | sum(g.1$Count)==0)))
         # {
-        #   cat("Special Case: zero for all variable of one group \n")
+        #   message("Special Case: zero for all variable of one group \n")
         #   assign(paste("Model", j, sep = "_"), NULL)
         # }
         else
         {
-        #cat("In else", "\n")
+        #message("In else", "\n")
         perm = curveFitting(formula, df = perm.dat, method = method, points)
         # visualizeFeatureSpline_permute(df = perm.dat, model = perm,
         #                                method = method, text = "ssgaussian",
@@ -149,7 +149,7 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
 #   ## Run in Parallel
 #   if(.data$parall == TRUE) {
 #     max.cores = detectCores()
-#     cat("# cores = ", max.cores, "\n")
+#     message("# cores = ", max.cores, "\n")
 #     desired.cores = max.cores - 1
 #     cl = makeCluster(desired.cores)
 #     registerDoParallel(cl)
@@ -168,21 +168,21 @@ permutationMC2 = function(formula = Count ~ Time, perm.dat, n.perm = 500,
 #   ### from the permuted subjects, lies outside the range of the points vector 
 #   if(g.min > min(points) | g.max < max(points))
 #   {
-#     #cat("\n")
-#     #cat("old: g.min = ", g.min, "   min(points) = ", min(points), "\n")
-#     #cat("old: g.max = ", g.max, "   max(points) = ", max(points), "\n")
+#     #message("\n")
+#     #message("old: g.min = ", g.min, "   min(points) = ", min(points), "\n")
+#     #message("old: g.max = ", g.max, "   max(points) = ", max(points), "\n")
 #     points = points[which(points>=g.min & points<=g.max)]
-#     #cat("new: g.min = ", g.min, "   min(points) = ", min(points), "\n")
-#     #cat("new: g.max = ", g.max, "   max(points) = ", max(points), "\n")
+#     #message("new: g.min = ", g.min, "   min(points) = ", min(points), "\n")
+#     #message("new: g.max = ", g.max, "   max(points) = ", max(points), "\n")
 #     
 #     bootstrapped = curveFitting(formula, df = bs.df, method = method, points)
 #     #assign(paste("Model", j, sep = "_"), bootstrapped)
 #     
-#     #cat("Special Case: generated permutation is out of range \n")
+#     #message("Special Case: generated permutation is out of range \n")
 #     # assign(paste("Model", j, sep = "_"), NULL)
 #   }  else
 #   {
-#     #cat("In else", "\n")
+#     #message("In else", "\n")
 #     bootstrapped = curveFitting(formula, df = bs.df, method = method, points)
 #     # visualizeFeatureSpline_permute(df = perm.dat, model = perm,
 #     #                        method = method, text = "ssgaussian",

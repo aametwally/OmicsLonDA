@@ -219,7 +219,7 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
     
     if(length(sig) == 0)
     {
-        cat("No Significant Intevals Found \n")
+        message("No Significant Intevals Found \n")
     }
     else if(length(sig) == 1)
     {
@@ -331,11 +331,11 @@ testStatPermutation = function(perm)
 #'     # col.data=0 ## this line is for CRAN package
 #'     if(method == "clr")
 #'     {
-#'         cat("Normalization using CLR method \n")
+#'         message("Normalization using CLR method \n")
 #'     }
 #'     else if(method == "css")
 #'     {
-#'         cat("Normalization using CSS method \n")
+#'         message("Normalization using CSS method \n")
 #'         otu = metagenomeSeq::newMRexperiment(count)
 #'         p.1 = metagenomeSeq::cumNormStatFast(otu, pFlag = TRUE)
 #'         otu.2 = metagenomeSeq::cumNorm(otu, p = p.1)
@@ -343,7 +343,7 @@ testStatPermutation = function(perm)
 #'     }
 #'     else if(method == "tmm")
 #'     {
-#'         cat("Normalization using TMM method \n")
+#'         message("Normalization using TMM method \n")
 #'         factors = edgeR::calcNormFactors(count, method="TMM")
 #'         eff.lib.size = colSums(count) * factors
 #'         
@@ -355,17 +355,17 @@ testStatPermutation = function(perm)
 #'     }
 #'     else if(method == "ra")
 #'     {
-#'         cat("Normalization using Relative Abundance (RA) method \n")
+#'         message("Normalization using Relative Abundance (RA) method \n")
 #'         count.normalized  = apply(count, 2, function(x) (x/sum(x)))
 #'     }
 #'     else if(method == "log10")
 #'     {
-#'         cat("Normalization using log10 of the RA method \n")
+#'         message("Normalization using log10 of the RA method \n")
 #'         count.normalized  = apply(count, 2, function(x) log10(x/sum(x) + 1)) 
 #'     }
 #'     else if(method == "median_ratio")
 #'     {
-#'         cat("Normalization using Median-Ratio method \n")
+#'         message("Normalization using Median-Ratio method \n")
 #'         col.data = as.data.frame(cbind(colnames(count),
 #'                                 rep(seq_len(2), length.out= ncol(count)),
 #'                                 rep(seq_len(2), length.out= ncol(count))))
