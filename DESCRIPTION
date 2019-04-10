@@ -23,11 +23,11 @@ Imports:
     graphics,
     stats,
     utils,
-    devtools
 Suggests:
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    devtools
 biocViews:
     TimeCourse,
     Survival,
@@ -37,7 +37,6 @@ biocViews:
     Lipidomics,
     Transcriptomics,
     Regression
-Repository: CRAN
 NeedsCompilation: no
 Encoding: UTF-8
 LazyData: true

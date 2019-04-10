@@ -28,7 +28,6 @@
 #' @import doParallel
 #' @import stats
 #' @import zoo
-#' @import devtools
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 

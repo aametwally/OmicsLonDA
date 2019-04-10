@@ -36,7 +36,6 @@ statistic
 ### Installation
 Download the latest development code of OmicsLonDA from GitHub using devtools:
 ```{r}
-library(devtools)
 library(OmicsLonDA)
 ```
 
