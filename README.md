@@ -25,31 +25,7 @@ install_github("aametwally/OmicsLonDA", ref = "master")
 
 
 ## Example:
-```
-library(OmicsLonDA)
 
-## Load 1000 simulated features
-data(diff_simulatedDataset_norm)
-head(diff_simulatedDataset_norm[[1]])
-
-```
-
-
-### Apply OmicsLonDA on feature #1 
-
-```
-## Define the prediction timepoints 
-points = seq(1, 200, length.out = 200)
-output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df = diff_simulatedDataset_norm[[1]], n.perm = 1000, 
-                                      fit.method = "ssgaussian", points = points,
-                                      text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
-                                      adjust.method = "BH", col = c("blue", "green"),
-                                      prefix = "OmicsLonDA_clr_f1", ylabel = "CLR-NormalizedCount",
-                                      DrawTestStatDist = FALSE, time.unit = "days")
-```
-
-
-<br>
 
 ### Bugs and Suggestions
 OmicsLonDA is under active research development. Please report any bugs/suggestions to Ahmed Metwally (ametwall@stanford.edu).
