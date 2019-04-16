@@ -4,17 +4,15 @@
 \alias{omicslonda}
 \title{Omics Longitudinal Differential Analysis for one feature}
 \usage{
-omicslonda(formula = Count ~ Time, df, n.perm = 500,
-  fit.method = "ssgaussian", points, text = 0, parall = FALSE,
+omicslonda(se_object = NULL, n.perm = 500, fit.method = "ssgaussian",
+  points = NULL, text = "FeatureName", parall = FALSE,
   pvalue.threshold = 0.05, adjust.method = "BH", time.unit = "days",
   ylabel = "Normalized Count", col = c("blue", "firebrick"),
-  prefix = "Test", DrawTestStatDist = FALSE)
+  prefix = "Test")
 }
 \arguments{
-\item{formula}{formula to be passed to the regression model}
-
-\item{df}{dataframe that contains (subject, time, group, count,
-normalizedCount, or any any other covariates) for each feature}
+\item{se_object}{SummarizedExperiment object contains omics count/level matrix 
+and  metadata contains (subject, time, group, and any any other covariates)}
 
 \item{n.perm}{number of permutations.}
 
@@ -40,28 +38,24 @@ months, etc.)}
 \item{col}{two color to be used for the two groups (eg., c("red", "blue")).}
 
 \item{prefix}{prefix to be used to create directory for the analysis results}
-
-\item{DrawTestStatDist}{boolean to indicate if the histogram of the testStat
-needs to be plotted or not. Default is "FALSE" since the histogram is usually
-a big file}
 }
 \value{
-returns a list of the significant time intervals for the tested
-feature.
+a list of the significant time intervals for the tested
+feature, fitted model for each group, null distribution of the test statistic 
+of the tested feature, and the original input data.
 }
 \description{
 Find significant time intervals of omic feature
 }
 \examples{
-data(diff_simulatedDataset_norm)
+data(omicslonda_data_example)
 points = seq(100, 130)
-output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, 
-                df = diff_simulatedDataset_norm[[1]], n.perm = 10, 
-                fit.method = "ssgaussian", points = points,
-                text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
-                adjust.method = "BH", col = c("blue", "green"),
-                prefix = "OmicsLonDA_clr_f1", ylabel = "CLR-NormalizedCount",
-                DrawTestStatDist = FALSE, time.unit = "days")
+res = omicslonda(se_object = omicslonda_data_example$omicslonda_se_object, n.perm = 10,
+                fit.method = "ssgaussian", points = points, text = "Feature_1",
+                parall = FALSE, pvalue.threshold = 0.05, 
+                adjust.method = "BH", time.unit = "days",
+                ylabel = "Normalized Count",
+                col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

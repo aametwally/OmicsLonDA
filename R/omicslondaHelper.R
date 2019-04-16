@@ -1,3 +1,44 @@
+#' Adjust for baseline differences using Centered-Log Ratio
+#'
+#' Adjust for baseline differences using Centered-Log Ratio
+#' 
+##' @param se_object SummarizedExperiment object contains omics count/level matrix 
+#' and  metadata 
+#' @return a SummarizedExperiment object with the adjusted baseline assay
+#' @importFrom SummarizedExperiment colData assay SummarizedExperiment assays
+#' @references
+#' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' data(omicslonda_data_example)
+#' adjusted_se = adjustBaseline(omicslonda_data_example$omicslonda_se_object)
+#' @export
+adjustBaseline = function(se_object = NULL){
+    subjects = unique(colData(se_object)$Subject)
+    
+    df = assay(se_object)
+    metadata = colData(se_object)
+    
+    ### Add psuedo count to prevent NA in CLR
+    df = df + 0.000000001
+    
+    for(i in 1:nrow(df))
+    {
+        for(subj in subjects)
+        {
+            m = min(metadata[metadata$Subject==subj, "Time"])
+            subj_samples = rownames(metadata)[metadata$Subject==subj]
+            df[i, subj_samples] = log(df[i, subj_samples]/df[i, metadata$Subject == subj & metadata$Time == m])
+        }
+    }
+    
+    se_object_normalized = se_object
+    assay(se_object_normalized) = as.matrix(df)
+    return(se_object_normalized)
+}
+
+
+
+
 #' Fit longitudinal data
 #'
 #' Fits longitudinal samples from the same group using negative binomial
@@ -7,28 +48,31 @@
 #' @param df dataframe has the Count, Group, Subject, Time
 #' @param method fitting method (ssgaussian)
 #' @param points points at which the prediction should happen
-#' @return returns the fitted model
+#' @return a list that contains fitted smoothing spline for each group 
+#' along with 95% confidence intervals
+#' @importFrom SummarizedExperiment colData assay SummarizedExperiment assays
 #' @import gss
 #' @import stats
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
-#' data(diff_simulatedDataset_norm)
-#' df = diff_simulatedDataset_norm[[1]]
-#' Group = as.character(df$Group)
+#' data(omicslonda_data_example)
+#' dt = data.frame(colData(se_object))
+#' dt$Count = as.vector(assay(se_object))
+#' Group = as.character(dt$Group)
 #' group.levels = sort(unique(Group))
 #' gr.1 = as.character(group.levels[1])
 #' gr.2 = as.character(group.levels[2])
+#' df = dt
 #' levels(df$Group) = c(levels(df$Group), "0", "1")
 #' df$Group[which(df$Group == gr.1)] = 0
 #' df$Group[which(df$Group == gr.2)] = 1
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method = "ssgaussian", 
-#'         points)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
 #' @export
-curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
+curveFitting = function(formula = Count ~ Time, df, method = "ssgaussian",
                         points){
     
     ## Seprate the two groups
@@ -41,21 +85,10 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
         
         ### Difference between random = mkran(~1|Subject, group.null) and
         ### random = ~1|Subject
-        ran.null = mkran(~1|Subject, group.null)
-        ran.0 = mkran(~1|Subject, group.0)
-        ran.1 = mkran(~1|Subject, group.1)
+        # ran.null = mkran(~1|Subject, group.null)
+        # ran.0 = mkran(~1|Subject, group.0)
+        # ran.1 = mkran(~1|Subject, group.1)
         
-        
-        ### With Subjet Random Effect
-        ## null model
-        # mod.null = ssanova(formula, data = group.null, skip.iter=TRUE, 
-        #                    random = ran.null, na.action = na.omit)
-        # 
-        # ## full model
-        # mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE,
-        #                 random = ran.0, na.action = na.omit)
-        # mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE,
-        #                 random = ran.1, na.action = na.omit)
         
         # ## null model
         mod.null = ssanova(formula, data = group.null, skip.iter=TRUE)
@@ -64,11 +97,6 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
         mod.0 = ssanova(formula, data = group.0, skip.iter=TRUE)
         mod.1 = ssanova(formula, data = group.1, skip.iter=TRUE)
         
-        # ### Troubleshoot ssanova
-        # mod.0.test = ssanova(formula, data = group.0, skip.iter=TRUE,
-        #                      nbasis=10)
-        # mod.1.test = ssanova(formula, data = group.1, skip.iter=TRUE,
-        #                      nbasis=10)
         
         ## Calculate goodness of fit F-statistic the fitted model
         rss.null = summary(mod.null)$rss
@@ -119,9 +147,6 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
                             Group = "fit.1.l", Subject = "fit.1.l")
     } 
     
-    
-    
-    ## Return the results
     if(method == "ssgaussian")
     {
         output = list(f.stat = f.stat, rss.null = rss.null, rss.full = rss.full,
@@ -142,25 +167,26 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssnbinomial",
 #' Calculate Test-Statistic of each feature's time interval
 #' 
 #' @param curve.fit.df gss data object of the fitted spline
-#' @return returns testStat for all time intervals
+#' @return a list that has the test statistic for each time interval
 #' @import pracma
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
-#' data(diff_simulatedDataset_norm)
-#' df = diff_simulatedDataset_norm[[1]]
-#' Group = as.character(df$Group)
+#' data(omicslonda_data_example)
+#' dt = data.frame(colData(se_object))
+#' dt$Count = as.vector(assay(se_object))
+#' Group = as.character(dt$Group)
 #' group.levels = sort(unique(Group))
 #' gr.1 = as.character(group.levels[1])
 #' gr.2 = as.character(group.levels[2])
+#' df = dt
 #' levels(df$Group) = c(levels(df$Group), "0", "1")
 #' df$Group[which(df$Group == gr.1)] = 0
 #' df$Group[which(df$Group == gr.2)] = 1
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
-#'         points)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
 #' tstat = testStat(model)
 #' stat = tstat$testStat
 #' @export
@@ -204,10 +230,10 @@ testStat = function(curve.fit.df){
 #' @examples 
 #' padjusted = abs(rnorm(10, mean = 0.05, sd = 0.04))
 #' sign = sample(x = c(1,-1), 10, replace = TRUE)
-#' significantIntervals = findSigInterval2(adjusted.pvalue = padjusted, 
+#' significantIntervals = findSigInterval(adjusted.pvalue = padjusted, 
 #'                         threshold = 0.05, sign = sign)
 #' @export
-findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
+findSigInterval = function(adjusted.pvalue, threshold = 0.05, sign)
 {
     sig = which(adjusted.pvalue < threshold/2)
     sign = sign[sig]
@@ -278,25 +304,27 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 #' Calculate testStat of each feature's time interval for all permutations
 #' 
 #' @param perm list has all the permutated models
-#' @return returns a list of all permutation area ratio
+#' @return a list of test statistic for each time interval for all all permutations
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
-#' data(diff_simulatedDataset_norm)
-#' df = diff_simulatedDataset_norm[[1]]
-#' Group = as.character(df$Group)
+#' data(omicslonda_data_example)
+#' dt = data.frame(colData(se_object))
+#' dt$Count = as.vector(assay(se_object))
+#' Group = as.character(dt$Group)
 #' group.levels = sort(unique(Group))
 #' gr.1 = as.character(group.levels[1])
 #' gr.2 = as.character(group.levels[2])
+#' df = dt
 #' levels(df$Group) = c(levels(df$Group), "0", "1")
 #' df$Group[which(df$Group == gr.1)] = 0
 #' df$Group[which(df$Group == gr.2)] = 1
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
-#'         points)
-#' perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' 
+#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = 10,
 #'             method = "ssgaussian", points = points, parall = FALSE,
 #'             prefix = "Test")
 #' test.stat.prem = testStatPermutation(perm)
@@ -304,75 +332,5 @@ findSigInterval2 = function(adjusted.pvalue, threshold = 0.05, sign)
 testStatPermutation = function(perm)
 {
     testStat.list <- lapply(perm, testStat)
-    
     return(testStat.list)
 }
-
-
-
-
-
-#' #' Normalize count matrix 
-#' #'
-#' #' Normalize count matrix
-#' #'
-#' #' @param count count matrix
-#' #' @param method normalization method
-#' #' @return the normalized count matrix
-#' #' @references
-#' #' Ahmed Metwally (ametwall@stanford.edu)
-#' #' @export
-#' normalize = function(count, method = "css"){
-#'     # col.data=0 ## this line is for CRAN package
-#'     if(method == "clr")
-#'     {
-#'         message("Normalization using CLR method \n")
-#'     }
-#'     else if(method == "css")
-#'     {
-#'         message("Normalization using CSS method \n")
-#'         otu = metagenomeSeq::newMRexperiment(count)
-#'         p.1 = metagenomeSeq::cumNormStatFast(otu, pFlag = TRUE)
-#'         otu.2 = metagenomeSeq::cumNorm(otu, p = p.1)
-#'         count.normalized = metagenomeSeq::MRcounts(otu.2, norm = TRUE)
-#'     }
-#'     else if(method == "tmm")
-#'     {
-#'         message("Normalization using TMM method \n")
-#'         factors = edgeR::calcNormFactors(count, method="TMM")
-#'         eff.lib.size = colSums(count) * factors
-#'         
-#'         # Use the mean of the effective library sizes as a reference library
-#'         # size.
-#'         ref.lib.size = mean(eff.lib.size)
-#'         count.normalized = (sweep(count, MARGIN = 2, eff.lib.size, "/")
-#'                                 *ref.lib.size)
-#'     }
-#'     else if(method == "ra")
-#'     {
-#'         message("Normalization using Relative Abundance (RA) method \n")
-#'         count.normalized  = apply(count, 2, function(x) (x/sum(x)))
-#'     }
-#'     else if(method == "log10")
-#'     {
-#'         message("Normalization using log10 of the RA method \n")
-#'         count.normalized  = apply(count, 2, function(x) log10(x/sum(x) + 1)) 
-#'     }
-#'     else if(method == "median_ratio")
-#'     {
-#'         message("Normalization using Median-Ratio method \n")
-#'         col.data = as.data.frame(cbind(colnames(count),
-#'                                 rep(seq_len(2), length.out= ncol(count)),
-#'                                 rep(seq_len(2), length.out= ncol(count))))
-#'                                 
-#'         rownames(col.data) = col.data[,1]
-#'         col.data =  col.data[,-1]
-#'         colnames(col.data) = c("test","condition")
-#'         data.deseq = DESeq2::DESeqDataSetFromMatrix(countData = count,
-#'                                                 colData = col.data,
-#'                                                 ~ condition)
-#'         cds = DESeq2::estimateSizeFactors( data.deseq )
-#'         count.normalized = t(t(DESeq2::counts(cds))/DESeq2::sizeFactors(cds))
-#'     }
-#'     return(count.normalized)
-#' }

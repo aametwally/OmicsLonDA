@@ -7,11 +7,12 @@ Author: Ahmed A. Metwally, Tom Zhang, Michael Snyder
 Maintainer: Ahmed A. Metwally <ametwall@stanford.edu>
 URL: https://github.com/aametwally/OmicsLonDA
 BugReports: https://github.com/aametwally/OmicsLonDA/issues
-Description: Statistical method that provides robust identification of time intervals where omics features (such as proteomics, lipidomics, metabolomics, transcriptomics, the microbiome, as well as physiological parameters captured by wearable devices such as heart rhythm, body temperature, and activity level) are significantly different between groups.
+Description: Statistical method that provides robust identification of time intervals where omics features (such as proteomics, lipidomics, metabolomics, transcriptomics, microbiome, as well as physiological parameters captured by wearable sensors such as heart rhythm, body temperature, and activity level) are significantly different between groups.
 License: MIT + file LICENSE
 Depends:
-    R(>= 3.6)
+    R(>= 3.5)
 Imports:
+    SummarizedExperiment,
     gss,
     plyr,
     zoo,

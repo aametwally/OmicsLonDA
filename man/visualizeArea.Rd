@@ -4,24 +4,16 @@
 \alias{visualizeArea}
 \title{Visualize significant time interval}
 \usage{
-visualizeArea(formula = Count ~ Time, model.ss, method, start, end, text,
-  group.levels, unit = "days", ylabel = "Normalized Count",
+visualizeArea(omicslonda_object = NULL, method = "ssgaussian",
+  text = "FeatureName", unit = "days", ylabel = "Normalized Count",
   col = c("blue", "firebrick"), prefix = "Test")
 }
 \arguments{
-\item{formula}{formula used in method}
-
-\item{model.ss}{The fitted model}
+\item{omicslonda_object}{The returned object from omicslonda analysis}
 
 \item{method}{Fitting method (ssgaussian)}
 
-\item{start}{Vector of the start points of the time intervals}
-
-\item{end}{Vector of the end points of the time intervals}
-
 \item{text}{Feature name}
-
-\item{group.levels}{Level's name}
 
 \item{unit}{time unit used in the Time vector
 (hours, days, weeks, months, etc.)}
@@ -40,44 +32,11 @@ null
 Visualize significant time interval
 }
 \examples{
-data(diff_simulatedDataset_norm)
-df = diff_simulatedDataset_norm[[1]]
-Group = as.character(df$Group)
-group.levels = sort(unique(Group))
-gr.1 = as.character(group.levels[1])
-gr.2 = as.character(group.levels[2])
-levels(df$Group) = c(levels(df$Group), "0", "1")
-df$Group[which(df$Group == gr.1)] = 0
-df$Group[which(df$Group == gr.2)] = 1
-group.0 = df[df$Group == 0, ]
-group.1 = df[df$Group == 1, ]
-points = seq(100, 130)
-model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
-        points)
-stat = testStat(model)$testStat
-perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-                        method = "ssgaussian", points = points, 
-                        parall = FALSE,
-                        prefix = "Test")
-test.stat.prem = testStatPermutation(perm)
-t1 = do.call(rbind, test.stat.prem)
-t2 = unlist(t1[,1])
-t3 = as.vector(t2)
-pvalue.test.stat = vapply(seq_len(length(points)-1), function(i){
-    if(stat[i]>=0)
-    {
-        sum(t3 > stat[i])/length(t3)
-    }
-    else if(stat[i]<0)
-    {
-        sum(t3 < stat[i])/length(t3)
-    }
-}, 1)
-adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
-interval = findSigInterval2(adjusted.pvalue, threshold = 0.05,
-sign = sign(stat))
-st = points[interval$start]
-en = points[interval$end + 1]
+data(omicslonda_data_example)
+visualizeArea(omicslonda_object = omicslonda_data_example$omicslonda_results,
+              method = "ssgaussian", text = "Feature_1", unit = "days",
+              ylabel = "Normalized Count", col = c("blue", "firebrick"),
+              prefix = "OmicsLonDA_example")
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

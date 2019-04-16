@@ -2,9 +2,8 @@
 #'
 #' Find significant time intervals of omic feature
 #' 
-#' @param formula formula to be passed to the regression model
-#' @param df dataframe that contains (subject, time, group, count,
-#' normalizedCount, or any any other covariates) for each feature
+#' @param se_object SummarizedExperiment object contains omics count/level matrix 
+#' and  metadata contains (subject, time, group, and any any other covariates)
 #' @param n.perm number of permutations.
 #' @param fit.method fitting method (ssguassian).
 #' @param points points at which the prediction should happen.
@@ -19,11 +18,10 @@
 #' @param ylabel text to be shown on the y-axis of all generated figures
 #' (default: "Normalized Count")
 #' @param prefix prefix to be used to create directory for the analysis results
-#' @param DrawTestStatDist boolean to indicate if the histogram of the testStat
-#' needs to be plotted or not. Default is "FALSE" since the histogram is usually
-#' a big file
-#' @return returns a list of the significant time intervals for the tested
-#' feature.
+#' @return a list of the significant time intervals for the tested
+#' feature, fitted model for each group, null distribution of the test statistic 
+#' of the tested feature, and the original input data.
+#' @importFrom SummarizedExperiment colData assay SummarizedExperiment
 #' @import parallel
 #' @import doParallel
 #' @import stats
@@ -31,38 +29,36 @@
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
-#' data(diff_simulatedDataset_norm)
+#' data(omicslonda_data_example)
 #' points = seq(100, 130)
-#' output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, 
-#'                 df = diff_simulatedDataset_norm[[1]], n.perm = 10, 
-#'                 fit.method = "ssgaussian", points = points,
-#'                 text = "sim_f1", parall = FALSE, pvalue.threshold = 0.05,
-#'                 adjust.method = "BH", col = c("blue", "green"),
-#'                 prefix = "OmicsLonDA_clr_f1", ylabel = "CLR-NormalizedCount",
-#'                 DrawTestStatDist = FALSE, time.unit = "days")
+#' res = omicslonda(se_object = omicslonda_data_example$omicslonda_se_object, n.perm = 10,
+#'                 fit.method = "ssgaussian", points = points, text = "Feature_1",
+#'                 parall = FALSE, pvalue.threshold = 0.05, 
+#'                 adjust.method = "BH", time.unit = "days",
+#'                 ylabel = "Normalized Count",
+#'                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 #' @export
-omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
-                        fit.method = "ssgaussian", points, text = 0,
+omicslonda = function(se_object = NULL, n.perm = 500,
+                        fit.method = "ssgaussian", points = NULL, text = "FeatureName",
                         parall = FALSE, pvalue.threshold = 0.05, 
                         adjust.method = "BH", time.unit = "days",
                         ylabel = "Normalized Count",
-                        col = c("blue", "firebrick"), prefix = "Test",
-                        DrawTestStatDist = FALSE)
+                        col = c("blue", "firebrick"), prefix = "Test")
 {
     message("Start OmicsLonDA")
-    # all.vars(formula)[1]
     
     if (!dir.exists(prefix)){
         dir.create(file.path(prefix))
     }
     
+  
+    dt = data.frame(colData(se_object))
+    dt$Count = as.vector(assay(se_object))
+  
     # Extract groups
-    Group = as.character(df$Group)
+    Group = as.character(dt$Group)
     group.levels = sort(unique(Group))
-    #print("Group levels = \n")
     print(group.levels)
-    #print("\n")
-    
     
     
     if(length(group.levels) > 2){
@@ -76,25 +72,10 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
     gr.2 = as.character(group.levels[2])
 
     
-    
+    df = dt
     levels(df$Group) = c(levels(df$Group), "0", "1")
     df$Group[which(df$Group == gr.1)] = 0
     df$Group[which(df$Group == gr.2)] = 1
-    
-    
-    
-    ## Preprocessing: add pseudo counts
-    ## TODO: Make sure this is applied to the corrsponding column
-    ## (Count, rawCount, normalized Count)
-    #df$Count = df$Count + 1e-8
-    
-    
-
-    
-    ## Visualize feature's abundance accross different time points
-    visualizeFeature(formula = formula, df, text, group.levels, 
-                    unit = time.unit, ylabel = ylabel, col = col,
-                    prefix = prefix)
     
     
     group.0 = df[df$Group == 0, ]
@@ -107,7 +88,6 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
     
     message("points.min = ", points.min, "\n")
     message("points.max = ", points.max, "\n")
-    message("points = ", points, "\n")
     
     message("Start Curve Fitting \n") 
     
@@ -115,46 +95,25 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
     {
         message("Fitting: Smoothing Spline Gaussian Regression \n")
         model = tryCatch({
-        curveFitting(formula = formula, df, method= "ssgaussian", points)
+        curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
         },  error = function(err) {
-        print(paste("ERROR in gss = ", err, sep="")); 
-        return("ERROR")
+          stop("ERROR in gss = ", err)
+          #print(paste("ERROR in gss = ", err, sep="")); 
+          #return("ERROR")
         })
     } else {
         stop("You have entered unsupported fitting method")
     }
     
-    ## Visualize feature's trajectories spline
-    visualizeFeatureSpline2(formula = formula, df, model, fit.method, text,
-                            group.levels, unit = time.unit, ylabel = ylabel, 
-                            col = col, prefix = prefix)
-
     
     ### Test Statistic
     stat = testStat(model)$testStat
     
     
-    
-    ### TODO: Test Bootstrapping
-    # library(boot)
-    # #bt = boot(formula = formula, bs.df = df, method = fit.method,
-    #            points = points, parall = parall, prefix = prefix)
-    # set.seed(27262)
-    # #index = sample(1:726, 726)
-    # #data = df
-    # bt = boot(df, bootstrapOmicslonda, 10)
-    # 
-    # set.seed(27262)
-    # bootstrapOmicslonda(df,1:726)
-    
-    
-    
-    
-    
     ## TODO: fix the occasional warning  # 1: <anonymous>: ... may be used in an
     #  incorrect context: ‘.fun(piece, ...)’
     ## Permutation 
-    perm  = permutationMC2(formula = formula, perm.dat = df, n.perm = n.perm,
+    perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
                             method = fit.method, points = points,
                             parall = parall, prefix = prefix)
 
@@ -185,31 +144,15 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
     }
         
     
-    
-    if(DrawTestStatDist)
-    {
-        ##  Visualize testStat empirical distribution for the null distribution
-        visualizeTestStatHistogram(t3, text, fit.method, prefix = prefix,
-                                modelStat = stat)
-    }
 
 
-    interval = findSigInterval2(adjusted.pvalue, threshold = pvalue.threshold,
+
+    interval = findSigInterval(adjusted.pvalue, threshold = pvalue.threshold,
                                 sign = sign(stat))
     
     st = points[interval$start]
     en = points[interval$end + 1]
-    
-    
-    if(length(st) > 0)
-    {
-        ## Visualize sigificant area
-        visualizeArea(formula = formula, model, fit.method, st, en, text,
-                    group.levels, unit = time.unit, ylabel = ylabel,
-                    col = col, prefix = prefix)
-    }
-    
-    
+  
     ## Calculate start, end, dominant for each interval
     interval.start = points[-length(points)]
     interval.end = points[-1]
@@ -234,19 +177,27 @@ omicslonda = function(formula = Count ~ Time, df, n.perm = 500,
                         testStat.sign = sign(stat), dominant = dominant,
                         intervals.pvalue = pvalue.test.stat,
                         adjusted.pvalue = adjusted.pvalue, points = points)
+    
+    output.details$points = output.details$points[-length(output.details$points)]
     output.summary = data.frame(feature = rep(text, length(interval$start)),
                                 start = st, end = en,
                                 dominant=interval$dominant,
                                 pvalue = interval$pvalue)
     
     
+    omicslonda_output = list(df = dt, details = output.details, summary = output.summary, 
+                             model = model, distribution = t3, start = st, end = en)
+    save(omicslonda_output, 
+         file = sprintf("%s/Feature_%s_results_%s.RData",
+                        prefix, text, fit.method))
+    
     ## Output table that summarize time intervals statistics
     feature.summary = as.data.frame(do.call(cbind, output.details),
                                     stringsAsFactors = FALSE)
     write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv",
-                                            prefix, text, fit.method),
-            row.names = FALSE)
-    message("\n\n")
+                                              prefix, text, fit.method),
+              row.names = FALSE)
     
-    return(list(detailed = output.details, summary = output.summary))
+    message("\n\n")
+    return(omicslonda_output)
 }

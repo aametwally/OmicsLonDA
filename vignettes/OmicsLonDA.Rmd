@@ -1,6 +1,6 @@
 ---
 title: "An Introduction to the OmicsLonDA Package"
-author: "Ahmed Metwally, Tom Zhang"
+author: "Ahmed A. Metwally"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -31,41 +31,112 @@ statistic
 
 ## Getting Started
 ### Prerequisites
-* R(>= 3.6)
+* R(>= 3.5)
 
 ### Installation
 Install the latest version of OmicsLonDA from Bioconductor:
-```{r}
+```{r results='hide',message=FALSE,warning=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager", repos = "http://cran.us.r-project.org")
+    install.packages("BiocManager")
 BiocManager::install("OmicsLonDA")
+
 ```
 
 ### Example
-```{r}
+```{r, results='hide',message=FALSE,warning=FALSE}
 library(OmicsLonDA)
+library(SummarizedExperiment)
 
-## Load 1000 simulated features
-data(diff_simulatedDataset_norm)
-head(diff_simulatedDataset_norm[[1]])
+## Load 10 simulated features and metadata
+data("omicslonda_data_example")
 ```
 
-### Apply OmicsLonDA on feature #1
+
 ```{r}
-## Define the prediction timepoints 
-points = seq(1, 200, length.out = 200)
-output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df =
-                                      diff_simulatedDataset_norm[[1]],
-                                      n.perm = 10, fit.method = "ssgaussian",
-                                      points = points, text = "sim_f1",
-                                      parall = FALSE, pvalue.threshold = 0.05,
-                                      adjust.method = "BH",
-                                      col = c("blue", "green"),
-                                      prefix = "OmicsLonDA_clr_f1",
-                                      ylabel = "CLR-NormalizedCount",
-                                      DrawTestStatDist = FALSE,
-                                      time.unit = "days")
+omicslonda_data_example$ome_matrix[1:5, 1:5]
+
+head(omicslonda_data_example$metadata)
 ```
+
+
+## Create SummarizedExperiment object
+```{r,message=FALSE,warning=FALSE}
+se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+se_metadata = DataFrame(omicslonda_data_example$metadata)
+omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+                                            colData = se_metadata)
+```
+
+## Adjust for baseline using CLR
+```{r,message=FALSE,warning=FALSE}
+omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+```
+
+```{r}
+assay(omicslonda_se_object_adjusted)[1:5, 1:5]
+```
+
+
+## Visualize first feature
+```{r,message=FALSE,warning=FALSE}
+omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
+                 unit = "days", ylabel = "Normalized Count", 
+                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+```
+![Visualize first feature](VisualizeFeature.jpg){width=400px}
+
+
+## Specify interval bounds
+```{r}
+points = seq(1, 500, length.out = 500)
+```
+
+
+
+## Run OmicsLonDA on the first feature
+```{r,results='hide', message=FALSE,warning=FALSE}
+res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
+                 fit.method = "ssgaussian", points = points, text = "Feature_1",
+                 parall = FALSE, pvalue.threshold = 0.05, 
+                 adjust.method = "BH", time.unit = "days",
+                 ylabel = "Normalized Count",
+                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+```
+
+
+## Visualize fitted spline of the first feature
+```{r,message=FALSE,warning=FALSE}
+visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = res, method = "ssgaussian",
+                        text = "Feature_1", unit = "days",
+                        ylabel = "Normalized Count", 
+                        col = c("blue", "firebrick"),
+                        prefix = "OmicsLonDA_example")
+```
+![Fitted spline of the first feature](FittedSplines.jpg){width=400px}
+
+
+## Visulaize null distribution of the first feature's statistic
+```{r,results='hide', message=FALSE,warning=FALSE}
+visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1", 
+                                method = "ssgaussian", prefix = "OmicsLonDA_example")
+```
+![null distribution of the first feature's statistic](TestStatistic_NullDistribution.jpg){width=400px}
+
+
+
+## Visulize significant time intervals of first feature
+```{r,message=FALSE,warning=FALSE}
+visualizeArea(omicslonda_object = res, method = "ssgaussian",
+              text = "Feature_1", unit = "days", 
+              ylabel = "Normalized Count", col =
+                c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+```
+
+
+![Significant time intervals of feature 1](SignificantIntervals.jpg){width=400px}
+
+
 
 ## Bugs and Suggestions
 OmicsLonDA is under active research development. Please report any
