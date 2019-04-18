@@ -138,6 +138,27 @@ visualizeArea(omicslonda_object = res, method = "ssgaussian",
 
 
 
+## Save OmicsLonDA results in RData file
+```
+save(res, file = sprintf("%s/Feature_%s_results_%s.RData",
+                        prefix = "OmicsLonDA_example", text = "Feature_1", 
+                        fit.method = "ssgaussian"))
+```
+
+
+
+## Save a summary of time intervals statistics in csv file
+```   
+feature.summary = as.data.frame(do.call(cbind, res$details),
+                                stringsAsFactors = FALSE)
+write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv",
+                                          prefix = "OmicsLonDA_example", text = "Feature_1", 
+                                          fit.method = "ssgaussian"), row.names = FALSE)
+```
+
+
+
+
 
 
 ### Bugs and Suggestions

@@ -50,12 +50,7 @@ Find significant time intervals of omic feature
 \examples{
 library(SummarizedExperiment)
 data(omicslonda_data_example)
-omicslonda_data_example$ome_matrix[1:5, 1:5]
-se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-se_metadata = DataFrame(omicslonda_data_example$metadata)
-omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-                                            colData = se_metadata)
-omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
 omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 points = seq(1, 500, length.out = 500)
 res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
@@ -63,7 +58,7 @@ res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
                  parall = FALSE, pvalue.threshold = 0.05, 
                  adjust.method = "BH", time.unit = "days",
                  ylabel = "Normalized Count",
-                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+                 col = c("blue", "firebrick"), prefix = tempfile())
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

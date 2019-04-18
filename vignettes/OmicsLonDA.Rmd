@@ -82,7 +82,7 @@ assay(omicslonda_se_object_adjusted)[1:5, 1:5]
 omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
                  unit = "days", ylabel = "Normalized Count", 
-                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+                 col = c("blue", "firebrick"), prefix = tempfile())
 ```
 ![Visualize first feature](VisualizeFeature.jpg){width=400px}
 
@@ -101,7 +101,7 @@ res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
                  parall = FALSE, pvalue.threshold = 0.05, 
                  adjust.method = "BH", time.unit = "days",
                  ylabel = "Normalized Count",
-                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+                 col = c("blue", "firebrick"), prefix = tempfile())
 ```
 
 
@@ -119,7 +119,7 @@ visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = r
 ## Visulaize null distribution of the first feature's statistic
 ```{r,results='hide', message=FALSE,warning=FALSE}
 visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1", 
-                                method = "ssgaussian", prefix = "OmicsLonDA_example")
+                                method = "ssgaussian", prefix = tempfile())
 ```
 ![null distribution of the first feature's statistic](TestStatistic_NullDistribution.jpg){width=400px}
 
@@ -130,12 +130,35 @@ visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1",
 visualizeArea(omicslonda_object = res, method = "ssgaussian",
               text = "Feature_1", unit = "days", 
               ylabel = "Normalized Count", col =
-                c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+                c("blue", "firebrick"), prefix = tempfile())
 ```
 
 
 ![Significant time intervals of feature 1](SignificantIntervals.jpg){width=400px}
 
+
+
+```{r,message=FALSE,warning=FALSE}
+prefix = tempfile()
+if (!dir.exists(prefix)){
+        dir.create(file.path(prefix))
+}
+
+## Save OmicsLonDA results in RData file
+save(res, file = sprintf("%s/Feature_%s_results_%s.RData",
+                        prefix = prefix, text = "Feature_1", 
+                        fit.method = "ssgaussian"))
+
+
+
+## Save a summary of time intervals statistics in csv file
+feature.summary = as.data.frame(do.call(cbind, res$details),
+                                stringsAsFactors = FALSE)
+
+write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv",
+                                          prefix = prefix, text = "Feature_1", 
+                                          fit.method = "ssgaussian"), row.names = FALSE)
+```
 
 
 ## Bugs and Suggestions

@@ -21,7 +21,7 @@ adjustBaseline = function(se_object = NULL){
     ### Add psuedo count to prevent NA in CLR
     df = df + 0.000000001
     
-    for(i in 1:nrow(df))
+    for(i in seq_len(nrow(df)))
     {
         for(subj in subjects)
         {
@@ -59,14 +59,8 @@ adjustBaseline = function(se_object = NULL){
 #' @examples 
 #' library(SummarizedExperiment)
 #' data("omicslonda_data_example")
-#' omicslonda_data_example$ome_matrix[1:5, 1:5]
-#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-#' se_metadata = DataFrame(omicslonda_data_example$metadata)
-#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-#'                                            colData = se_metadata)
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
-#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
-#' se_object = omicslonda_test_object
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+#' se_object = omicslonda_se_object_adjusted[1,]
 #' dt = data.frame(colData(se_object))
 #' dt$Count = as.vector(assay(se_object))
 #' Group = as.character(dt$Group)
@@ -79,11 +73,11 @@ adjustBaseline = function(se_object = NULL){
 #' df$Group[which(df$Group == gr.2)] = 1
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
-#' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' points = seq(1, 500)
+#' model = curveFitting(formula = Count ~ Time, df = df, method = "ssgaussian", points = points)
 #' @export
-curveFitting = function(formula = Count ~ Time, df, method = "ssgaussian",
-                        points){
+curveFitting = function(formula = Count ~ Time, df = "NULL", method = "ssgaussian",
+                        points = NULL){
     
     ## Seprate the two groups
     group.null = df
@@ -184,28 +178,7 @@ curveFitting = function(formula = Count ~ Time, df, method = "ssgaussian",
 #' @examples 
 #' library(SummarizedExperiment)
 #' data("omicslonda_data_example")
-#' omicslonda_data_example$ome_matrix[1:5, 1:5]
-#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-#' se_metadata = DataFrame(omicslonda_data_example$metadata)
-#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-#'                                            colData = se_metadata)
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
-#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
-#' se_object = omicslonda_test_object
-#' dt = data.frame(colData(se_object))
-#' dt$Count = as.vector(assay(se_object))
-#' Group = as.character(dt$Group)
-#' group.levels = sort(unique(Group))
-#' gr.1 = as.character(group.levels[1])
-#' gr.2 = as.character(group.levels[2])
-#' df = dt
-#' levels(df$Group) = c(levels(df$Group), "0", "1")
-#' df$Group[which(df$Group == gr.1)] = 0
-#' df$Group[which(df$Group == gr.2)] = 1
-#' group.0 = df[df$Group == 0, ]
-#' group.1 = df[df$Group == 1, ]
-#' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' model = omicslonda_data_example$omicslonda_results$model
 #' stat = testStat(model)$testStat
 #' @export
 testStat = function(curve.fit.df){
@@ -242,12 +215,7 @@ testStat = function(curve.fit.df){
 #' @examples 
 #' library(SummarizedExperiment)
 #' data("omicslonda_data_example")
-#' omicslonda_data_example$ome_matrix[1:5, 1:5]
-#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-#' se_metadata = DataFrame(omicslonda_data_example$metadata)
-#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-#'                                            colData = se_metadata)
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
 #' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 #' se_object = omicslonda_test_object
 #' dt = data.frame(colData(se_object))
@@ -263,15 +231,9 @@ testStat = function(curve.fit.df){
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
-#' stat = testStat(model)$testStat
-#' n.perm = 10
-#' parall = FALSE
-#' prefix = "OmicsLonDA_example"
-#' fit.method = "ssgaussian"
-#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
-#'                       method = fit.method, points = points,
-#'                       parall = parall, prefix = prefix)
+#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+#'                       method = "ssgaussian", points = points,
+#'                       parall = FALSE, prefix = tempfile())
 #' test.stat.prem = testStatPermutation(perm)
 #' @export
 testStatPermutation = function(perm)
@@ -294,56 +256,10 @@ testStatPermutation = function(perm)
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
 #' library(SummarizedExperiment)
-#' data("omicslonda_data_example")
-#' omicslonda_data_example$ome_matrix[1:5, 1:5]
-#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-#' se_metadata = DataFrame(omicslonda_data_example$metadata)
-#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-#'                                            colData = se_metadata)
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
-#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
-#' se_object = omicslonda_test_object
-#' dt = data.frame(colData(se_object))
-#' dt$Count = as.vector(assay(se_object))
-#' Group = as.character(dt$Group)
-#' group.levels = sort(unique(Group))
-#' gr.1 = as.character(group.levels[1])
-#' gr.2 = as.character(group.levels[2])
-#' df = dt
-#' levels(df$Group) = c(levels(df$Group), "0", "1")
-#' df$Group[which(df$Group == gr.1)] = 0
-#' df$Group[which(df$Group == gr.2)] = 1
-#' group.0 = df[df$Group == 0, ]
-#' group.1 = df[df$Group == 1, ]
-#' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
-#' stat = testStat(model)$testStat
-#' n.perm = 10
-#' parall = FALSE
-#' prefix = "OmicsLonDA_example"
-#' fit.method = "ssgaussian"
-#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
-#'                       method = fit.method, points = points,
-#'                       parall = parall, prefix = prefix)
-#' test.stat.prem = testStatPermutation(perm)
-#' t1 = do.call(rbind, test.stat.prem)
-#' t2 = unlist(t1[,1])
-#' t3 = as.vector(t2)
-#' length(t3)
-#' pvalue.test.stat = vapply(head(seq_along(points), -1), function(i){
-#'   if(stat[i]>=0)
-#'   {
-#'     sum(t3 > stat[i])/length(t3)
-#'   }
-#'   else if(stat[i]<0)
-#'   {
-#'     sum(t3 < stat[i])/length(t3)
-#'   }
-#' }, 1)
-#' pvalue.threshold = 0.05
-#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
-#' interval = findSigInterval(adjusted.pvalue, threshold = pvalue.threshold,
-#'                            sign = sign(stat))
+#' padjusted = abs(rnorm(10, mean = 0.05, sd = 0.04))
+#' sign = sample(x = c(1,-1), 10, replace = TRUE)
+#' intervals = findSigInterval(adjusted.pvalue = padjusted, 
+#'                         threshold = 0.05, sign = sign)
 #' @export
 findSigInterval = function(adjusted.pvalue, threshold = 0.05, sign)
 {

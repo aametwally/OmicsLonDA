@@ -19,12 +19,7 @@
 #' @examples 
 #' library(SummarizedExperiment)
 #' data("omicslonda_data_example")
-#' omicslonda_data_example$ome_matrix[1:5, 1:5]
-#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-#' se_metadata = DataFrame(omicslonda_data_example$metadata)
-#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-#'                                            colData = se_metadata)
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
 #' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 #' se_object = omicslonda_test_object
 #' dt = data.frame(colData(se_object))
@@ -40,13 +35,9 @@
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
-#' n.perm = 10
-#' parall = FALSE
-#' prefix = "OmicsLonDA_example"
-#' fit.method = "ssgaussian"
-#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
-#'                       method = fit.method, points = points,
-#'                       parall = parall, prefix = prefix)
+#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+#'                       method = "ssgaussian", points = points,
+#'                       parall = FALSE, prefix = tempfile())
 #' @export
 permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500,
                         method="ssgaussian", points, parall = FALSE, prefix){

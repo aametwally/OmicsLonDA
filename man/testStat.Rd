@@ -18,28 +18,7 @@ Calculate Test-Statistic of each feature's time interval
 \examples{
 library(SummarizedExperiment)
 data("omicslonda_data_example")
-omicslonda_data_example$ome_matrix[1:5, 1:5]
-se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-se_metadata = DataFrame(omicslonda_data_example$metadata)
-omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-                                           colData = se_metadata)
-omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
-omicslonda_test_object = omicslonda_se_object_adjusted[1,]
-se_object = omicslonda_test_object
-dt = data.frame(colData(se_object))
-dt$Count = as.vector(assay(se_object))
-Group = as.character(dt$Group)
-group.levels = sort(unique(Group))
-gr.1 = as.character(group.levels[1])
-gr.2 = as.character(group.levels[2])
-df = dt
-levels(df$Group) = c(levels(df$Group), "0", "1")
-df$Group[which(df$Group == gr.1)] = 0
-df$Group[which(df$Group == gr.2)] = 1
-group.0 = df[df$Group == 0, ]
-group.1 = df[df$Group == 1, ]
-points = seq(100, 130)
-model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+model = omicslonda_data_example$omicslonda_results$model
 stat = testStat(model)$testStat
 }
 \references{

@@ -32,12 +32,7 @@
 #' @examples
 #' library(SummarizedExperiment)
 #' data(omicslonda_data_example)
-#' omicslonda_data_example$ome_matrix[1:5, 1:5]
-#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
-#' se_metadata = DataFrame(omicslonda_data_example$metadata)
-#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
-#'                                             colData = se_metadata)
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
 #' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 #' points = seq(1, 500, length.out = 500)
 #' res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
@@ -45,7 +40,7 @@
 #'                  parall = FALSE, pvalue.threshold = 0.05, 
 #'                  adjust.method = "BH", time.unit = "days",
 #'                  ylabel = "Normalized Count",
-#'                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+#'                  col = c("blue", "firebrick"), prefix = tempfile())
 #' @export
 omicslonda = function(se_object = NULL, n.perm = 500,
                         fit.method = "ssgaussian", points = NULL, text = "FeatureName",
@@ -186,27 +181,15 @@ omicslonda = function(se_object = NULL, n.perm = 500,
                         testStat.sign = sign(stat), dominant = dominant,
                         intervals.pvalue = pvalue.test.stat,
                         adjusted.pvalue = adjusted.pvalue, points = points)
-    
     output.details$points = output.details$points[-length(output.details$points)]
+    
     output.summary = data.frame(feature = rep(text, length(interval$start)),
                                 start = st, end = en,
                                 dominant=interval$dominant,
                                 pvalue = interval$pvalue)
     
-    
     omicslonda_output = list(df = dt, details = output.details, summary = output.summary, 
                              model = model, distribution = t3, start = st, end = en)
-    save(omicslonda_output, 
-         file = sprintf("%s/Feature_%s_results_%s.RData",
-                        prefix, text, fit.method))
-    
-    ## Output table that summarize time intervals statistics
-    feature.summary = as.data.frame(do.call(cbind, output.details),
-                                    stringsAsFactors = FALSE)
-    write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv",
-                                              prefix, text, fit.method),
-              row.names = FALSE)
-    
-    message("\n\n")
+
     return(omicslonda_output)
 }
