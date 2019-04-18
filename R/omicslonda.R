@@ -26,6 +26,7 @@
 #' @import doParallel
 #' @import stats
 #' @import zoo
+#' @import SummarizedExperiment
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
