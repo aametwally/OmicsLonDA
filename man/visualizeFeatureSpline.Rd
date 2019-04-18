@@ -35,12 +35,27 @@ null
 Plot the longitudinal features along with the fitted splines
 }
 \examples{
+library(SummarizedExperiment)
 data(omicslonda_data_example)
-visualizeFeatureSpline(se_object = omicslonda_data_example$omicslonda_se_object, 
-                      omicslonda_object = omicslonda_data_example$omicslonda_results, 
-                      method = "ssgaussian", text = "Feature_1", unit = "days",
-                      ylabel = "Normalized Count", col = c("blue", "firebrick"),
-                      prefix = "OmicsLonDA_example")
+omicslonda_data_example$ome_matrix[1:5, 1:5]
+se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+se_metadata = DataFrame(omicslonda_data_example$metadata)
+omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+                                            colData = se_metadata)
+omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+points = seq(1, 500, length.out = 500)
+res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
+                 fit.method = "ssgaussian", points = points, text = "Feature_1",
+                 parall = FALSE, pvalue.threshold = 0.05, 
+                 adjust.method = "BH", time.unit = "days",
+                 ylabel = "Normalized Count",
+                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = res, method = "ssgaussian",
+                       text = "Feature_1", unit = "days",
+                       ylabel = "Normalized Count", 
+                       col = c("blue", "firebrick"),
+                       prefix = "OmicsLonDA_example")
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

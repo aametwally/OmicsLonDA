@@ -18,11 +18,18 @@
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
-#' data(omicslonda_data_example)
-#' visualizeFeature(se_object = omicslonda_data_example$omicslonda_se_object, 
-#'                 text = "Feature_1",
-#'                 unit = "days", ylabel = "Normalized Count", 
-#'                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+#' library(SummarizedExperiment)
+#' data("omicslonda_data_example")
+#' omicslonda_data_example$ome_matrix[1:5, 1:5]
+#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+#' se_metadata = DataFrame(omicslonda_data_example$metadata)
+#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+#'                                            colData = se_metadata)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+#' visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
+#'                  unit = "days", ylabel = "Normalized Count", 
+#'                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 #' @export
 visualizeFeature = function (se_object = NULL, text = "featureName",
                                 unit = "days", ylabel = "Normalized Count", 
@@ -91,12 +98,27 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
+#' library(SummarizedExperiment)
 #' data(omicslonda_data_example)
-#' visualizeFeatureSpline(se_object = omicslonda_data_example$omicslonda_se_object, 
-#'                       omicslonda_object = omicslonda_data_example$omicslonda_results, 
-#'                       method = "ssgaussian", text = "Feature_1", unit = "days",
-#'                       ylabel = "Normalized Count", col = c("blue", "firebrick"),
-#'                       prefix = "OmicsLonDA_example")
+#' omicslonda_data_example$ome_matrix[1:5, 1:5]
+#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+#' se_metadata = DataFrame(omicslonda_data_example$metadata)
+#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+#'                                             colData = se_metadata)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+#' points = seq(1, 500, length.out = 500)
+#' res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
+#'                  fit.method = "ssgaussian", points = points, text = "Feature_1",
+#'                  parall = FALSE, pvalue.threshold = 0.05, 
+#'                  adjust.method = "BH", time.unit = "days",
+#'                  ylabel = "Normalized Count",
+#'                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+#' visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = res, method = "ssgaussian",
+#'                        text = "Feature_1", unit = "days",
+#'                        ylabel = "Normalized Count", 
+#'                        col = c("blue", "firebrick"),
+#'                        prefix = "OmicsLonDA_example")
 #' @export
 visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, method = "ssgaussian",
                                     text = "FeatureName", unit = "days",
@@ -197,9 +219,24 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, m
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
+#' library(SummarizedExperiment)
 #' data(omicslonda_data_example)
-#' visualizeTestStatHistogram(omicslonda_object = omicslonda_data_example$omicslonda_results,
-#'                   text = "Feature_1", method = "ssgaussian", prefix = "OmicsLonDA_example")
+#' omicslonda_data_example$ome_matrix[1:5, 1:5]
+#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+#' se_metadata = DataFrame(omicslonda_data_example$metadata)
+#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+#'                                             colData = se_metadata)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+#' points = seq(1, 500, length.out = 500)
+#' res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
+#'                  fit.method = "ssgaussian", points = points, text = "Feature_1",
+#'                  parall = FALSE, pvalue.threshold = 0.05, 
+#'                  adjust.method = "BH", time.unit = "days",
+#'                  ylabel = "Normalized Count",
+#'                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+#' visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1", 
+#'                  method = "ssgaussian", prefix = "OmicsLonDA_example")
 #' @export
 visualizeTestStatHistogram = function(omicslonda_object = NULL, text = "FeatureName", 
                                       method = "ssgaussian", prefix = "Test"){
@@ -245,11 +282,26 @@ visualizeTestStatHistogram = function(omicslonda_object = NULL, text = "FeatureN
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples
+#' library(SummarizedExperiment)
 #' data(omicslonda_data_example)
-#' visualizeArea(omicslonda_object = omicslonda_data_example$omicslonda_results,
-#'               method = "ssgaussian", text = "Feature_1", unit = "days",
-#'               ylabel = "Normalized Count", col = c("blue", "firebrick"),
-#'               prefix = "OmicsLonDA_example")
+#' omicslonda_data_example$ome_matrix[1:5, 1:5]
+#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+#' se_metadata = DataFrame(omicslonda_data_example$metadata)
+#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+#'                                             colData = se_metadata)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+#' points = seq(1, 500, length.out = 500)
+#' res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
+#'                  fit.method = "ssgaussian", points = points, text = "Feature_1",
+#'                  parall = FALSE, pvalue.threshold = 0.05, 
+#'                  adjust.method = "BH", time.unit = "days",
+#'                  ylabel = "Normalized Count",
+#'                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+#' visualizeArea(omicslonda_object = res, method = "ssgaussian",
+#'                  text = "Feature_1", unit = "days", 
+#'                  ylabel = "Normalized Count", col =
+#'                  c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 #' @export
 visualizeArea = function(omicslonda_object = NULL, method = "ssgaussian",
                             text = "FeatureName", unit = "days",

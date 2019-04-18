@@ -30,11 +30,18 @@ null
 Visualize Longitudinal Feature
 }
 \examples{
-data(omicslonda_data_example)
-visualizeFeature(se_object = omicslonda_data_example$omicslonda_se_object, 
-                text = "Feature_1",
-                unit = "days", ylabel = "Normalized Count", 
-                col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
+library(SummarizedExperiment)
+data("omicslonda_data_example")
+omicslonda_data_example$ome_matrix[1:5, 1:5]
+se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+se_metadata = DataFrame(omicslonda_data_example$metadata)
+omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+                                           colData = se_metadata)
+omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
+                 unit = "days", ylabel = "Normalized Count", 
+                 col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)
