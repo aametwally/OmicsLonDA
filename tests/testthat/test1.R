@@ -15,5 +15,5 @@ test_that("Element test", {
                    col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
   #correct <- c("sim_f1")
   #expect_match(output.omicslonda_diff_1[[1]][[1]][1], correct)
-  expect_true(identical(res$details$feature[1], "FeatureName"))
+  expect_true(identical(res$details$feature[1], "Feature_1"))
 })

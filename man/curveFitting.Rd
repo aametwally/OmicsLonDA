@@ -24,7 +24,16 @@ Fits longitudinal samples from the same group using negative binomial
 smoothing splines or LOWESS
 }
 \examples{
-data(omicslonda_data_example)
+library(SummarizedExperiment)
+data("omicslonda_data_example")
+omicslonda_data_example$ome_matrix[1:5, 1:5]
+se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+se_metadata = DataFrame(omicslonda_data_example$metadata)
+omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+                                           colData = se_metadata)
+omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+se_object = omicslonda_test_object
 dt = data.frame(colData(se_object))
 dt$Count = as.vector(assay(se_object))
 Group = as.character(dt$Group)
