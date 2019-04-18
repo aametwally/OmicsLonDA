@@ -51,8 +51,9 @@ adjustBaseline = function(se_object = NULL){
 #' @return a list that contains fitted smoothing spline for each group 
 #' along with 95% confidence intervals
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment assays
+#' @importFrom stats predict
 #' @import gss
-#' @import stats
+
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 

@@ -24,7 +24,7 @@
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
 #' @import parallel
 #' @import doParallel
-#' @import stats
+#' @importFrom stats p.adjust
 #' @import zoo
 #' @import SummarizedExperiment
 #' @references
