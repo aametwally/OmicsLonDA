@@ -46,7 +46,8 @@ res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
                  adjust.method = "BH", time.unit = "days",
                  ylabel = "Normalized Count",
                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
-visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = res, method = "ssgaussian",
+visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = 
+                       omicslonda_data_example$omicslonda_results, method = "ssgaussian",
                        text = "Feature_1", unit = "days",
                        ylabel = "Normalized Count", 
                        col = c("blue", "firebrick"),

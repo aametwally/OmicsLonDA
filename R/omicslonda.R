@@ -99,12 +99,12 @@ omicslonda = function(se_object = NULL, n.perm = 500,
     {
         message("Fitting: Smoothing Spline Gaussian Regression \n")
         model = tryCatch({
-        curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
-        },  error = function(err) {
-          stop("ERROR in gss = ", err)
-          #print(paste("ERROR in gss = ", err, sep="")); 
-          #return("ERROR")
-        })
+            curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+            },  error = function(err) {
+              stop("ERROR in gss = ", err)
+              #print(paste("ERROR in gss = ", err, sep="")); 
+              #return("ERROR")
+            })
     } else {
         stop("You have entered unsupported fitting method")
     }
@@ -113,9 +113,6 @@ omicslonda = function(se_object = NULL, n.perm = 500,
     ### Test Statistic
     stat = testStat(model)$testStat
     
-    
-    ## TODO: fix the occasional warning  # 1: <anonymous>: ... may be used in an
-    #  incorrect context: ‘.fun(piece, ...)’
     ## Permutation 
     perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
                             method = fit.method, points = points,

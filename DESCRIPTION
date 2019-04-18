@@ -10,7 +10,7 @@ BugReports: https://github.com/aametwally/OmicsLonDA/issues
 Description: Statistical method that provides robust identification of time intervals where omics features (such as proteomics, lipidomics, metabolomics, transcriptomics, microbiome, as well as physiological parameters captured by wearable sensors such as heart rhythm, body temperature, and activity level) are significantly different between groups.
 License: MIT + file LICENSE
 Depends:
-    R(>= 3.5)
+    R(>= 3.6)
 Imports:
     SummarizedExperiment,
     gss,
