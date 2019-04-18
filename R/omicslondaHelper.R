@@ -231,8 +231,55 @@ testStat = function(curve.fit.df){
     return(list(testStat = testStat))
 }
 
-    
-    
+
+#' Calculate testStat of each feature's time interval for all permutations
+#' 
+#' @param perm list has all the permutated models
+#' @return a list of test statistic for each time interval for all all permutations
+#' @references
+#' Ahmed Metwally (ametwall@stanford.edu)
+#' @examples 
+#' library(SummarizedExperiment)
+#' data("omicslonda_data_example")
+#' omicslonda_data_example$ome_matrix[1:5, 1:5]
+#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+#' se_metadata = DataFrame(omicslonda_data_example$metadata)
+#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+#'                                            colData = se_metadata)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+#' se_object = omicslonda_test_object
+#' dt = data.frame(colData(se_object))
+#' dt$Count = as.vector(assay(se_object))
+#' Group = as.character(dt$Group)
+#' group.levels = sort(unique(Group))
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' df = dt
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points = seq(100, 130)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' stat = testStat(model)$testStat
+#' n.perm = 10
+#' parall = FALSE
+#' prefix = "OmicsLonDA_example"
+#' fit.method = "ssgaussian"
+#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
+#'                       method = fit.method, points = points,
+#'                       parall = parall, prefix = prefix)
+#' test.stat.prem = testStatPermutation(perm)
+#' @export
+testStatPermutation = function(perm)
+{
+  testStat.list <- lapply(perm, testStat)
+  return(testStat.list)
+}
+
+
 #' Find Significant Interval based on testStat
 #'
 #' Find Significant Interval based on testStat
@@ -245,10 +292,57 @@ testStat = function(curve.fit.df){
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
-#' padjusted = abs(rnorm(10, mean = 0.05, sd = 0.04))
-#' sign = sample(x = c(1,-1), 10, replace = TRUE)
-#' significantIntervals = findSigInterval(adjusted.pvalue = padjusted, 
-#'                         threshold = 0.05, sign = sign)
+#' library(SummarizedExperiment)
+#' data("omicslonda_data_example")
+#' omicslonda_data_example$ome_matrix[1:5, 1:5]
+#' se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+#' se_metadata = DataFrame(omicslonda_data_example$metadata)
+#' omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+#'                                            colData = se_metadata)
+#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+#' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+#' se_object = omicslonda_test_object
+#' dt = data.frame(colData(se_object))
+#' dt$Count = as.vector(assay(se_object))
+#' Group = as.character(dt$Group)
+#' group.levels = sort(unique(Group))
+#' gr.1 = as.character(group.levels[1])
+#' gr.2 = as.character(group.levels[2])
+#' df = dt
+#' levels(df$Group) = c(levels(df$Group), "0", "1")
+#' df$Group[which(df$Group == gr.1)] = 0
+#' df$Group[which(df$Group == gr.2)] = 1
+#' group.0 = df[df$Group == 0, ]
+#' group.1 = df[df$Group == 1, ]
+#' points = seq(100, 130)
+#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+#' stat = testStat(model)$testStat
+#' n.perm = 10
+#' parall = FALSE
+#' prefix = "OmicsLonDA_example"
+#' fit.method = "ssgaussian"
+#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
+#'                       method = fit.method, points = points,
+#'                       parall = parall, prefix = prefix)
+#' test.stat.prem = testStatPermutation(perm)
+#' t1 = do.call(rbind, test.stat.prem)
+#' t2 = unlist(t1[,1])
+#' t3 = as.vector(t2)
+#' length(t3)
+#' pvalue.test.stat = vapply(head(seq_along(points), -1), function(i){
+#'   if(stat[i]>=0)
+#'   {
+#'     sum(t3 > stat[i])/length(t3)
+#'   }
+#'   else if(stat[i]<0)
+#'   {
+#'     sum(t3 < stat[i])/length(t3)
+#'   }
+#' }, 1)
+#' pvalue.threshold = 0.05
+#' adjusted.pvalue = p.adjust(pvalue.test.stat, method = "BH")
+#' interval = findSigInterval(adjusted.pvalue, threshold = pvalue.threshold,
+#'                            sign = sign(stat))
 #' @export
 findSigInterval = function(adjusted.pvalue, threshold = 0.05, sign)
 {
@@ -313,41 +407,4 @@ findSigInterval = function(adjusted.pvalue, threshold = 0.05, sign)
     }
     
     return(list(start = start, end = end, pvalue = p, dominant = dom))
-}
-
-
-
-
-#' Calculate testStat of each feature's time interval for all permutations
-#' 
-#' @param perm list has all the permutated models
-#' @return a list of test statistic for each time interval for all all permutations
-#' @references
-#' Ahmed Metwally (ametwall@stanford.edu)
-#' @examples 
-#' data(omicslonda_data_example)
-#' dt = data.frame(colData(se_object))
-#' dt$Count = as.vector(assay(se_object))
-#' Group = as.character(dt$Group)
-#' group.levels = sort(unique(Group))
-#' gr.1 = as.character(group.levels[1])
-#' gr.2 = as.character(group.levels[2])
-#' df = dt
-#' levels(df$Group) = c(levels(df$Group), "0", "1")
-#' df$Group[which(df$Group == gr.1)] = 0
-#' df$Group[which(df$Group == gr.2)] = 1
-#' group.0 = df[df$Group == 0, ]
-#' group.1 = df[df$Group == 1, ]
-#' points = seq(100, 130)
-#' model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
-#' 
-#' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'             method = "ssgaussian", points = points, parall = FALSE,
-#'             prefix = "Test")
-#' test.stat.prem = testStatPermutation(perm)
-#' @export
-testStatPermutation = function(perm)
-{
-    testStat.list <- lapply(perm, testStat)
-    return(testStat.list)
 }
