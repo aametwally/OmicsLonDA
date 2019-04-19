@@ -4,40 +4,46 @@
 \alias{curveFitting}
 \title{Fit longitudinal data}
 \usage{
-curveFitting(formula = Count ~ Time, df, method = "ssnbinomial",
-  points)
+curveFitting(formula = Count ~ Time, df = "NULL",
+  fit.method = "ssgaussian", points = NULL)
 }
 \arguments{
 \item{formula}{formula to be passed to the regression model}
 
 \item{df}{dataframe has the Count, Group, Subject, Time}
 
-\item{method}{fitting method (ssgaussian)}
+\item{fit.method}{fitting method (ssgaussian)}
 
 \item{points}{points at which the prediction should happen}
 }
 \value{
-returns the fitted model
+a list that contains fitted smoothing spline for each group 
+along with 95% confidence intervals
 }
 \description{
 Fits longitudinal samples from the same group using negative binomial
 smoothing splines or LOWESS
 }
 \examples{
-data(diff_simulatedDataset_norm)
-df = diff_simulatedDataset_norm[[1]]
-Group = as.character(df$Group)
+library(SummarizedExperiment)
+data("omicslonda_data_example")
+omicslonda_se_object_adjusted = adjustBaseline(
+                 se_object = omicslonda_data_example$omicslonda_se_object)
+se_object = omicslonda_se_object_adjusted[1,]
+dt = data.frame(colData(se_object))
+dt$Count = as.vector(assay(se_object))
+Group = as.character(dt$Group)
 group.levels = sort(unique(Group))
 gr.1 = as.character(group.levels[1])
 gr.2 = as.character(group.levels[2])
+df = dt
 levels(df$Group) = c(levels(df$Group), "0", "1")
 df$Group[which(df$Group == gr.1)] = 0
 df$Group[which(df$Group == gr.2)] = 1
 group.0 = df[df$Group == 0, ]
 group.1 = df[df$Group == 1, ]
-points = seq(100, 130)
-model = curveFitting(formula = Count ~ Time, df, method = "ssgaussian", 
-        points)
+points = seq(1, 500)
+model = curveFitting(formula = Count ~ Time, df = df, fit.method = "ssgaussian", points = points)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

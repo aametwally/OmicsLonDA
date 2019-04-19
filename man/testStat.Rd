@@ -10,28 +10,16 @@ testStat(curve.fit.df)
 \item{curve.fit.df}{gss data object of the fitted spline}
 }
 \value{
-returns testStat for all time intervals
+a list that has the test statistic for each time interval
 }
 \description{
 Calculate Test-Statistic of each feature's time interval
 }
 \examples{
-data(diff_simulatedDataset_norm)
-df = diff_simulatedDataset_norm[[1]]
-Group = as.character(df$Group)
-group.levels = sort(unique(Group))
-gr.1 = as.character(group.levels[1])
-gr.2 = as.character(group.levels[2])
-levels(df$Group) = c(levels(df$Group), "0", "1")
-df$Group[which(df$Group == gr.1)] = 0
-df$Group[which(df$Group == gr.2)] = 1
-group.0 = df[df$Group == 0, ]
-group.1 = df[df$Group == 1, ]
-points = seq(100, 130)
-model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
-        points)
-tstat = testStat(model)
-stat = tstat$testStat
+library(SummarizedExperiment)
+data("omicslonda_data_example")
+model = omicslonda_data_example$omicslonda_results$model
+stat = testStat(model)$testStat
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

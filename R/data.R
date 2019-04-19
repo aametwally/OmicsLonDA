@@ -1,6 +1,6 @@
 #' Simulated dataset
 #'
-#' The dataset is used for testing OmicsLonDA
+#' Datasets used for examples/testing OmicsLonDA
 #'
-#' @format A data frame with 1000 simulated features 
-"diff_simulatedDataset_norm"
+#' @format A data frame with 10 simulated features 
+"omicslonda_data_example"

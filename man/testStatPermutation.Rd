@@ -10,29 +10,34 @@ testStatPermutation(perm)
 \item{perm}{list has all the permutated models}
 }
 \value{
-returns a list of all permutation area ratio
+a list of test statistic for each time interval for all all permutations
 }
 \description{
 Calculate testStat of each feature's time interval for all permutations
 }
 \examples{
-data(diff_simulatedDataset_norm)
-df = diff_simulatedDataset_norm[[1]]
-Group = as.character(df$Group)
+library(SummarizedExperiment)
+data("omicslonda_data_example")
+omicslonda_se_object_adjusted = adjustBaseline(
+    se_object = omicslonda_data_example$omicslonda_se_object)
+omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+se_object = omicslonda_test_object
+dt = data.frame(colData(se_object))
+dt$Count = as.vector(assay(se_object))
+Group = as.character(dt$Group)
 group.levels = sort(unique(Group))
 gr.1 = as.character(group.levels[1])
 gr.2 = as.character(group.levels[2])
+df = dt
 levels(df$Group) = c(levels(df$Group), "0", "1")
 df$Group[which(df$Group == gr.1)] = 0
 df$Group[which(df$Group == gr.2)] = 1
 group.0 = df[df$Group == 0, ]
 group.1 = df[df$Group == 1, ]
 points = seq(100, 130)
-model = curveFitting(formula = Count ~ Time, df, method= "ssgaussian", 
-        points)
-perm  = permutationMC2(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-            method = "ssgaussian", points = points, parall = FALSE,
-            prefix = "Test")
+perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = 10,
+                      fit.method = "ssgaussian", points = points,
+                      parall = FALSE, prefix = tempfile())
 test.stat.prem = testStatPermutation(perm)
 }
 \references{

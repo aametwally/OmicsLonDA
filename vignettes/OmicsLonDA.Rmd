@@ -1,6 +1,6 @@
 ---
 title: "An Introduction to the OmicsLonDA Package"
-author: "Ahmed Metwally, Tom Zhang"
+author: "Ahmed A. Metwally"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -31,40 +31,143 @@ statistic
 
 ## Getting Started
 ### Prerequisites
-* R(>= 3.6)
+* R(>= 3.5)
 
 ### Installation
-Download the latest development code of OmicsLonDA from GitHub using devtools:
-```{r}
-library(devtools)
-library(OmicsLonDA)
+Install the latest version of OmicsLonDA from Bioconductor:
+```{r results='hide',message=FALSE,warning=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager", repos = "http://cran.us.r-project.org")
+BiocManager::install("OmicsLonDA")
+
 ```
 
 ### Example
-```{r}
+```{r, results='hide',message=FALSE,warning=FALSE}
 library(OmicsLonDA)
+library(SummarizedExperiment)
 
-## Load 1000 simulated features
-data(diff_simulatedDataset_norm)
-head(diff_simulatedDataset_norm[[1]])
+## Load 10 simulated features and metadata
+data("omicslonda_data_example")
 ```
 
-### Apply OmicsLonDA on feature #1
+
+
+The measurment matrix represents count/intensity of features from an omic experiment. Columns represent various samples from different subjects longitudinally. Rows represent various features. Here is an example:
 ```{r}
-## Define the prediction timepoints 
-points = seq(1, 200, length.out = 200)
-output.omicslonda_diff_1 = omicslonda(formula = normalizedCount ~ Time, df =
-                                      diff_simulatedDataset_norm[[1]],
-                                      n.perm = 10, fit.method = "ssgaussian",
-                                      points = points, text = "sim_f1",
-                                      parall = FALSE, pvalue.threshold = 0.05,
-                                      adjust.method = "BH",
-                                      col = c("blue", "green"),
-                                      prefix = "OmicsLonDA_clr_f1",
-                                      ylabel = "CLR-NormalizedCount",
-                                      DrawTestStatDist = FALSE,
-                                      time.unit = "days")
+omicslonda_data_example$ome_matrix[1:5, 1:5]
 ```
+
+
+The metadata dataframe contains annotations for each sample. Most impotantly it should have at least: (a) "Subject": which denote from which subject this sample is coming from,  (b) "Group": which represents which group this sample is from (eg., healthy, disease, etc), (c) "Time": which represents the collection time of the corresponding sample. Here is an example:
+```{r}
+head(omicslonda_data_example$metadata)
+```
+
+
+## Create SummarizedExperiment object
+```{r,message=FALSE,warning=FALSE}
+se_ome_matrix = as.matrix(omicslonda_data_example$ome_matrix)
+se_metadata = DataFrame(omicslonda_data_example$metadata)
+omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
+                                            colData = se_metadata)
+```
+
+## Adjust for baseline using CLR
+```{r,message=FALSE,warning=FALSE}
+omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
+```
+
+
+## Measurments after baseline adjustment
+```{r}
+assay(omicslonda_se_object_adjusted)[1:5, 1:5]
+```
+
+
+## Visualize first feature
+```{r,message=FALSE,warning=FALSE}
+omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
+                 unit = "days", ylabel = "Normalized Count", 
+                 col = c("blue", "firebrick"), prefix = tempfile())
+```
+![Visualize first feature](VisualizeFeature.jpg){width=400px}
+
+
+## Specify interval bounds
+```{r}
+points = seq(1, 500, length.out = 500)
+```
+
+
+
+## Run OmicsLonDA on the first feature
+```{r,results='hide', message=FALSE,warning=FALSE}
+res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
+                 fit.method = "ssgaussian", points = points, text = "Feature_1",
+                 parall = FALSE, pvalue.threshold = 0.05, 
+                 adjust.method = "BH", time.unit = "days",
+                 ylabel = "Normalized Count",
+                 col = c("blue", "firebrick"), prefix = tempfile())
+```
+
+
+## Visualize fitted spline of the first feature
+```{r,message=FALSE,warning=FALSE}
+visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = res, fit.method = "ssgaussian",
+                        text = "Feature_1", unit = "days",
+                        ylabel = "Normalized Count", 
+                        col = c("blue", "firebrick"),
+                        prefix = "OmicsLonDA_example")
+```
+![Fitted spline of the first feature](FittedSplines.jpg){width=400px}
+
+
+## Visulaize null distribution of the first feature's statistic
+```{r,results='hide', message=FALSE,warning=FALSE}
+visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1", 
+                                fit.method = "ssgaussian", prefix = tempfile())
+```
+![null distribution of the first feature's statistic](TestStatistic_NullDistribution.jpg){width=400px}
+
+
+
+## Visulize significant time intervals of first feature
+```{r,message=FALSE,warning=FALSE}
+visualizeArea(omicslonda_object = res, fit.method = "ssgaussian",
+              text = "Feature_1", unit = "days", 
+              ylabel = "Normalized Count", col =
+                c("blue", "firebrick"), prefix = tempfile())
+```
+
+
+![Significant time intervals of feature 1](SignificantIntervals.jpg){width=400px}
+
+
+
+```{r,message=FALSE,warning=FALSE}
+prefix = tempfile()
+if (!dir.exists(prefix)){
+        dir.create(file.path(prefix))
+}
+
+## Save OmicsLonDA results in RData file
+save(res, file = sprintf("%s/Feature_%s_results_%s.RData",
+                        prefix = prefix, text = "Feature_1", 
+                        fit.method = "ssgaussian"))
+
+
+
+## Save a summary of time intervals statistics in csv file
+feature.summary = as.data.frame(do.call(cbind, res$details),
+                                stringsAsFactors = FALSE)
+
+write.csv(feature.summary, file = sprintf("%s/Feature_%s_Summary_%s.csv",
+                                          prefix = prefix, text = "Feature_1", 
+                                          fit.method = "ssgaussian"), row.names = FALSE)
+```
+
 
 ## Bugs and Suggestions
 OmicsLonDA is under active research development. Please report any

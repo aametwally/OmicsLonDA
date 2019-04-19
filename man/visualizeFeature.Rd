@@ -4,18 +4,15 @@
 \alias{visualizeFeature}
 \title{Visualize Longitudinal Feature}
 \usage{
-visualizeFeature(formula = Count ~ Time, df, text, group.levels,
+visualizeFeature(se_object = NULL, text = "featureName",
   unit = "days", ylabel = "Normalized Count", col = c("blue",
   "firebrick"), prefix = "Test")
 }
 \arguments{
-\item{formula}{formula used in method}
-
-\item{df}{dataframe has the Count, Group, ID, Time}
+\item{se_object}{SummarizedExperiment object contains omics count/level matrix 
+and  metadata}
 
 \item{text}{feature name}
-
-\item{group.levels}{The two level's name}
 
 \item{unit}{time interval unit}
 
@@ -33,15 +30,14 @@ null
 Visualize Longitudinal Feature
 }
 \examples{
-data(diff_simulatedDataset_norm)
-df = diff_simulatedDataset_norm[[1]]
-Group = as.character(df$Group)
-group.levels = sort(unique(Group))
-gr.1 = as.character(group.levels[1])
-gr.2 = as.character(group.levels[2])
-levels(df$Group) = c(levels(df$Group), "0", "1")
-df$Group[which(df$Group == gr.1)] = 0
-df$Group[which(df$Group == gr.2)] = 1
+library(SummarizedExperiment)
+data("omicslonda_data_example")
+omicslonda_se_object_adjusted = adjustBaseline(
+                 se_object = omicslonda_data_example$omicslonda_se_object)
+omicslonda_test_object = omicslonda_se_object_adjusted[1,]
+visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
+                 unit = "days", ylabel = "Normalized Count", 
+                 col = c("blue", "firebrick"), prefix = tempfile())
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)
