@@ -59,7 +59,8 @@ adjustBaseline = function(se_object = NULL){
 #' @examples 
 #' library(SummarizedExperiment)
 #' data("omicslonda_data_example")
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+#' omicslonda_se_object_adjusted = adjustBaseline(
+#'                  se_object = omicslonda_data_example$omicslonda_se_object)
 #' se_object = omicslonda_se_object_adjusted[1,]
 #' dt = data.frame(colData(se_object))
 #' dt$Count = as.vector(assay(se_object))
@@ -215,7 +216,8 @@ testStat = function(curve.fit.df){
 #' @examples 
 #' library(SummarizedExperiment)
 #' data("omicslonda_data_example")
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+#' omicslonda_se_object_adjusted = adjustBaseline(
+#'     se_object = omicslonda_data_example$omicslonda_se_object)
 #' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 #' se_object = omicslonda_test_object
 #' dt = data.frame(colData(se_object))

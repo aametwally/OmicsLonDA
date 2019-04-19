@@ -37,7 +37,8 @@ Plot the longitudinal features along with the fitted splines
 \examples{
 library(SummarizedExperiment)
 data(omicslonda_data_example)
-omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+omicslonda_se_object_adjusted = adjustBaseline(
+                 se_object = omicslonda_data_example$omicslonda_se_object)
 omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 points = seq(1, 500, length.out = 500)
 res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
@@ -47,11 +48,11 @@ res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
                  ylabel = "Normalized Count",
                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = 
-                       omicslonda_data_example$omicslonda_results, method = "ssgaussian",
-                       text = "Feature_1", unit = "days",
-                       ylabel = "Normalized Count", 
-                       col = c("blue", "firebrick"),
-                       prefix = tempfile())
+                 omicslonda_data_example$omicslonda_results, method = "ssgaussian",
+                 text = "Feature_1", unit = "days",
+                 ylabel = "Normalized Count", 
+                 col = c("blue", "firebrick"),
+                 prefix = tempfile())
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

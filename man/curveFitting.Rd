@@ -27,7 +27,8 @@ smoothing splines or LOWESS
 \examples{
 library(SummarizedExperiment)
 data("omicslonda_data_example")
-omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+omicslonda_se_object_adjusted = adjustBaseline(
+                 se_object = omicslonda_data_example$omicslonda_se_object)
 se_object = omicslonda_se_object_adjusted[1,]
 dt = data.frame(colData(se_object))
 dt$Count = as.vector(assay(se_object))

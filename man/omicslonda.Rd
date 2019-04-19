@@ -50,7 +50,8 @@ Find significant time intervals of omic feature
 \examples{
 library(SummarizedExperiment)
 data(omicslonda_data_example)
-omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+omicslonda_se_object_adjusted = adjustBaseline(
+                 se_object = omicslonda_data_example$omicslonda_se_object)
 omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 points = seq(1, 500, length.out = 500)
 res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,

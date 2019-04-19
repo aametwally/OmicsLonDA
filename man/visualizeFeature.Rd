@@ -32,7 +32,8 @@ Visualize Longitudinal Feature
 \examples{
 library(SummarizedExperiment)
 data("omicslonda_data_example")
-omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+omicslonda_se_object_adjusted = adjustBaseline(
+                 se_object = omicslonda_data_example$omicslonda_se_object)
 omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
                  unit = "days", ylabel = "Normalized Count", 

@@ -20,7 +20,8 @@
 #' @examples 
 #' library(SummarizedExperiment)
 #' data("omicslonda_data_example")
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+#' omicslonda_se_object_adjusted = adjustBaseline(
+#'                  se_object = omicslonda_data_example$omicslonda_se_object)
 #' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 #' visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
 #'                  unit = "days", ylabel = "Normalized Count", 
@@ -41,8 +42,8 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
     df$Count = as.vector(assay(se_object))
     group.levels = sort(unique(as.character(df$Group)))
     
-    p = ggplot(df, aes(Time, Count, colour = Group, group = interaction(Group,
-                                                                Subject)))
+    p = ggplot(df, aes(.data$Time, .data$Count, colour = .data$Group, group = interaction(.data$Group,
+                                                         .data$Subject)))
     p = p + geom_point(size = 1, alpha = 0.5) + geom_line(size = 1,
         alpha = 0.7) + theme_bw() + ggtitle(paste("Feature = ", text,
         sep = "")) + labs(y = ylabel, x = sprintf("Time (%s)", unit)) +
@@ -95,7 +96,8 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
 #' @examples 
 #' library(SummarizedExperiment)
 #' data(omicslonda_data_example)
-#' omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_data_example$omicslonda_se_object)
+#' omicslonda_se_object_adjusted = adjustBaseline(
+#'                  se_object = omicslonda_data_example$omicslonda_se_object)
 #' omicslonda_test_object = omicslonda_se_object_adjusted[1,]
 #' points = seq(1, 500, length.out = 500)
 #' res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
@@ -105,11 +107,11 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
 #'                  ylabel = "Normalized Count",
 #'                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 #' visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = 
-#'                        omicslonda_data_example$omicslonda_results, method = "ssgaussian",
-#'                        text = "Feature_1", unit = "days",
-#'                        ylabel = "Normalized Count", 
-#'                        col = c("blue", "firebrick"),
-#'                        prefix = tempfile())
+#'                  omicslonda_data_example$omicslonda_results, method = "ssgaussian",
+#'                  text = "Feature_1", unit = "days",
+#'                  ylabel = "Normalized Count", 
+#'                  col = c("blue", "firebrick"),
+#'                  prefix = tempfile())
 #' @export
 visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, method = "ssgaussian",
                                     text = "FeatureName", unit = "days",
@@ -144,7 +146,7 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, m
                                         colour = .data$Group,
                                         group = interaction(.data$Group,
                                                             .data$Subject),
-                                        linetype=lnn), size=2, alpha=0.8) +
+                                        linetype=.data$lnn), size=2, alpha=0.8) +
         geom_point(data = df_subset, aes(.data$Time,
                                         .data$Count, 
                                         colour = .data$Group, group =
