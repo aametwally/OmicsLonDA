@@ -5,14 +5,14 @@
 \title{Fit longitudinal data}
 \usage{
 curveFitting(formula = Count ~ Time, df = "NULL",
-  method = "ssgaussian", points = NULL)
+  fit.method = "ssgaussian", points = NULL)
 }
 \arguments{
 \item{formula}{formula to be passed to the regression model}
 
 \item{df}{dataframe has the Count, Group, Subject, Time}
 
-\item{method}{fitting method (ssgaussian)}
+\item{fit.method}{fitting method (ssgaussian)}
 
 \item{points}{points at which the prediction should happen}
 }
@@ -43,7 +43,7 @@ df$Group[which(df$Group == gr.2)] = 1
 group.0 = df[df$Group == 0, ]
 group.1 = df[df$Group == 1, ]
 points = seq(1, 500)
-model = curveFitting(formula = Count ~ Time, df = df, method = "ssgaussian", points = points)
+model = curveFitting(formula = Count ~ Time, df = df, fit.method = "ssgaussian", points = points)
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

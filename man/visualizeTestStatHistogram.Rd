@@ -5,14 +5,14 @@
 \title{Visualize test statistics empirical distribution}
 \usage{
 visualizeTestStatHistogram(omicslonda_object = NULL,
-  text = "FeatureName", method = "ssgaussian", prefix = "Test")
+  text = "FeatureName", fit.method = "ssgaussian", prefix = "Test")
 }
 \arguments{
 \item{omicslonda_object}{The returned object from omicslonda analysis}
 
 \item{text}{Feature name}
 
-\item{method}{fitting method}
+\item{fit.method}{fitting method}
 
 \item{prefix}{prefix to be used to create directory for the analysis results}
 }
@@ -27,7 +27,7 @@ library(SummarizedExperiment)
 data(omicslonda_data_example)
 visualizeTestStatHistogram(omicslonda_object = omicslonda_data_example$omicslonda_results, 
                  text = "Feature_1", 
-                 method = "ssgaussian", prefix = tempfile())
+                 fit.method = "ssgaussian", prefix = tempfile())
 }
 \references{
 Ahmed Metwally (ametwall@stanford.edu)

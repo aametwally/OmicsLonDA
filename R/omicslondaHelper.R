@@ -13,6 +13,11 @@
 #' adjusted_se = adjustBaseline(omicslonda_data_example$omicslonda_se_object)
 #' @export
 adjustBaseline = function(se_object = NULL){
+  
+    ### validate se_object
+    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
+
     subjects = unique(colData(se_object)$Subject)
     
     df = assay(se_object)
@@ -46,7 +51,7 @@ adjustBaseline = function(se_object = NULL){
 #' 
 #' @param formula formula to be passed to the regression model
 #' @param df dataframe has the Count, Group, Subject, Time
-#' @param method fitting method (ssgaussian)
+#' @param fit.method fitting method (ssgaussian)
 #' @param points points at which the prediction should happen
 #' @return a list that contains fitted smoothing spline for each group 
 #' along with 95% confidence intervals
@@ -75,9 +80,9 @@ adjustBaseline = function(se_object = NULL){
 #' group.0 = df[df$Group == 0, ]
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(1, 500)
-#' model = curveFitting(formula = Count ~ Time, df = df, method = "ssgaussian", points = points)
+#' model = curveFitting(formula = Count ~ Time, df = df, fit.method = "ssgaussian", points = points)
 #' @export
-curveFitting = function(formula = Count ~ Time, df = "NULL", method = "ssgaussian",
+curveFitting = function(formula = Count ~ Time, df = "NULL", fit.method = "ssgaussian",
                         points = NULL){
     
     ## Seprate the two groups
@@ -86,7 +91,7 @@ curveFitting = function(formula = Count ~ Time, df = "NULL", method = "ssgaussia
     group.1 = df[df$Group==1, ]
     
     ## Fitting 
-    if(method == "ssgaussian"){
+    if(fit.method == "ssgaussian"){
         
         ### Difference between random = mkran(~1|Subject, group.null) and
         ### random = ~1|Subject
@@ -121,7 +126,7 @@ curveFitting = function(formula = Count ~ Time, df = "NULL", method = "ssgaussia
     
     
     ## prepare dataframe for plotting
-    if (method == "ssgaussian")
+    if (fit.method == "ssgaussian")
     {
         ## Curve dataframe
         dd.null = data.frame(Time = points, Count = est.null$fit,
@@ -152,7 +157,7 @@ curveFitting = function(formula = Count ~ Time, df = "NULL", method = "ssgaussia
                             Group = "fit.1.l", Subject = "fit.1.l")
     } 
     
-    if(method == "ssgaussian")
+    if(fit.method == "ssgaussian")
     {
         output = list(f.stat = f.stat, rss.null = rss.null, rss.full = rss.full,
                     dd.null = dd.null, dd.0 = dd.0, dd.1 = dd.1,
@@ -234,7 +239,7 @@ testStat = function(curve.fit.df){
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
 #' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'                       method = "ssgaussian", points = points,
+#'                       fit.method = "ssgaussian", points = points,
 #'                       parall = FALSE, prefix = tempfile())
 #' test.stat.prem = testStatPermutation(perm)
 #' @export
@@ -275,7 +280,7 @@ findSigInterval = function(adjusted.pvalue, threshold = 0.05, sign)
     
     if(length(sig) == 0)
     {
-        message("No Significant Intevals Found \n")
+        message("No Significant Intevals Found")
     }
     else if(length(sig) == 1)
     {

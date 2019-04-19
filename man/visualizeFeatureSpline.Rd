@@ -5,7 +5,7 @@
 \title{Visualize the feature trajectory with the fitted Splines}
 \usage{
 visualizeFeatureSpline(se_object = NULL, omicslonda_object = NULL,
-  method = "ssgaussian", text = "FeatureName", unit = "days",
+  fit.method = "ssgaussian", text = "FeatureName", unit = "days",
   ylabel = "Normalized Count", col = c("blue", "firebrick"),
   prefix = "Test")
 }
@@ -15,7 +15,7 @@ and  metadata}
 
 \item{omicslonda_object}{The returned object from omicslonda analysis}
 
-\item{method}{The fitting method (ssgaussian)}
+\item{fit.method}{The fitting method (ssgaussian)}
 
 \item{text}{feature name}
 
@@ -48,7 +48,7 @@ res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
                  ylabel = "Normalized Count",
                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = 
-                 omicslonda_data_example$omicslonda_results, method = "ssgaussian",
+                 omicslonda_data_example$omicslonda_results, fit.method = "ssgaussian",
                  text = "Feature_1", unit = "days",
                  ylabel = "Normalized Count", 
                  col = c("blue", "firebrick"),

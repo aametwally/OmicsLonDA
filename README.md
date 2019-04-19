@@ -1,10 +1,5 @@
 # OmicsLonDA
 
-OmicsLonDA (Omics Longitudinal Differential Analysis) is a statistical framework that provides robust identification of time intervals where omics features are significantly different between groups. OmicsLonDA is based on 5 main steps: (a) adjust measurements based on each subject's specific baseline, (b) global testing using linear mixed-effect model to select candidate features and covariates for time intervals analysis, (c) fitting smoothing spline regression model, (d) Monte Carlo simulation to generate the empirical distribution of the test statistic, and (e) inference of significant time intervals of omics features. 
-
-
-
-
 OmicsLonDA (Omics Longitudinal Differential Analysis) is a statistical framework
 that provides robust identification of time intervals where omics features are
 significantly different between groups. OmicsLonDA is based on 5 main steps:
@@ -53,10 +48,17 @@ data("omicslonda_data_example")
 ```
 
 
+The measurment matrix represents count/intensity of features from an omic experiment. Columns represent various samples from different subjects longitudinally. Rows represent various features. Here is an example:
 ```
 omicslonda_data_example$ome_matrix[1:5, 1:5]
+```
+
+
+The metadata dataframe contains annotations for each sample. Most impotantly it should have at least: (a) "Subject": which denote from which subject this sample is coming from,  (b) "Group": which represents which group this sample is from (eg., healthy, disease, etc), (c) "Time": which represents the collection time of the corresponding sample. Here is an example:
+```
 head(omicslonda_data_example$metadata)
 ```
+
 
 
 ## Create SummarizedExperiment object
@@ -72,6 +74,8 @@ omicslonda_se_object = SummarizedExperiment(assays=list(se_ome_matrix),
 omicslonda_se_object_adjusted = adjustBaseline(se_object = omicslonda_se_object)
 ```
 
+
+## Measurments after baseline adjustment
 ```
 assay(omicslonda_se_object_adjusted)[1:5, 1:5]
 ```
@@ -107,7 +111,7 @@ res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
 
 ## Visualize fitted spline of the first feature
 ```
-visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = res, method = "ssgaussian",
+visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = res, fit.method = "ssgaussian",
                         text = "Feature_1", unit = "days",
                         ylabel = "Normalized Count", 
                         col = c("blue", "firebrick"),
@@ -119,7 +123,7 @@ visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = r
 ## Visulaize null distribution of the first feature's statistic
 ```
 visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1", 
-                                method = "ssgaussian", prefix = "OmicsLonDA_example")
+                                fit.method = "ssgaussian", prefix = "OmicsLonDA_example")
 ```
 ![null distribution of the first feature's statistic](vignettes/TestStatistic_NullDistribution.jpg){width=400px}
 
@@ -127,7 +131,7 @@ visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1",
 
 ## Visulize significant time intervals of first feature
 ```
-visualizeArea(omicslonda_object = res, method = "ssgaussian",
+visualizeArea(omicslonda_object = res, fit.method = "ssgaussian",
               text = "Feature_1", unit = "days", 
               ylabel = "Normalized Count", col =
                 c("blue", "firebrick"), prefix = "OmicsLonDA_example")

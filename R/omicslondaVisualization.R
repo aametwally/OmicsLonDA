@@ -31,8 +31,13 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
                                 unit = "days", ylabel = "Normalized Count", 
                                 col = c("blue", "firebrick"), prefix = "Test")
 {
-    message("Visualizing Feature = ", text, "\n")
+    message("Visualizing Feature = ", text)
     
+    ### validate se_object
+    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
+    ## validate col
+    stopifnot(length(col) == 2)
     
     if (!dir.exists(prefix)){
         dir.create(file.path(prefix))
@@ -79,7 +84,7 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
 #' @param se_object SummarizedExperiment object contains omics count/level matrix 
 #' and  metadata 
 #' @param omicslonda_object The returned object from omicslonda analysis 
-#' @param method The fitting method (ssgaussian)
+#' @param fit.method The fitting method (ssgaussian)
 #' @param text feature name
 #' @param unit time unit used in Time vector (hours, days, weeks, months, etc.)
 #' @param col two color to be used for the two groups (eg., c("red", "blue")).
@@ -107,19 +112,28 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
 #'                  ylabel = "Normalized Count",
 #'                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 #' visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = 
-#'                  omicslonda_data_example$omicslonda_results, method = "ssgaussian",
+#'                  omicslonda_data_example$omicslonda_results, fit.method = "ssgaussian",
 #'                  text = "Feature_1", unit = "days",
 #'                  ylabel = "Normalized Count", 
 #'                  col = c("blue", "firebrick"),
 #'                  prefix = tempfile())
 #' @export
-visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, method = "ssgaussian",
+visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, fit.method = "ssgaussian",
                                     text = "FeatureName", unit = "days",
                                     ylabel = "Normalized Count", 
                                     col = c("blue", "firebrick"),
                                     prefix = "Test")
 { 
-    message("Visualizing Fitted Smoothings Splines for each Group of Feature = ", text, "\n")
+    message("Visualizing Fitted Smoothings Splines for each Group of Feature = ", text)
+    
+    ### validate se_object
+    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
+    ## validate col
+    stopifnot(length(col) == 2)
+    ## validate fit.method
+    stopifnot(fit.method %in% c("ssgaussian"))
+    
     
     if (!dir.exists(prefix)){
         dir.create(file.path(prefix))
@@ -139,14 +153,23 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, m
                                                 "Count", "Group", "Subject")])
     dm$lnn=ln
     df_subset = df[,c("Time", "Count", "Group", "Subject")]
-
+    
+    
+    ## Hack for matching colors to each group
+    x = data.frame(group = c(group.levels, "fit.0", "fit.1"), 
+               label = c(group.levels[1], group.levels[2],
+                          paste(group.levels[1], ".fit", sep=""),
+                         paste(group.levels[2], ".fit", sep="")),
+               color = c(col, col))
+    x.ordered <- x[order(x$color),]
+    x.ordered$group = as.character(x.ordered$group)
+    x.ordered$label = as.character(x.ordered$label)
+    x.ordered$color = as.character(x.ordered$color)
+    
+    
     p = ggplot()
     p = p + theme_bw()  + 
-        geom_line(data= dm, aes(.data$Time, .data$Count, 
-                                        colour = .data$Group,
-                                        group = interaction(.data$Group,
-                                                            .data$Subject),
-                                        linetype=.data$lnn), size=2, alpha=0.8) +
+        
         geom_point(data = df_subset, aes(.data$Time,
                                         .data$Count, 
                                         colour = .data$Group, group =
@@ -159,18 +182,16 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, m
                                         interaction(.data$Group,
                                                     .data$Subject)),
                 size=1, alpha=0.1) +
+        geom_line(data= dm, aes(.data$Time, .data$Count, 
+                                colour = .data$Group,
+                                group = interaction(.data$Group,
+                                                    .data$Subject),
+                                linetype=.data$lnn), size=2, alpha=0.8) +
         ggtitle(paste("Feature = ", text, sep = "")) + labs(y = ylabel,
-                                                x = sprintf("Time (%s)", unit))+
-        scale_colour_manual(
-                       breaks = factor(c(group.levels, "fit.0", "fit.1"), 
-                                       levels = c(group.levels, "fit.0", "fit.1")),
-                        labels = factor(c(group.levels[1], group.levels[2],
-                                  paste(group.levels[1], ".fit", sep=""),
-                                  paste(group.levels[2], ".fit", sep="")), 
-                                  levels = c(group.levels[1], group.levels[2],
-                                             paste(group.levels[1], ".fit", sep=""),
-                                             paste(group.levels[2], ".fit", sep=""))),
-                       values = c(col, col)) +
+                                                x = sprintf("Time (%s)", unit)) +
+        scale_colour_manual(breaks = x.ordered$group,
+                            labels = x.ordered$label,
+                            values = x.ordered$color) +  
         theme(axis.text.x=element_text(colour="black", size=12, angle=0,
                                         hjust=0.5, vjust=0.5, face="bold"),
             axis.text.y = element_text(colour="black", size=12, angle=0,
@@ -187,7 +208,7 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, m
         guides(linetype=FALSE, size =FALSE)
     
     ggsave(filename=paste(prefix, "/", "Feature_", text, "_CurveFitting_",
-            method, ".jpg", sep=""), dpi = 1200, height = 10, width = 15,
+            fit.method, ".jpg", sep=""), dpi = 1200, height = 10, width = 15,
     units = 'cm')
 
 }
@@ -202,7 +223,7 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, m
 #'
 #' @param omicslonda_object The returned object from omicslonda analysis 
 #' @param text Feature name
-#' @param method fitting method
+#' @param fit.method fitting method
 #' @param prefix prefix to be used to create directory for the analysis results
 #' @return null
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
@@ -216,10 +237,14 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, m
 #' data(omicslonda_data_example)
 #' visualizeTestStatHistogram(omicslonda_object = omicslonda_data_example$omicslonda_results, 
 #'                  text = "Feature_1", 
-#'                  method = "ssgaussian", prefix = tempfile())
+#'                  fit.method = "ssgaussian", prefix = tempfile())
 #' @export
 visualizeTestStatHistogram = function(omicslonda_object = NULL, text = "FeatureName", 
-                                      method = "ssgaussian", prefix = "Test"){
+                                      fit.method = "ssgaussian", prefix = "Test"){
+    message("Visualizing test statstic null distribution of Feature = ", text)
+    
+    ## validate fit.method
+    stopifnot(fit.method %in% c("ssgaussian"))
     
     if (!dir.exists(prefix)){
         dir.create(file.path(prefix))
@@ -227,12 +252,12 @@ visualizeTestStatHistogram = function(omicslonda_object = NULL, text = "FeatureN
     
     null_dist = omicslonda_object$distribution
     
-    jpeg(filename = paste(prefix, "/", "Feature_", text, "_testStat_distribution_ALL_only", method, ".jpg", sep = ""), 
+    jpeg(filename = paste(prefix, "/", "Feature_", text, "_testStat_distribution_ALL_only", fit.method, ".jpg", sep = ""), 
          res = 1200, height = 7, width = 10, units = 'cm')
     
     hist(null_dist, xlab = "testStat", 
          breaks = 100, col = "gray", border = "gray", 
-         main = , paste("testStat Null Dist of ", text, sep=""), 
+         main = paste("test statistic null dist of ", text, sep=""), 
          freq = TRUE)
     dev.off()
 }
@@ -246,7 +271,7 @@ visualizeTestStatHistogram = function(omicslonda_object = NULL, text = "FeatureN
 #' Visualize significant time interval
 #'
 #' @param omicslonda_object The returned object from omicslonda analysis
-#' @param method Fitting method (ssgaussian)
+#' @param fit.method Fitting method (ssgaussian)
 #' @param text Feature name
 #' @param unit time unit used in the Time vector
 #' (hours, days, weeks, months, etc.)
@@ -265,17 +290,22 @@ visualizeTestStatHistogram = function(omicslonda_object = NULL, text = "FeatureN
 #' library(SummarizedExperiment)
 #' data(omicslonda_data_example)
 #' visualizeArea(omicslonda_object = omicslonda_data_example$omicslonda_results, 
-#'                  method = "ssgaussian",
+#'                  fit.method = "ssgaussian",
 #'                  text = "Feature_1", unit = "days", 
 #'                  ylabel = "Normalized Count", col =
 #'                  c("blue", "firebrick"), prefix = tempfile())
 #' @export
-visualizeArea = function(omicslonda_object = NULL, method = "ssgaussian",
+visualizeArea = function(omicslonda_object = NULL, fit.method = "ssgaussian",
                             text = "FeatureName", unit = "days",
                             ylabel = "Normalized Count", col =
                             c("blue", "firebrick"), prefix = "Test")
 {
-    message("Visualizing Significant Intervals of Feature = ", text, "\n")
+    message("Visualizing Significant Intervals of Feature = ", text)
+    
+    ## validate col
+    stopifnot(length(col) == 2)
+    ## validate fit.method
+    stopifnot(fit.method %in% c("ssgaussian"))
 
     if (!dir.exists(prefix)){
         dir.create(file.path(prefix))
@@ -338,7 +368,7 @@ visualizeArea = function(omicslonda_object = NULL, method = "ssgaussian",
 
 
     ggsave(filename=paste(prefix, "/", "Feature_", text,
-                            "_SignificantInterval_", method, ".jpg", sep=""),
+                            "_SignificantInterval_", fit.method, ".jpg", sep=""),
                             dpi = 1200, height = 10, width = 15,
                             units = 'cm')
 }

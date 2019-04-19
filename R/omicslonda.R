@@ -51,7 +51,23 @@ omicslonda = function(se_object = NULL, n.perm = 500,
                         col = c("blue", "firebrick"), prefix = "Test")
 {
     message("Start OmicsLonDA")
+  
     
+    ### validate se_object
+    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
+    ## validate fit.method
+    stopifnot(fit.method %in% c("ssgaussian"))
+    ## validate pvalue.threshold
+    stopifnot(pvalue.threshold >= 0, pvalue.threshold <= 1)
+    ## validate pvalue adjustment method
+    stopifnot(adjust.method %in% c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"))
+    ## validate col
+    stopifnot(length(col) == 2)
+    ## validate points
+    stopifnot(length(points) >= 2, is(points)[1] == "numeric")
+   
+  
     if (!dir.exists(prefix)){
         dir.create(file.path(prefix))
     }
@@ -91,16 +107,16 @@ omicslonda = function(se_object = NULL, n.perm = 500,
     points = points[which(points >= points.min & points <= points.max)]
     
     
-    message("points.min = ", points.min, "\n")
-    message("points.max = ", points.max, "\n")
+    message("points.min = ", points.min)
+    message("points.max = ", points.max)
     
-    message("Start Curve Fitting \n") 
+    message("Start Curve Fitting") 
     
     if (fit.method == "ssgaussian")
     {
-        message("Fitting: Smoothing Spline Gaussian Regression \n")
+        message("Fitting: Smoothing Spline Gaussian Regression")
         model = tryCatch({
-            curveFitting(formula = Count ~ Time, df, method= "ssgaussian", points)
+            curveFitting(formula = Count ~ Time, df, fit.method = "ssgaussian", points)
             },  error = function(err) {
               stop("ERROR in gss = ", err)
               #print(paste("ERROR in gss = ", err, sep="")); 
@@ -116,7 +132,7 @@ omicslonda = function(se_object = NULL, n.perm = 500,
     
     ## Permutation 
     perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = n.perm,
-                            method = fit.method, points = points,
+                            fit.method = fit.method, points = points,
                             parall = parall, prefix = prefix)
 
     test.stat.prem = testStatPermutation(perm)

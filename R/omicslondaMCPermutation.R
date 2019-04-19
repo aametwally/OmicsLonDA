@@ -6,7 +6,7 @@
 #' @param formula formula to be passed to the regression model
 #' @param perm.dat dataframe has the Count, Group, Subject, Time
 #' @param n.perm number of permutations
-#' @param method The fitting method (ssgaussian)
+#' @param fit.method The fitting method (ssgaussian)
 #' @param points The points at which the prediction should happen
 #' @param parall boolean to indicate whether to use multicore.
 #' @param prefix prefix to be used to create directory for the analysis results
@@ -37,26 +37,26 @@
 #' group.1 = df[df$Group == 1, ]
 #' points = seq(100, 130)
 #' perm  = permutationMC(formula = Count ~ Time, perm.dat = df, n.perm = 10,
-#'                       method = "ssgaussian", points = points,
+#'                       fit.method = "ssgaussian", points = points,
 #'                       parall = FALSE, prefix = tempfile())
 #' @export
 permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500,
-                        method="ssgaussian", points, parall = FALSE, prefix){
+                        fit.method = "ssgaussian", points, parall = FALSE, prefix){
     
     
-    message("Start Permutation \n")
+    message("Start Permutation")
     
-    message("Number of permutation = ", n.perm, "\n")
+    message("Number of permutation = ", n.perm)
     
     pp = list() 
     perm = 0 # to be able to store the value
     n.subjects = length(unique(perm.dat$Subject))
-    message("# of Subjects = ", n.subjects, "\n")
+    message("# of Subjects = ", n.subjects)
     
     
     ## Run in Parallel
     if(parall == TRUE) {max.cores = detectCores()
-        message("# cores = ", max.cores, "\n")
+        message("# cores = ", max.cores)
         desired.cores = max.cores - 1
         cl = makeCluster(desired.cores)
         registerDoParallel(cl)
@@ -86,27 +86,13 @@ permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500,
         ### points vector
         if(g.min > min(points) | g.max < max(points))
         {
-        #message("\n")
-        #message("old: g.min = ", g.min, "   min(points) = ", min(points), "\n")
-        #message("old: g.max = ", g.max, "   max(points) = ", max(points), "\n")
-        points = points[which(points>=g.min & points<=g.max)]
-        #message("new: g.min = ", g.min, "   min(points) = ", min(points), "\n")
-        #message("new: g.max = ", g.max, "   max(points) = ", max(points), "\n")
-        
-        perm = curveFitting(formula, df = perm.dat, method = method, points)
-        assign(paste("Model", j, sep = "_"), perm)
-        
-        #message("Special Case: generated permutation is out of range \n")
-        # assign(paste("Model", j, sep = "_"), NULL)
+            points = points[which(points>=g.min & points<=g.max)]
+            perm = curveFitting(formula, df = perm.dat, fit.method = fit.method, points)
+            assign(paste("Model", j, sep = "_"), perm)
         }
-        # else if (length(which(sum(g.0$Count) == 0 | sum(g.1$Count)==0)))
-        # {
-        #   message("Special Case: zero for all variable of one group \n")
-        #   assign(paste("Model", j, sep = "_"), NULL)
-        # }
         else
         {
-            perm = curveFitting(formula, df = perm.dat, method = method, points)
+            perm = curveFitting(formula, df = perm.dat, fit.method = fit.method, points)
             assign(paste("Model", j, sep = "_"), perm)
         }
     }, .parallel = parall, .progress = "text", .inform = TRUE,

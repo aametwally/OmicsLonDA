@@ -4,14 +4,14 @@
 \alias{visualizeArea}
 \title{Visualize significant time interval}
 \usage{
-visualizeArea(omicslonda_object = NULL, method = "ssgaussian",
+visualizeArea(omicslonda_object = NULL, fit.method = "ssgaussian",
   text = "FeatureName", unit = "days", ylabel = "Normalized Count",
   col = c("blue", "firebrick"), prefix = "Test")
 }
 \arguments{
 \item{omicslonda_object}{The returned object from omicslonda analysis}
 
-\item{method}{Fitting method (ssgaussian)}
+\item{fit.method}{Fitting method (ssgaussian)}
 
 \item{text}{Feature name}
 
@@ -35,7 +35,7 @@ Visualize significant time interval
 library(SummarizedExperiment)
 data(omicslonda_data_example)
 visualizeArea(omicslonda_object = omicslonda_data_example$omicslonda_results, 
-                 method = "ssgaussian",
+                 fit.method = "ssgaussian",
                  text = "Feature_1", unit = "days", 
                  ylabel = "Normalized Count", col =
                  c("blue", "firebrick"), prefix = tempfile())
