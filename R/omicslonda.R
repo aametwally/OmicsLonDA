@@ -23,6 +23,7 @@
 #' of the tested feature, and the original input data.
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
 #' @importFrom methods is
+#' @importFrom BiocGenerics rowSums colSums rowMeans colMeans
 #' @import parallel
 #' @import doParallel
 #' @importFrom stats p.adjust
@@ -52,7 +53,11 @@ omicslonda = function(se_object = NULL, n.perm = 500,
                         col = c("blue", "firebrick"), prefix = "Test")
 {
     message("Start OmicsLonDA")
-  
+    
+    rowSums <- BiocGenerics::rowSums
+    colSums <- BiocGenerics::colSums
+    rowMeans <- BiocGenerics::rowMeans
+    colMeans <- BiocGenerics::colMeans
     
     ### validate se_object
     stopifnot(is(se_object, "SummarizedExperiment"))
