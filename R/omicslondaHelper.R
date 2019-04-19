@@ -6,6 +6,7 @@
 #' and  metadata 
 #' @return a SummarizedExperiment object with the adjusted baseline assay
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment assays
+#' @importFrom methods is
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
@@ -15,7 +16,7 @@
 adjustBaseline = function(se_object = NULL){
   
     ### validate se_object
-    stopifnot(class(se_object) == "SummarizedExperiment")
+    stopifnot(is(se_object, "SummarizedExperiment"))
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
 
     subjects = unique(colData(se_object)$Subject)

@@ -12,6 +12,7 @@
 #' @param prefix prefix to be used to create directory for the analysis results
 #' @return null
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
+#' @importFrom methods is
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -34,7 +35,7 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
     message("Visualizing Feature = ", text)
     
     ### validate se_object
-    stopifnot(class(se_object) == "SummarizedExperiment")
+    stopifnot(is(se_object, "SummarizedExperiment"))
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
     ## validate col
     stopifnot(length(col) == 2)
@@ -93,6 +94,7 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
 #' @param prefix prefix to be used to create directory for the analysis results
 #' @return null
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
+#' @importFrom methods is
 #' @import ggplot2
 #' @import grDevices
 #' @import graphics
@@ -127,7 +129,7 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, f
     message("Visualizing Fitted Smoothings Splines for each Group of Feature = ", text)
     
     ### validate se_object
-    stopifnot(class(se_object) == "SummarizedExperiment")
+    stopifnot(is(se_object, "SummarizedExperiment"))
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
     ## validate col
     stopifnot(length(col) == 2)

@@ -22,6 +22,7 @@
 #' feature, fitted model for each group, null distribution of the test statistic 
 #' of the tested feature, and the original input data.
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
+#' @importFrom methods is
 #' @import parallel
 #' @import doParallel
 #' @importFrom stats p.adjust
@@ -54,7 +55,7 @@ omicslonda = function(se_object = NULL, n.perm = 500,
   
     
     ### validate se_object
-    stopifnot(class(se_object) == "SummarizedExperiment")
+    stopifnot(is(se_object, "SummarizedExperiment"))
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
     ## validate fit.method
     stopifnot(fit.method %in% c("ssgaussian"))
@@ -65,7 +66,7 @@ omicslonda = function(se_object = NULL, n.perm = 500,
     ## validate col
     stopifnot(length(col) == 2)
     ## validate points
-    stopifnot(length(points) >= 2, class(points) == "numeric")
+    stopifnot(length(points) >= 2, is(points, "numeric"))
    
   
     if (!dir.exists(prefix)){
