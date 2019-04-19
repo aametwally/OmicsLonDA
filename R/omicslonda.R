@@ -54,7 +54,7 @@ omicslonda = function(se_object = NULL, n.perm = 500,
   
     
     ### validate se_object
-    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(class(se_object) == "SummarizedExperiment")
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
     ## validate fit.method
     stopifnot(fit.method %in% c("ssgaussian"))
@@ -65,7 +65,7 @@ omicslonda = function(se_object = NULL, n.perm = 500,
     ## validate col
     stopifnot(length(col) == 2)
     ## validate points
-    stopifnot(length(points) >= 2, is(points)[1] == "numeric")
+    stopifnot(length(points) >= 2, class(points) == "numeric")
    
   
     if (!dir.exists(prefix)){

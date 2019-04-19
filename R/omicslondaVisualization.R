@@ -34,7 +34,7 @@ visualizeFeature = function (se_object = NULL, text = "featureName",
     message("Visualizing Feature = ", text)
     
     ### validate se_object
-    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(class(se_object) == "SummarizedExperiment")
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
     ## validate col
     stopifnot(length(col) == 2)
@@ -127,7 +127,7 @@ visualizeFeatureSpline = function (se_object = NULL, omicslonda_object = NULL, f
     message("Visualizing Fitted Smoothings Splines for each Group of Feature = ", text)
     
     ### validate se_object
-    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(class(se_object) == "SummarizedExperiment")
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
     ## validate col
     stopifnot(length(col) == 2)

@@ -15,7 +15,7 @@
 adjustBaseline = function(se_object = NULL){
   
     ### validate se_object
-    stopifnot(is(se_object)[1] == "SummarizedExperiment")
+    stopifnot(class(se_object) == "SummarizedExperiment")
     stopifnot(all(c("Subject", "Time", "Group") %in% colnames(colData(se_object))))
 
     subjects = unique(colData(se_object)$Subject)
