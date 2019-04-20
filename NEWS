@@ -1,2 +1,16 @@
-Changes in version 0.99.1 (2019-03-29)
-+ Submitted to Bioconductor
+CHANGES IN VERSION 0.99.10
+-------------------------
+
+    - Fix FeatureSpline plots in README and vignette 
+
+
+CHANGES IN VERSION 0.99.9
+-------------------------
+
+    - Fix all CRAN and Bioconductor checks  
+
+
+CHANGES IN VERSION 0.99.1
+--------------------------
+
+    - Submitted to Bioconductor
