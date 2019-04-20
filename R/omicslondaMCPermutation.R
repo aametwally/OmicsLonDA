@@ -14,6 +14,8 @@
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
 #' @import plyr
 #' @import utils
+#' @import gss
+#' @importFrom parallel detectCores
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
@@ -40,12 +42,11 @@
 #'                       fit.method = "ssgaussian", points = points,
 #'                       parall = FALSE, prefix = tempfile())
 #' @export
-permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500,
-                        fit.method = "ssgaussian", points, parall = FALSE, prefix){
+permutationMC = function(formula = Count ~ Time, perm.dat = NULL, n.perm = 500,
+                        fit.method = "ssgaussian", points, parall = FALSE, prefix = "Test"){
     
     
     message("Start Permutation")
-    
     message("Number of permutation = ", n.perm)
     
     pp = list() 
@@ -54,32 +55,35 @@ permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500,
     message("# of Subjects = ", n.subjects)
     
     
-    ## Run in Parallel
-    if(parall == TRUE) {max.cores = detectCores()
-        message("# cores = ", max.cores)
+    ## Parallelization
+    if(parall == TRUE) {
+        max.cores = detectCores()
         desired.cores = max.cores - 1
-        cl = makeCluster(desired.cores)
-        registerDoParallel(cl)
-    } 
+        message("# of used cores = ", desired.cores)
+       
+        param = SnowParam(workers = desired.cores, progressbar = TRUE, type = "SOCK")
+        #param = MulticoreParam(workers = desired.cores)
+    } else{
+        param = SerialParam()
+    }
     
     
     sample_group = unique(perm.dat[,c("Subject","Group")])
-    pp = llply(seq_len(n.perm), function(j){
+    permute = function(j, curveFitting){
+        library(gss)
         sample_group$Group = sample(sample_group$Group, 
                                     length(sample_group$Group), replace = FALSE)
         for (i in seq_len(nrow(perm.dat)))
         {
-        perm.dat[i, "Group"] = sample_group[which(sample_group$Subject ==
-                                                perm.dat[i, "Subject"]),]$Group
+            perm.dat[i, "Group"] = sample_group[which(sample_group$Subject ==
+                                                          perm.dat[i, "Subject"]),]$Group
         }
         
         g.0 = perm.dat[perm.dat$Group == 0, ]
         g.1 = perm.dat[perm.dat$Group == 1, ]
         g.min = max(sort(g.0$Time)[1], sort(g.1$Time)[1])
         g.max = min(sort(g.0$Time)[length(g.0$Time)],
-                sort(g.1$Time)[length(g.1$Time)])
-        
-    
+                    sort(g.1$Time)[length(g.1$Time)])
         
         ### This part to handle the situation when min/max timepoint of each
         ### group from the permuted subjects, lies outside the range of the
@@ -95,15 +99,9 @@ permutationMC = function(formula = Count ~ Time, perm.dat, n.perm = 500,
             perm = curveFitting(formula, df = perm.dat, fit.method = fit.method, points)
             assign(paste("Model", j, sep = "_"), perm)
         }
-    }, .parallel = parall, .progress = "text", .inform = TRUE,
-    .paropts = list(.export=ls(.GlobalEnv),
-                    .packages=.packages(all.available=TRUE)))
-    
-    
-    if(parall == TRUE) {
-        stopCluster(cl)
     }
     
+    pp = bplapply(seq_len(n.perm), permute, BPPARAM = param, curveFitting = curveFitting)
     pp[vapply(pp, is.null, logical(1))] = NULL
     return(pp)
 }  

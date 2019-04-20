@@ -97,7 +97,6 @@ points = seq(1, 500, length.out = 500)
 ```
 
 
-
 ## Run OmicsLonDA on the first feature
 ```
 res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,

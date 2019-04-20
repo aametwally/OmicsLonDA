@@ -4,8 +4,8 @@
 \alias{permutationMC}
 \title{Permute group labels}
 \usage{
-permutationMC(formula = Count ~ Time, perm.dat, n.perm = 500,
-  fit.method = "ssgaussian", points, parall = FALSE, prefix)
+permutationMC(formula = Count ~ Time, perm.dat = NULL, n.perm = 500,
+  fit.method = "ssgaussian", points, parall = FALSE, prefix = "Test")
 }
 \arguments{
 \item{formula}{formula to be passed to the regression model}

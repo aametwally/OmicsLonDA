@@ -59,7 +59,6 @@ adjustBaseline = function(se_object = NULL){
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment assays
 #' @importFrom stats predict
 #' @import gss
-
 #' @references
 #' Ahmed Metwally (ametwall@stanford.edu)
 #' @examples 
@@ -192,23 +191,24 @@ testStat = function(curve.fit.df){
     size = length(curve.fit.df$dd.null$Time)
     testStat = numeric(size - 1)
     
-    
-    for(i in seq_len(size-1)){
-        testStat.null = trapz(curve.fit.df$dd.null$Time[i:(i+1)],
+    testStat = sapply(seq_len(size-1), function(i){
+      testStat.null = trapz(curve.fit.df$dd.null$Time[i:(i+1)],
                             curve.fit.df$dd.null$Count[i:(i+1)])
-        testStat.0 = trapz(curve.fit.df$dd.0$Time[i:(i+1)],
-                        curve.fit.df$dd.0$Count[i:(i+1)])
-        testStat.1 = trapz(curve.fit.df$dd.1$Time[i:(i+1)],
-                        curve.fit.df$dd.1$Count[i:(i+1)])
-        
-        testStat[i] = (testStat.0 - testStat.1) /
+      testStat.0 = trapz(curve.fit.df$dd.0$Time[i:(i+1)],
+                         curve.fit.df$dd.0$Count[i:(i+1)])
+      testStat.1 = trapz(curve.fit.df$dd.1$Time[i:(i+1)],
+                         curve.fit.df$dd.1$Count[i:(i+1)])
+      
+      testStat = (testStat.0 - testStat.1) /
         sqrt((mean(curve.fit.df$dd.0$SE[i:(i+1)]))^2 +
-                (mean(curve.fit.df$dd.1$SE[i:(i+1)]))^2)
-        if(is.na(testStat[i])){
-        testStat[i] = 0
-        }
-    }
-    
+               (mean(curve.fit.df$dd.1$SE[i:(i+1)]))^2)
+      if(is.na(testStat)){
+        testStat = 0
+      }
+      
+      testStat
+    })
+
     return(list(testStat = testStat))
 }
 
@@ -303,31 +303,31 @@ findSigInterval = function(adjusted.pvalue, threshold = 0.05, sign)
         
         for(i in 2:length(sig))
         {
-        if(i != length(sig))
-        {
-        if((sig[i] - sig[i-1]) > 1 | sign[i] != sign[i-1])
-        {
-            start= c(start, sig[i])
-        }
-        
-        if((sig[i+1] - sig[i]) != 1 | sign[i+1] != sign[i])
-        {
-            end = c(end, sig[i])
+          if(i != length(sig))
+          {
+            if((sig[i] - sig[i-1]) > 1 | sign[i] != sign[i-1])
+            {
+                start= c(start, sig[i])
+            }
+          
+            if((sig[i+1] - sig[i]) != 1 | sign[i+1] != sign[i])
+            {
+                end = c(end, sig[i])
+                dom = c(dom, sign[i])
+                p = c(p, mean(adjusted.pvalue[start[length(start)] :
+                                                end[length(end)]]))
+            }
+          }
+          else
+          {
+            if((sig[i]-sig[i-1]) > 1 | sign[i] != sign[i-1])
+            {
+                start= c(start, sig[i])
+            }
+            end= c(end, sig[i])
             dom = c(dom, sign[i])
-            p = c(p, mean(adjusted.pvalue[start[length(start)] :
-                                            end[length(end)]]))
-        }
-        }
-        else
-        {
-        if((sig[i]-sig[i-1]) > 1 | sign[i] != sign[i-1])
-        {
-            start= c(start, sig[i])
-        }
-        end= c(end, sig[i])
-        dom = c(dom, sign[i])
-        p = c(p, mean(adjusted.pvalue[start[length(start)] : end[length(end)]]))
-        }
+            p = c(p, mean(adjusted.pvalue[start[length(start)] : end[length(end)]]))
+          }
         }
     }
     

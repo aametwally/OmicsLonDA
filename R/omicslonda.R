@@ -24,8 +24,7 @@
 #' @importFrom SummarizedExperiment colData assay SummarizedExperiment
 #' @importFrom methods is
 #' @importFrom BiocGenerics rowSums colSums rowMeans colMeans
-#' @import parallel
-#' @import doParallel
+#' @import BiocParallel
 #' @importFrom stats p.adjust
 #' @import zoo
 #' @import SummarizedExperiment
