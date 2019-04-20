@@ -99,7 +99,7 @@ points = seq(1, 500, length.out = 500)
 
 ## Run OmicsLonDA on the first feature
 ```
-res = omicslonda(se_object = omicslonda_test_object, n.perm = 10,
+res = omicslonda(se_object = omicslonda_test_object, n.perm = 100,
                  fit.method = "ssgaussian", points = points, text = "Feature_1",
                  parall = FALSE, pvalue.threshold = 0.05, 
                  adjust.method = "BH", time.unit = "days",
