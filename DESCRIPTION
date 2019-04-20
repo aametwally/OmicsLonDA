@@ -1,7 +1,7 @@
 Package: OmicsLonDA
 Type: Package
 Title: Omics Longitudinal Differential Analysis
-Version: 0.99.9
+Version: 0.99.10
 Date: 2019-03-29
 Author: Ahmed A. Metwally, Tom Zhang, Michael Snyder
 Maintainer: Ahmed A. Metwally <ametwall@stanford.edu>
