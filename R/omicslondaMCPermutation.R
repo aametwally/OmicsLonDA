@@ -70,7 +70,6 @@ permutationMC = function(formula = Count ~ Time, perm.dat = NULL, n.perm = 500,
     
     sample_group = unique(perm.dat[,c("Subject","Group")])
     permute = function(j, curveFitting){
-        library(gss)
         sample_group$Group = sample(sample_group$Group, 
                                     length(sample_group$Group), replace = FALSE)
         for (i in seq_len(nrow(perm.dat)))
