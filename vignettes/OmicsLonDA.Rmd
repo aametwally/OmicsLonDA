@@ -145,21 +145,25 @@ visualizeArea(omicslonda_object = res, fit.method = "ssgaussian",
 ![Significant time intervals of feature 1](SignificantIntervals.jpg){width=400px}
 
 
-
+## Save OmicsLonDA results in RData file
 ```{r,message=FALSE,warning=FALSE}
 prefix = tempfile()
 if (!dir.exists(prefix)){
         dir.create(file.path(prefix))
 }
 
-## Save OmicsLonDA results in RData file
 save(res, file = sprintf("%s/Feature_%s_results_%s.RData",
                         prefix = prefix, text = "Feature_1", 
                         fit.method = "ssgaussian"))
-
+```
 
 
 ## Save a summary of time intervals statistics in csv file
+```{r,message=FALSE,warning=FALSE}
+prefix = tempfile()
+if (!dir.exists(prefix)){
+        dir.create(file.path(prefix))
+}
 feature.summary = as.data.frame(do.call(cbind, res$details),
                                 stringsAsFactors = FALSE)
 
