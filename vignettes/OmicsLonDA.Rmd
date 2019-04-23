@@ -31,7 +31,7 @@ statistic
 
 ## Getting Started
 ### Prerequisites
-* R(>= 3.5)
+* R(>= 3.6)
 
 ### Installation
 Install the latest version of OmicsLonDA from Bioconductor:
