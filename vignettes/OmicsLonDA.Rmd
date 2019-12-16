@@ -134,7 +134,7 @@ visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1",
 
 
 ## Visulize significant time intervals of first feature
-```{r,message=FALSE,warning=FALSE, eval=FALSE}
+```{r,message=FALSE,warning=FALSE}
 visualizeArea(omicslonda_object = res, fit.method = "ssgaussian",
               text = "Feature_1", unit = "days", 
               ylabel = "Normalized Count", col =
