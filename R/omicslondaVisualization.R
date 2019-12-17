@@ -329,7 +329,7 @@ visualizeArea = function(omicslonda_object = NULL, fit.method = "ssgaussian",
         sub.10[[i]] = subset(model.ss$dd.0, Time >= start[i] & Time <= end[i])
         cmd=sprintf('geom_ribbon(data=sub.10[[%d]], aes(
                 ymin = sub.11[[%d]]$Count, ymax = Count), colour= "grey3",
-                fill="grey69", alpha = "0.6")', i, i)
+                fill="grey69", alpha = 0.6)', i, i)
         if (i != 1)
         {
         xx = paste(xx, cmd, sep = "+")
