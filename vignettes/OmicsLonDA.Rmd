@@ -35,7 +35,7 @@ statistic
 
 ### Installation
 Install the latest version of OmicsLonDA from Bioconductor:
-```{r results='hide',message=FALSE,warning=FALSE}
+```{r eval=FALSE, results='hide', message=FALSE, warning=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager", repos = "http://cran.us.r-project.org")
 BiocManager::install("OmicsLonDA")
