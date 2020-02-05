@@ -1,3 +1,5 @@
+<a href="http://bioconductor.org/checkResults/release/bioc-LATEST/OmicsLonDA/"><img src="https://bioconductor.org/shields/availability/3.10/OmicsLonDA.svg"></a>
+
 ![OmicsLonDA Logo](vignettes/OmicsLonDA_logo.png)
 
 # OmicsLonDA
