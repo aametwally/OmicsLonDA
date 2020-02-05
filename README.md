@@ -1,3 +1,5 @@
+![OmicsLonDA Logo](vignettes/OmicsLonDA_logo.png)
+
 # OmicsLonDA
 
 OmicsLonDA (Omics Longitudinal Differential Analysis) is a statistical framework
@@ -88,7 +90,7 @@ visualizeFeature(se_object = omicslonda_test_object, text = "Feature_1",
                  unit = "days", ylabel = "Normalized Count", 
                  col = c("blue", "firebrick"), prefix = "OmicsLonDA_example")
 ```
-![Visualize first feature](vignettes/VisualizeFeature.jpg){width=400px}
+![Visualize first feature](vignettes/VisualizeFeature.jpg)
 
 
 ## Specify interval bounds
@@ -116,15 +118,15 @@ visualizeFeatureSpline(se_object = omicslonda_test_object, omicslonda_object = r
                         col = c("blue", "firebrick"),
                         prefix = "OmicsLonDA_example")
 ```
-![Fitted spline of the first feature](vignettes/FittedSplines.jpg){width=400px}
+![Fitted spline of the first feature](vignettes/FittedSplines.jpg)
 
 
-## Visulaize null distribution of the first feature's statistic
+## Visualize null distribution of the first feature's statistic
 ```
 visualizeTestStatHistogram(omicslonda_object = res, text = "Feature_1", 
                                 fit.method = "ssgaussian", prefix = "OmicsLonDA_example")
 ```
-![null distribution of the first feature's statistic](vignettes/TestStatistic_NullDistribution.jpg){width=400px}
+![null distribution of the first feature's statistic](vignettes/TestStatistic_NullDistribution.jpg)
 
 
 
@@ -137,7 +139,7 @@ visualizeArea(omicslonda_object = res, fit.method = "ssgaussian",
 ```
 
 
-![Significant time intervals of feature 1](vignettes/SignificantIntervals.jpg){width=400px}
+![Significant time intervals of feature 1](vignettes/SignificantIntervals.jpg)
 
 
 
