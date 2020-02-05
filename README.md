@@ -1,4 +1,7 @@
-<a href="http://bioconductor.org/checkResults/release/bioc-LATEST/OmicsLonDA/"><img src="https://bioconductor.org/shields/availability/3.10/OmicsLonDA.svg"></a>
+<a href="https://bioconductor.org/packages/release/bioc/html/OmicsLonDA.html"><img src="https://bioconductor.org/shields/availability/3.10/OmicsLonDA.svg"></a>
+<a href="https://bioconductor.org/packages/release/bioc/html/OmicsLonDA.html"><img src="https://bioconductor.org/shields/build/release/bioc/OmicsLonDA.svg"></a>
+<a href="https://bioconductor.org/packages/release/bioc/html/OmicsLonDA.html"><img src="https://bioconductor.org/shields/lastcommit/release/bioc/OmicsLonDA.svg"></a>
+<a href="https://bioconductor.org/packages/release/bioc/html/OmicsLonDA.html"><img src="https://bioconductor.org/shields/years-in-bioc/OmicsLonDA.svg"></a>
 
 ![OmicsLonDA Logo](vignettes/OmicsLonDA_logo.png)
 
