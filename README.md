@@ -34,10 +34,12 @@ statistic
 
 ## Installation
 
-Download the latest development code of OmicsLonDA from GitHub using devtools
+Install the latest release of OmicsLonDA from Bioconductor:
 ```
-library(devtools)
-install_github("aametwally/OmicsLonDA", ref = "master")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("OmicsLonDA")
 ```
 
 
